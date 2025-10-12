@@ -3,7 +3,7 @@
         <div class="home-container">
             <!-- 标题 -->
             <div class="home-header">
-                <h1 class="title">W3D SDK Examples</h1>
+                <h1 class="title">Mogl SDK Examples</h1>
                 <p class="subtitle">探索 WebGL 3D 渲染的无限可能</p>
                 <p class="version">Vue 3 + Vite + Three.js</p>
             </div>

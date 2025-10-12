@@ -1,5 +1,5 @@
 /**
- * W3D SDK Examples - Vue 3 版本
+ * Mogl SDK Examples - Vue 3 版本
  * 主入口文件
  */
 
@@ -8,8 +8,8 @@ import App from './App.vue';
 import router from './router';
 import './styles/main.css';
 
-console.log('🚀 W3D SDK Examples - Vue 3');
-console.log('欢迎使用 W3D SDK 示例展示系统！');
+console.log('🚀 Mogl SDK Examples - Vue 3');
+console.log('欢迎使用 Mogl SDK 示例展示系统！');
 
 const app = createApp(App);
 

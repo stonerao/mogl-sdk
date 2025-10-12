@@ -24,7 +24,7 @@ const routes = [
         name: 'Home',
         component: HomePage,
         meta: {
-            title: 'W3D SDK Examples'
+            title: 'Mogl SDK Examples'
         }
     },
     {
@@ -116,7 +116,7 @@ const router = createRouter({
 
 // 路由守卫 - 更新页面标题
 router.beforeEach((to, from, next) => {
-    document.title = to.meta.title || 'W3D SDK Examples';
+    document.title = to.meta.title || 'Mogl SDK Examples';
     next();
 });
 

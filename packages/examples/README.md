@@ -1,6 +1,6 @@
-# W3D SDK Examples
+# Mogl SDK Examples
 
-W3D SDK 示例展示系统 - 使用 Vue 3 + Vite 构建的代码与效果分屏展示平台。
+Mogl SDK 示例展示系统 - 使用 Vue 3 + Vite 构建的代码与效果分屏展示平台。
 
 ## 📋 功能特性
 
@@ -86,11 +86,13 @@ packages/examples/
 分屏布局组件，负责管理代码面板和场景面板的布局。
 
 **Props:**
+
 - `code` (String, required): 要显示的源代码
 - `language` (String, default: 'javascript'): 代码语言
 - `title` (String, default: 'Example'): 示例标题
 
 **特性:**
+
 - 支持拖动调整左右区域大小
 - 响应式布局（移动端自动切换为上下布局）
 - 限制调整范围（30%-70%）
@@ -99,14 +101,10 @@ packages/examples/
 
 ```vue
 <template>
-  <SplitLayout 
-    :code="sourceCode" 
-    language="javascript"
-    title="My Example"
-  >
-    <!-- 3D 场景内容 -->
-    <div ref="sceneContainer"></div>
-  </SplitLayout>
+    <SplitLayout :code="sourceCode" language="javascript" title="My Example">
+        <!-- 3D 场景内容 -->
+        <div ref="sceneContainer"></div>
+    </SplitLayout>
 </template>
 
 <script setup>
@@ -121,6 +119,7 @@ const sourceCode = `// Your example code here`;
 代码展示面板，提供代码高亮和复制功能。
 
 **特性:**
+
 - Prism.js 语法高亮
 - 行号显示
 - 一键复制代码
@@ -131,6 +130,7 @@ const sourceCode = `// Your example code here`;
 3D 场景展示面板，包含返回首页按钮。
 
 **特性:**
+
 - 固定头部工具栏
 - 返回首页快捷按钮
 - 全屏场景渲染区域
@@ -147,13 +147,9 @@ const sourceCode = `// Your example code here`;
 
 ```vue
 <template>
-  <SplitLayout 
-    :code="sourceCode" 
-    language="javascript"
-    title="Your Example Title"
-  >
-    <div ref="sceneContainer" class="scene-container"></div>
-  </SplitLayout>
+    <SplitLayout :code="sourceCode" language="javascript" title="Your Example Title">
+        <div ref="sceneContainer" class="scene-container"></div>
+    </SplitLayout>
 </template>
 
 <script setup>
@@ -167,26 +163,26 @@ const sourceCode = `// Your example code`;
 let scene = null;
 
 onMounted(() => {
-  // 初始化场景
-  scene = new Scene(sceneContainer.value, {
-    // 配置...
-  });
-  scene.init();
-  scene.start();
+    // 初始化场景
+    scene = new Scene(sceneContainer.value, {
+        // 配置...
+    });
+    scene.init();
+    scene.start();
 });
 
 onUnmounted(() => {
-  // 清理资源
-  if (scene) {
-    scene.dispose();
-  }
+    // 清理资源
+    if (scene) {
+        scene.dispose();
+    }
 });
 </script>
 
 <style scoped>
 .scene-container {
-  width: 100%;
-  height: 100%;
+    width: 100%;
+    height: 100%;
 }
 </style>
 ```
@@ -208,7 +204,7 @@ pnpm preview
 - **Vue Router** - 官方路由管理器
 - **Prism.js** - 代码语法高亮
 - **Three.js** - 3D 图形库
-- **W3D SDK** - 自研 3D 渲染引擎
+- **Mogl SDK** - 自研 3D 渲染引擎
 
 ## 🎯 性能优化
 
@@ -226,7 +222,7 @@ pnpm preview
 
 ## 🔗 相关链接
 
-- [W3D SDK 文档](../core/README.md)
+- [Mogl SDK 文档](../core/README.md)
 - [Vue 3 文档](https://vuejs.org/)
 - [Vite 文档](https://vitejs.dev/)
 - [Three.js 文档](https://threejs.org/)
@@ -237,7 +233,6 @@ MIT
 
 ---
 
-**版本**: 2.0.0  
-**更新日期**: 2025-10-09  
+**版本**: 2.0.0
+**更新日期**: 2025-10-09
 **维护者**: W3D Team
-

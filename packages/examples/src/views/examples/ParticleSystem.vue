@@ -815,7 +815,7 @@ const initScene = async () => {
 // 创建粒子系统
 const createParticleSystem = async () => {
     try {
-        // 使用 W3D SDK 的 ParticleSystem 组件
+        // 使用 Mogl SDK 的 ParticleSystem 组件
         particleSystem = await scene.add('ParticleSystem', {
             name: 'main-particles',
             count: particleSettings.count,

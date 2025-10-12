@@ -23,7 +23,6 @@ W3D SDK is a next-generation WebGL 3D rendering engine based on Three.js, provid
 - 🎯 **Event-Driven** - Comprehensive event system supporting rich interactions
 - 📦 **Resource Management** - Smart resource loading and caching for optimized performance
 - 🎬 **Animation System** - Built-in animation manager and tween animations for complex effects
-- ⚡ **High Performance** - Optimized rendering pipeline, smooth 60fps experience
 - 🔧 **Developer Friendly** - Complete documentation and rich examples
 - 📱 **Responsive Design** - Automatically adapts to different screen sizes
 
@@ -162,17 +161,12 @@ model.on('click', (event) => {
 import { Tween } from '@w3d/core';
 
 // Create tween animation
-Tween.to(
-    model.position,
-    { y: 10 },
-    2000,
-    {
-        easing: 'easeInOutQuad',
-        onComplete: () => {
-            console.log('Animation complete');
-        }
+Tween.to(model.position, { y: 10 }, 2000, {
+    easing: 'easeInOutQuad',
+    onComplete: () => {
+        console.log('Animation complete');
     }
-);
+});
 ```
 
 ## 🛠️ Development
@@ -363,4 +357,3 @@ Thanks to all developers who contributed to this project!
 Made with ❤️ by W3D Team
 
 </div>
-

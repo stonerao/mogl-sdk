@@ -1,26 +1,25 @@
 {
-  "name": "@w3d/examples",
-  "version": "2.0.0",
-  "private": true,
-  "type": "module",
-  "description": "W3D SDK 示例展示系统 - Vue 3 版本",
-  "scripts": {
-    "dev": "vite",
-    "build": "vite build",
-    "preview": "vite preview"
-  },
-  "dependencies": {
-    "@w3d/core": "workspace:*",
-    "@w3d/components": "workspace:*",
-    "@w3d/utils": "workspace:*",
-    "three": "^0.180.0",
-    "vue": "^3.4.0",
-    "vue-router": "^4.2.0",
-    "prismjs": "^1.29.0"
-  },
-  "devDependencies": {
-    "vite": "^5.1.4",
-    "@vitejs/plugin-vue": "^5.0.0"
-  }
+    "name": "@w3d/examples",
+    "version": "2.0.0",
+    "private": true,
+    "type": "module",
+    "description": "Mogl SDK 示例展示系统 - Vue 3 版本",
+    "scripts": {
+        "dev": "vite",
+        "build": "vite build",
+        "preview": "vite preview"
+    },
+    "dependencies": {
+        "@w3d/core": "workspace:*",
+        "@w3d/components": "workspace:*",
+        "@w3d/utils": "workspace:*",
+        "three": "^0.180.0",
+        "vue": "^3.4.0",
+        "vue-router": "^4.2.0",
+        "prismjs": "^1.29.0"
+    },
+    "devDependencies": {
+        "vite": "^5.1.4",
+        "@vitejs/plugin-vue": "^5.0.0"
+    }
 }
-
