@@ -1,0 +1,39 @@
+{
+    "name": "@w3d/utils",
+    "version": "2.0.0",
+    "type": "module",
+    "description": "W3D 工具函数库",
+    "main": "./src/index.js",
+    "module": "./src/index.js",
+    "exports": {
+        ".": {
+            "import": "./src/index.js",
+            "require": "./src/index.js"
+        }
+    },
+    "files": [
+        "dist",
+        "src",
+        "README.md"
+    ],
+    "scripts": {
+        "dev": "vite",
+        "build": "vite build"
+    },
+    "devDependencies": {
+        "vite": "^5.1.4"
+    },
+    "keywords": [
+        "webgl",
+        "3d",
+        "utils",
+        "helpers"
+    ],
+    "author": "W3D Team",
+    "license": "MIT",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/yourusername/w3d-sdk.git",
+        "directory": "packages/utils"
+    }
+}

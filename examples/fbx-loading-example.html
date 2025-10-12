@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FBX 模型加载示例 - W3D SDK</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            overflow: hidden;
+        }
+
+        #app {
+            width: 100vw;
+            height: 100vh;
+        }
+
+        .controls {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            min-width: 300px;
+            max-width: 400px;
+        }
+
+        .controls h2 {
+            margin: 0 0 15px 0;
+            color: #333;
+            font-size: 18px;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 10px;
+        }
+
+        .control-group {
+            margin-bottom: 15px;
+        }
+
+        .control-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #555;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .control-group button {
+            width: 100%;
+            padding: 10px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background 0.3s;
+        }
+
+        .control-group button:hover {
+            background: #5568d3;
+        }
+
+        .control-group button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        .progress-container {
+            margin-top: 10px;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 25px;
+            background: #f0f0f0;
+            border-radius: 5px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            width: 0%;
+            transition: width 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .info {
+            margin-top: 15px;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 5px;
+            font-size: 12px;
+            color: #666;
+        }
+
+        .info-item {
+            margin: 5px 0;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .info-label {
+            font-weight: 500;
+            color: #333;
+        }
+
+        .status {
+            padding: 8px 12px;
+            border-radius: 5px;
+            font-size: 12px;
+            margin-top: 10px;
+        }
+
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .status.loading {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+    </style>
+</head>
+<body>
+    <div id="app"></div>
+
+    <div class="controls">
+        <h2>🎮 FBX 模型加载示例</h2>
+
+        <div class="control-group">
+            <label>选择模型格式：</label>
+            <button id="loadGLTF">加载 GLTF 模型</button>
+        </div>
+
+        <div class="control-group">
+            <button id="loadFBX">加载 FBX 模型</button>
+        </div>
+
+        <div class="control-group">
+            <button id="loadBoth">同时加载两种格式</button>
+        </div>
+
+        <div class="progress-container" id="progressContainer" style="display: none;">
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill">0%</div>
+            </div>
+        </div>
+
+        <div id="status"></div>
+
+        <div class="info">
+            <div class="info-item">
+                <span class="info-label">已加载模型：</span>
+                <span id="modelCount">0</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">动画数量：</span>
+                <span id="animationCount">0</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">模型类型：</span>
+                <span id="modelType">-</span>
+            </div>
+        </div>
+
+        <div class="info" style="margin-top: 10px;">
+            <strong>💡 提示：</strong><br>
+            • 点击模型可以查看信息<br>
+            • 支持 GLTF/GLB/FBX 格式<br>
+            • 自动检测模型格式<br>
+            • 统一的加载接口
+        </div>
+    </div>
+
+    <script type="module">
+        import { Scene, ModelLoader } from '../packages/core/src/index.js';
+        import * as THREE from 'three';
+
+        // 创建场景
+        const scene = new Scene('#app', {
+            renderer: {
+                antialias: true,
+                alpha: false
+            },
+            camera: {
+                position: [0, 5, 10],
+                fov: 45
+            },
+            controls: {
+                enableDamping: true,
+                dampingFactor: 0.05
+            }
+        });
+
+        // 添加灯光
+        scene.light.addAmbient({
+            color: '#ffffff',
+            intensity: 0.6
+        });
+
+        scene.light.addDirectional({
+            color: '#ffffff',
+            intensity: 1.0,
+            position: [10, 10, 10],
+            castShadow: true
+        });
+
+        // 添加地面
+        const groundGeometry = new THREE.PlaneGeometry(20, 20);
+        const groundMaterial = new THREE.MeshStandardMaterial({
+            color: '#808080',
+            roughness: 0.8,
+            metalness: 0.2
+        });
+        const ground = new THREE.Mesh(groundGeometry, groundMaterial);
+        ground.rotation.x = -Math.PI / 2;
+        ground.receiveShadow = true;
+        scene.scene.add(ground);
+
+        // 注册组件
+        scene.registerComponent('ModelLoader', ModelLoader);
+
+        // 初始化场景
+        scene.init();
+
+        // UI 元素
+        const loadGLTFBtn = document.getElementById('loadGLTF');
+        const loadFBXBtn = document.getElementById('loadFBX');
+        const loadBothBtn = document.getElementById('loadBoth');
+        const progressContainer = document.getElementById('progressContainer');
+        const progressFill = document.getElementById('progressFill');
+        const statusDiv = document.getElementById('status');
+        const modelCountSpan = document.getElementById('modelCount');
+        const animationCountSpan = document.getElementById('animationCount');
+        const modelTypeSpan = document.getElementById('modelType');
+
+        let loadedModels = 0;
+
+        // 显示状态
+        function showStatus(message, type = 'loading') {
+            statusDiv.className = `status ${type}`;
+            statusDiv.textContent = message;
+            statusDiv.style.display = 'block';
+        }
+
+        // 隐藏状态
+        function hideStatus() {
+            statusDiv.style.display = 'none';
+        }
+
+        // 更新进度
+        function updateProgress(percent) {
+            const percentValue = Math.round(percent * 100);
+            progressFill.style.width = percentValue + '%';
+            progressFill.textContent = percentValue + '%';
+        }
+
+        // 监听加载进度
+        scene.resourceManager.on('resource:load:progress', (event) => {
+            progressContainer.style.display = 'block';
+            updateProgress(event.progress);
+        });
+
+        scene.resourceManager.on('resource:load:complete', (event) => {
+            setTimeout(() => {
+                progressContainer.style.display = 'none';
+                updateProgress(0);
+            }, 500);
+        });
+
+        // 加载 GLTF 模型（示例 - 使用占位符）
+        loadGLTFBtn.addEventListener('click', async () => {
+            try {
+                showStatus('正在加载 GLTF 模型...', 'loading');
+                
+                // 注意：这里使用示例 URL，实际使用时需要替换为真实的模型路径
+                const model = await scene.add('ModelLoader', {
+                    name: 'gltf-model',
+                    url: '/models/example.glb',  // 替换为实际的 GLTF 模型路径
+                    scale: 2,
+                    position: [-3, 0, 0]
+                });
+
+                setupModel(model, 'GLTF');
+                showStatus('GLTF 模型加载成功！', 'success');
+                
+            } catch (error) {
+                showStatus(`加载失败: ${error.message}`, 'error');
+                console.error('GLTF 加载错误:', error);
+            }
+        });
+
+        // 加载 FBX 模型（示例 - 使用占位符）
+        loadFBXBtn.addEventListener('click', async () => {
+            try {
+                showStatus('正在加载 FBX 模型...', 'loading');
+                
+                // 注意：这里使用示例 URL，实际使用时需要替换为真实的模型路径
+                const model = await scene.add('ModelLoader', {
+                    name: 'fbx-model',
+                    url: '/models/example.fbx',  // 替换为实际的 FBX 模型路径
+                    scale: 0.01,  // FBX 模型通常需要缩小
+                    position: [3, 0, 0]
+                });
+
+                setupModel(model, 'FBX');
+                showStatus('FBX 模型加载成功！', 'success');
+                
+            } catch (error) {
+                showStatus(`加载失败: ${error.message}`, 'error');
+                console.error('FBX 加载错误:', error);
+            }
+        });
+
+        // 同时加载两种格式
+        loadBothBtn.addEventListener('click', async () => {
+            try {
+                showStatus('正在同时加载 GLTF 和 FBX 模型...', 'loading');
+                
+                const [gltfModel, fbxModel] = await Promise.all([
+                    scene.add('ModelLoader', {
+                        name: 'gltf-model',
+                        url: '/models/example.glb',
+                        scale: 2,
+                        position: [-3, 0, 0]
+                    }),
+                    scene.add('ModelLoader', {
+                        name: 'fbx-model',
+                        url: '/models/example.fbx',
+                        scale: 0.01,
+                        position: [3, 0, 0]
+                    })
+                ]);
+
+                setupModel(gltfModel, 'GLTF');
+                setupModel(fbxModel, 'FBX');
+                
+                showStatus('所有模型加载成功！', 'success');
+                
+            } catch (error) {
+                showStatus(`加载失败: ${error.message}`, 'error');
+                console.error('批量加载错误:', error);
+            }
+        });
+
+        // 设置模型
+        function setupModel(model, type) {
+            loadedModels++;
+            modelCountSpan.textContent = loadedModels;
+            modelTypeSpan.textContent = type;
+
+            // 启用阴影
+            model.scene.traverse((child) => {
+                if (child.isMesh) {
+                    child.castShadow = true;
+                    child.receiveShadow = true;
+                }
+            });
+
+            // 更新动画数量
+            if (model.animations && model.animations.length > 0) {
+                animationCountSpan.textContent = model.animations.length;
+                
+                // 播放第一个动画
+                scene.animationManager.play(
+                    model.scene,
+                    model.animations[0],
+                    { loop: THREE.LoopRepeat }
+                );
+            }
+
+            // 添加点击事件
+            model.on('click', (event) => {
+                console.log('模型被点击:', {
+                    name: model.name,
+                    type: model.type,
+                    animations: model.animations.length,
+                    object: event.object
+                });
+                
+                showStatus(`点击了 ${type} 模型`, 'success');
+            });
+
+            console.log('模型加载完成:', {
+                type: model.type,
+                animations: model.animations.length,
+                cameras: model.cameras.length
+            });
+        }
+
+        // 初始提示
+        showStatus('请选择要加载的模型格式', 'loading');
+        setTimeout(hideStatus, 2000);
+    </script>
+</body>
+</html>
+
