@@ -15,11 +15,13 @@ export { HDRLoader } from './loaders/HDRLoader/index.js';
 export { PathAnimation } from './animation/PathAnimation/index.js';
 export { CameraAnimation } from './animation/CameraAnimation/index.js';
 export { ModelAnimation } from './animation/ModelAnimation/index.js';
+export { MigrationLine } from './animation/MigrationLine/index.js';
 
 // 标注组件
 export { MarkPoint } from './markers/MarkPoint/index.js';
 export { MarkLine } from './markers/MarkLine/index.js';
 export { MarkArea } from './markers/MarkArea/index.js';
+export { Label3D } from './markers/Label3D/index.js';
 
 // 特效组件
 export { ParticleSystem } from './effects/ParticleSystem/index.js';

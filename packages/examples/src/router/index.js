@@ -17,6 +17,8 @@ const Animations = () => import('../views/examples/Animations.vue');
 const ParticleSystem = () => import('../views/examples/ParticleSystem.vue');
 const AdvancedModelLoader = () => import('../views/examples/AdvancedModelLoader.vue');
 const HenglajiBakedLighting = () => import('../views/examples/ModelBake.vue');
+const Label3DDemo = () => import('../views/examples/Label3DDemo.vue');
+const MigrationLineDemo = () => import('../views/examples/MigrationLineDemo.vue');
 
 const routes = [
     {
@@ -97,6 +99,24 @@ const routes = [
         meta: {
             title: '08 - 模型烘焙光照',
             category: 'expert'
+        }
+    },
+    {
+        path: '/examples/09-label3d',
+        name: 'Label3DDemo',
+        component: Label3DDemo,
+        meta: {
+            title: '09 - 三维标签组件',
+            category: 'advanced'
+        }
+    },
+    {
+        path: '/examples/10-migration-line',
+        name: 'MigrationLineDemo',
+        component: MigrationLineDemo,
+        meta: {
+            title: '10 - 迁移线动画组件',
+            category: 'advanced'
         }
     },
     {

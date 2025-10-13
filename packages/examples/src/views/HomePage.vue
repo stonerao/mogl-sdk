@@ -112,6 +112,22 @@ const examples = ref([
         icon: '🏭',
         category: 'expert',
         route: '/examples/08-henglaji-baked-lighting'
+    },
+    {
+        id: 9,
+        title: '09 - Label3D',
+        description: '三维标签组件 - Canvas 文字纹理和事件交互',
+        icon: '🏷️',
+        category: 'advanced',
+        route: '/examples/09-label3d'
+    },
+    {
+        id: 10,
+        title: '10 - Migration Line',
+        description: '迁移线动画组件 - Shader/Particle/Line2 三种渲染方式',
+        icon: '🌊',
+        category: 'advanced',
+        route: '/examples/10-migration-line'
     }
 ]);
 

@@ -30,31 +30,39 @@ const model = await scene.add('ModelLoader', {
 ## 📚 组件分类
 
 ### 加载器组件（Loaders）
+
 - **ModelLoader** - GLTF/GLB 模型加载器
 - **TextureLoader** - 纹理加载器
 - **HDRLoader** - HDR 环境贴图加载器
 
 ### 动画组件（Animation）
+
 - **PathAnimation** - 路径动画
 - **CameraAnimation** - 相机动画
 - **ModelAnimation** - 模型动画
+- **MigrationLine** - 迁移线动画（支持 Shader/Particle/Line2 三种渲染方式）
 
 ### 标注组件（Markers）
+
 - **MarkPoint** - 标注点
 - **MarkLine** - 标注线
 - **MarkArea** - 标注区域
+- **Label3D** - 三维标签（Canvas 文字纹理）
 
 ### 特效组件（Effects）
+
 - **ParticleSystem** - 粒子系统
 - **WaterEffect** - 水面效果
 - **FireEffect** - 火焰效果
 
 ### 控制组件（Controls）
+
 - **FirstPersonControls** - 第一人称控制
 - **FlyControls** - 飞行控制
 - **TransformControls** - 变换控制
 
 ### 辅助组件（Helpers）
+
 - **GridHelper** - 网格辅助
 - **AxesHelper** - 坐标轴辅助
 - **BoundingBoxHelper** - 包围盒辅助
@@ -66,4 +74,3 @@ const model = await scene.add('ModelLoader', {
 ## 📄 许可证
 
 MIT License
-
