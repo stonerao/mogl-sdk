@@ -128,6 +128,14 @@ const examples = ref([
         icon: '🌊',
         category: 'advanced',
         route: '/examples/10-migration-line'
+    },
+    {
+        id: 11,
+        title: '11 - Area Block',
+        description: '区域块组件 - 基于 Three.js 的自定义几何体',
+        icon: '🧱',
+        category: 'advanced',
+        route: '/examples/11-area-block'
     }
 ]);
 

@@ -19,6 +19,7 @@ const AdvancedModelLoader = () => import('../views/examples/AdvancedModelLoader.
 const HenglajiBakedLighting = () => import('../views/examples/ModelBake.vue');
 const Label3DDemo = () => import('../views/examples/Label3DDemo.vue');
 const MigrationLineDemo = () => import('../views/examples/MigrationLineDemo.vue');
+const AreaBlockDemo = () => import('../views/examples/AreaBlockDemo.vue');
 
 const routes = [
     {
@@ -116,6 +117,15 @@ const routes = [
         component: MigrationLineDemo,
         meta: {
             title: '10 - 迁移线动画组件',
+            category: 'advanced'
+        }
+    },
+    {
+        path: '/examples/11-area-block',
+        name: 'AreaBlockDemo',
+        component: AreaBlockDemo,
+        meta: {
+            title: '11 - 区域块组件',
             category: 'advanced'
         }
     },
