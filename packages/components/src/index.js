@@ -23,6 +23,12 @@ export { MarkLine } from './markers/MarkLine/index.js';
 export { MarkArea } from './markers/MarkArea/index.js';
 export { Label3D } from './markers/Label3D/index.js';
 
+// 点位组件
+export { ImageMarker } from './marker/ImageMarker/index.js';
+
+// 区域组件
+export { AreaBlock } from './area/AreaBlock/index.js';
+
 // 特效组件
 export { ParticleSystem } from './effects/ParticleSystem/index.js';
 export { WaterEffect } from './effects/WaterEffect/index.js';

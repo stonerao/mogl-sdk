@@ -146,7 +146,7 @@
 <script setup>
 import { ref, reactive, onMounted, onUnmounted, computed } from 'vue';
 import { Scene } from '@w3d/core';
-import { MigrationLine, GridHelper } from '@w3d/components';
+import { AreaBlock, GridHelper } from '@w3d/components';
 import * as THREE from 'three';
 import SplitLayout from '../../components/SplitLayout.vue';
 
@@ -159,7 +159,7 @@ const areaShapeType = ref('square');
 const displayMode = ref('all');
 
 let scene = null;
-let migrationLineComponent = null;
+let areaBlockComponent = null;
 let areaCounter = 0;
 let fpsUpdateInterval = null;
 
@@ -190,7 +190,7 @@ const displayConfig = computed(() => {
 
 // 源代码展示
 const sourceCode = `import { Scene } from '@w3d/core';
-import { MigrationLine, GridHelper } from '@w3d/components';
+import { AreaBlock, GridHelper } from '@w3d/components';
 
 // 创建场景
 const scene = new Scene(container, {
@@ -220,7 +220,7 @@ scene.light.addDirectional({
 });
 
 // 注册组件
-scene.registerComponent('MigrationLine', MigrationLine);
+scene.registerComponent('AreaBlock', AreaBlock);
 scene.registerComponent('GridHelper', GridHelper);
 
 // 添加网格
@@ -231,7 +231,7 @@ await scene.add('GridHelper', {
 });
 
 // 添加区域块组件
-const areaBlock = await scene.add('MigrationLine', {
+const areaBlock = await scene.add('AreaBlock', {
   name: 'area-blocks',
   areas: [
     {
@@ -260,7 +260,25 @@ areaBlock.on('areaAdded', (data) => {
 
 areaBlock.on('areaRemoved', (data) => {
   console.log('区域块已移除:', data.areaId);
-});`;
+});
+
+// 添加新区域块
+await areaBlock.addArea({
+  id: 'area2',
+  points: [
+    { x: 10, y: 0, z: 10 },
+    { x: 20, y: 0, z: 10 },
+    { x: 20, y: 0, z: 20 },
+    { x: 10, y: 0, z: 20 }
+  ],
+  color: '#ff0000',
+  wallHeight: 8,
+  showWall: true,
+  showBottom: false
+});
+
+// 移除区域块
+areaBlock.removeArea('area1');`;
 
 // 添加日志
 const addLog = (message) => {
@@ -305,8 +323,8 @@ const initScene = async () => {
         scene.renderer.enableResize();
 
         // 注册组件
-        scene.registerComponent('MigrationLine', MigrationLine);
         scene.registerComponent('GridHelper', GridHelper);
+        scene.registerComponent('AreaBlock', AreaBlock);
 
         // 添加网格辅助
         await scene.add('GridHelper', {
@@ -316,8 +334,10 @@ const initScene = async () => {
             color: '#888888'
         });
 
+        // 注册 AreaBlock 组件
+
         // 创建区域块组件
-        migrationLineComponent = await scene.add('MigrationLine', {
+        areaBlockComponent = await scene.add('AreaBlock', {
             name: 'area-blocks',
             areas: [
                 // 示例 1：墙壁+底部
@@ -390,15 +410,15 @@ const initScene = async () => {
         });
 
         // 暴露到 window 对象以便调试
-        window.__w3d_areaBlock__ = migrationLineComponent;
+        window.__w3d_areaBlock__ = areaBlockComponent;
 
         // 监听事件
-        migrationLineComponent.on('areaAdded', (data) => {
+        areaBlockComponent.on('areaAdded', (data) => {
             addLog(`区域块已添加: ${data.areaId}`);
             updateAreaList();
         });
 
-        migrationLineComponent.on('areaRemoved', (data) => {
+        areaBlockComponent.on('areaRemoved', (data) => {
             addLog(`区域块已移除: ${data.areaId}`);
             updateAreaList();
         });
@@ -430,9 +450,9 @@ const startFPSMonitor = () => {
 
 // 更新统计
 const updateStats = () => {
-    if (!migrationLineComponent) return;
+    if (!areaBlockComponent) return;
 
-    areaCount.value = migrationLineComponent.getAllAreas().length;
+    areaCount.value = areaBlockComponent.getAllAreas().length;
 
     // 更新区域块列表
     updateAreaList();
@@ -440,9 +460,9 @@ const updateStats = () => {
 
 // 更新区域块列表
 const updateAreaList = () => {
-    if (!migrationLineComponent) return;
+    if (!areaBlockComponent) return;
 
-    const areas = migrationLineComponent.getAllAreas();
+    const areas = areaBlockComponent.getAllAreas();
     areaList.value = areas;
     areaCount.value = areas.length;
 };
@@ -506,7 +526,7 @@ const generateAreaPoints = (shapeType, centerX, centerZ, size) => {
 
 // 添加随机区域块
 const addRandomArea = async () => {
-    if (!migrationLineComponent) return;
+    if (!areaBlockComponent) return;
 
     areaCounter++;
     const newId = `area-${Date.now()}-${areaCounter}`;
@@ -524,7 +544,7 @@ const addRandomArea = async () => {
     const colors = ['#00ff00', '#ff0000', '#0000ff', '#ffff00', '#ff00ff', '#00ffff'];
     const randomColor = colors[Math.floor(Math.random() * colors.length)];
 
-    await migrationLineComponent.addArea({
+    await areaBlockComponent.addArea({
         id: newId,
         points: points,
         color: areaConfig.color || randomColor,
@@ -543,18 +563,18 @@ const addRandomArea = async () => {
 
 // 移除区域块
 const removeArea = async (areaId) => {
-    if (!migrationLineComponent) return;
+    if (!areaBlockComponent) return;
 
-    migrationLineComponent.removeArea(areaId);
+    areaBlockComponent.removeArea(areaId);
     addLog(`移除区域块: ${areaId}`);
     updateStats();
 };
 
 // 清除所有区域块
 const clearAllAreas = () => {
-    if (!migrationLineComponent) return;
+    if (!areaBlockComponent) return;
 
-    migrationLineComponent.clearAreas();
+    areaBlockComponent.clearAreas();
     addLog('清除所有区域块');
     updateStats();
 };

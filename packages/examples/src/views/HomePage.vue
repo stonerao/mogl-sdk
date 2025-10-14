@@ -132,10 +132,18 @@ const examples = ref([
     {
         id: 11,
         title: '11 - Area Block',
-        description: '区域块组件 - 基于 Three.js 的自定义几何体',
+        description: '独立区域块组件 - 云雾 Shader 效果、墙壁底部渲染',
         icon: '🧱',
         category: 'advanced',
         route: '/examples/11-area-block'
+    },
+    {
+        id: 12,
+        title: '12 - Image Marker',
+        description: '独立图片点位组件 - Sprite/Plane 渲染、多状态切换、鼠标交互',
+        icon: '📍',
+        category: 'advanced',
+        route: '/examples/12-image-marker'
     }
 ]);
 

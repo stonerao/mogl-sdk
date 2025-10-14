@@ -20,6 +20,7 @@ const HenglajiBakedLighting = () => import('../views/examples/ModelBake.vue');
 const Label3DDemo = () => import('../views/examples/Label3DDemo.vue');
 const MigrationLineDemo = () => import('../views/examples/MigrationLineDemo.vue');
 const AreaBlockDemo = () => import('../views/examples/AreaBlockDemo.vue');
+const ImageMarkerDemo = () => import('../views/examples/ImageMarkerDemo.vue');
 
 const routes = [
     {
@@ -126,6 +127,15 @@ const routes = [
         component: AreaBlockDemo,
         meta: {
             title: '11 - 区域块组件',
+            category: 'advanced'
+        }
+    },
+    {
+        path: '/examples/12-image-marker',
+        name: 'ImageMarkerDemo',
+        component: ImageMarkerDemo,
+        meta: {
+            title: '12 - 图片点位组件',
             category: 'advanced'
         }
     },
