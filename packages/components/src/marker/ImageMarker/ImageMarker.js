@@ -1,5 +1,6 @@
 import { Component } from '@w3d/core';
 import * as THREE from 'three';
+import { Label3D } from '../../markers/Label3D/Label3D.js';
 
 /**
  * ImageMarker 图片点位组件
@@ -30,6 +31,9 @@ export class ImageMarker extends Component {
         // 图片点位数据映射表 (id -> markerData)
         this.markerDataMap = new Map();
 
+        // 标签对象映射表 (markerId -> labelSprite)
+        this.markerLabels = new Map();
+
         // 纹理缓存 (url -> texture)
         this.textureCache = new Map();
 
@@ -42,6 +46,9 @@ export class ImageMarker extends Component {
         this.raycaster.params.Sprite = { threshold: 10 };
         this.mouse = new THREE.Vector2();
         this.hoveredMarker = null;
+
+        // 位置动画相关
+        this.positionAnimations = new Map(); // markerId -> animationData
     }
 
     /**
@@ -207,7 +214,7 @@ export class ImageMarker extends Component {
      * @param {Object} markerData - 点位数据
      */
     async addMarker(markerData) {
-        const { id } = markerData;
+        const { id, label } = markerData;
 
         if (!id) {
             console.warn('ImageMarker: id is required');
@@ -236,6 +243,11 @@ export class ImageMarker extends Component {
         // 保存点位数据
         const currentState = markerData.state || Object.keys(markerData.images)[0];
         this.markerDataMap.set(id, { ...markerData, state: currentState });
+
+        // 创建标签（如果配置了）
+        if (label) {
+            await this.createLabelForMarker(id, markerObject, label);
+        }
 
         // 触发事件
         this.emit('markerAdded', { markerId: id, markerData });
@@ -346,6 +358,14 @@ export class ImageMarker extends Component {
         if (!markerObject) {
             console.warn(`ImageMarker: Marker "${id}" not found`);
             return;
+        }
+
+        // 移除关联的标签
+        this.removeLabelForMarker(id);
+
+        // 停止位置动画（如果有）
+        if (this.positionAnimations.has(id)) {
+            this.positionAnimations.delete(id);
         }
 
         // 从场景中移除
@@ -574,6 +594,342 @@ export class ImageMarker extends Component {
         return null;
     }
 
+    // ==================== 位置更新相关方法 ====================
+
+    /**
+     * 更新点位位置
+     * @param {string} id - 点位 ID
+     * @param {Object} newPosition - 新位置 {x, y, z}
+     * @param {Object} options - 动画选项 {duration, easing}
+     */
+    updatePosition(id, newPosition, options = {}) {
+        const markerObject = this.imageMarkers.get(id);
+        const markerData = this.markerDataMap.get(id);
+
+        if (!markerObject || !markerData) {
+            console.warn(`ImageMarker: Marker "${id}" not found`);
+            return;
+        }
+
+        const { duration = 0, easing = 'linear' } = options;
+
+        if (duration > 0) {
+            // 使用动画过渡
+            this.animatePosition(id, markerObject, newPosition, duration, easing);
+        } else {
+            // 立即更新位置
+            markerObject.position.set(newPosition.x, newPosition.y, newPosition.z);
+
+            // 更新标签位置（如果有）
+            this.updateLabelPosition(id, markerObject);
+
+            // 更新数据
+            markerData.position = { ...newPosition };
+
+            // 触发事件
+            this.emit('positionUpdated', {
+                markerId: id,
+                newPosition,
+                markerData
+            });
+        }
+    }
+
+    /**
+     * 动画更新位置
+     * @param {string} id - 点位 ID
+     * @param {THREE.Object3D} markerObject - 点位对象
+     * @param {Object} targetPosition - 目标位置
+     * @param {number} duration - 动画时长（毫秒）
+     * @param {string} easing - 缓动函数名称
+     */
+    animatePosition(id, markerObject, targetPosition, duration, easing) {
+        const startPosition = {
+            x: markerObject.position.x,
+            y: markerObject.position.y,
+            z: markerObject.position.z
+        };
+
+        const startTime = Date.now();
+
+        // 保存动画数据
+        this.positionAnimations.set(id, {
+            startPosition,
+            targetPosition,
+            startTime,
+            duration,
+            easing
+        });
+    }
+
+    /**
+     * 缓动函数
+     * @param {number} t - 进度 (0-1)
+     * @param {string} type - 缓动类型
+     * @returns {number}
+     */
+    easeFunction(t, type) {
+        switch (type) {
+            case 'easeIn':
+                return t * t;
+            case 'easeOut':
+                return t * (2 - t);
+            case 'easeInOut':
+                return t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
+            case 'linear':
+            default:
+                return t;
+        }
+    }
+
+    // ==================== 标签相关方法 ====================
+
+    /**
+     * 为点位创建标签
+     * @param {string} markerId - 点位 ID
+     * @param {THREE.Object3D} markerObject - 点位对象
+     * @param {Object} labelConfig - 标签配置
+     */
+    async createLabelForMarker(markerId, markerObject, labelConfig) {
+        const {
+            text,
+            offset = { x: 0, y: 2, z: 0 },
+            fontSize = 16,
+            color = '#ffffff',
+            backgroundColor = 'rgba(0, 0, 0, 0.6)',
+            borderColor = '#ffffff',
+            borderWidth = 1,
+            padding = 8,
+            borderRadius = 4,
+            visible = true
+        } = labelConfig;
+
+        if (!text) {
+            console.warn('ImageMarker: Label text is required');
+            return;
+        }
+
+        // 创建 Label3D 实例（如果还没有）
+        if (!this.labelComponent) {
+            this.labelComponent = new Label3D(this.scene, {
+                globalConfig: {
+                    fontSize,
+                    textColor: color,
+                    backgroundColor,
+                    borderColor,
+                    borderWidth,
+                    padding,
+                    borderRadius,
+                    scale: 0.05, // 缩小标签以适应场景
+                    billboard: true,
+                    depthTest: true,
+                    sizeAttenuation: true
+                }
+            });
+            // 将 Label3D 组件添加到场景
+            this.add(this.labelComponent);
+        }
+
+        // 计算标签位置（点位位置 + 偏移）
+        const labelPosition = {
+            x: markerObject.position.x + offset.x,
+            y: markerObject.position.y + offset.y,
+            z: markerObject.position.z + offset.z
+        };
+
+        // 创建标签
+        await this.labelComponent.createLabel({
+            id: `marker-label-${markerId}`,
+            label: text,
+            position: labelPosition,
+            userData: { markerId },
+            config: {
+                fontSize,
+                textColor: color,
+                backgroundColor,
+                borderColor,
+                borderWidth,
+                padding,
+                borderRadius
+            }
+        });
+
+        // 保存标签引用和配置
+        this.markerLabels.set(markerId, {
+            labelId: `marker-label-${markerId}`,
+            offset,
+            visible
+        });
+
+        // 如果不可见，隐藏标签
+        if (!visible) {
+            this.labelComponent.hideLabel(`marker-label-${markerId}`);
+        }
+    }
+
+    /**
+     * 更新点位标签
+     * @param {string} markerId - 点位 ID
+     * @param {Object} updates - 更新内容
+     */
+    async updateLabel(markerId, updates) {
+        const labelInfo = this.markerLabels.get(markerId);
+
+        if (!labelInfo || !this.labelComponent) {
+            console.warn(`ImageMarker: No label found for marker "${markerId}"`);
+            return;
+        }
+
+        const { labelId } = labelInfo;
+
+        // 更新标签
+        await this.labelComponent.updateLabel(labelId, updates);
+
+        // 更新偏移量（如果有）
+        if (updates.offset) {
+            labelInfo.offset = updates.offset;
+            const markerObject = this.imageMarkers.get(markerId);
+            if (markerObject) {
+                this.updateLabelPosition(markerId, markerObject);
+            }
+        }
+    }
+
+    /**
+     * 更新标签位置
+     * @param {string} markerId - 点位 ID
+     * @param {THREE.Object3D} markerObject - 点位对象
+     */
+    updateLabelPosition(markerId, markerObject) {
+        const labelInfo = this.markerLabels.get(markerId);
+
+        if (!labelInfo || !this.labelComponent) {
+            return;
+        }
+
+        const { labelId, offset } = labelInfo;
+
+        // 计算新的标签位置
+        const newPosition = {
+            x: markerObject.position.x + offset.x,
+            y: markerObject.position.y + offset.y,
+            z: markerObject.position.z + offset.z
+        };
+
+        // 更新标签位置
+        this.labelComponent.updateLabel(labelId, { position: newPosition });
+    }
+
+    /**
+     * 显示点位标签
+     * @param {string} markerId - 点位 ID
+     */
+    showLabel(markerId) {
+        const labelInfo = this.markerLabels.get(markerId);
+
+        if (!labelInfo || !this.labelComponent) {
+            console.warn(`ImageMarker: No label found for marker "${markerId}"`);
+            return;
+        }
+
+        this.labelComponent.showLabel(labelInfo.labelId);
+        labelInfo.visible = true;
+    }
+
+    /**
+     * 隐藏点位标签
+     * @param {string} markerId - 点位 ID
+     */
+    hideLabel(markerId) {
+        const labelInfo = this.markerLabels.get(markerId);
+
+        if (!labelInfo || !this.labelComponent) {
+            console.warn(`ImageMarker: No label found for marker "${markerId}"`);
+            return;
+        }
+
+        this.labelComponent.hideLabel(labelInfo.labelId);
+        labelInfo.visible = false;
+    }
+
+    /**
+     * 移除点位标签
+     * @param {string} markerId - 点位 ID
+     */
+    removeLabelForMarker(markerId) {
+        const labelInfo = this.markerLabels.get(markerId);
+
+        if (!labelInfo || !this.labelComponent) {
+            return;
+        }
+
+        this.labelComponent.removeLabel(labelInfo.labelId);
+        this.markerLabels.delete(markerId);
+    }
+
+    // ==================== 生命周期方法 ====================
+
+    /**
+     * 每帧更新
+     * @param {number} delta - 时间增量（秒）
+     */
+    onUpdate(delta) {
+        // 更新位置动画
+        const now = Date.now();
+        const completedAnimations = [];
+
+        this.positionAnimations.forEach((animData, markerId) => {
+            const { startPosition, targetPosition, startTime, duration, easing } = animData;
+            const elapsed = now - startTime;
+            const progress = Math.min(elapsed / duration, 1);
+
+            // 应用缓动函数
+            const easedProgress = this.easeFunction(progress, easing);
+
+            // 计算当前位置
+            const markerObject = this.imageMarkers.get(markerId);
+            if (markerObject) {
+                markerObject.position.x =
+                    startPosition.x + (targetPosition.x - startPosition.x) * easedProgress;
+                markerObject.position.y =
+                    startPosition.y + (targetPosition.y - startPosition.y) * easedProgress;
+                markerObject.position.z =
+                    startPosition.z + (targetPosition.z - startPosition.z) * easedProgress;
+
+                // 更新标签位置
+                this.updateLabelPosition(markerId, markerObject);
+
+                // 动画完成
+                if (progress >= 1) {
+                    completedAnimations.push(markerId);
+
+                    // 更新数据
+                    const markerData = this.markerDataMap.get(markerId);
+                    if (markerData) {
+                        markerData.position = { ...targetPosition };
+                    }
+
+                    // 触发事件
+                    this.emit('positionUpdated', {
+                        markerId,
+                        newPosition: targetPosition,
+                        markerData
+                    });
+                }
+            }
+        });
+
+        // 清除已完成的动画
+        completedAnimations.forEach((markerId) => {
+            this.positionAnimations.delete(markerId);
+        });
+
+        // 更新 Label3D 组件
+        if (this.labelComponent && this.labelComponent.onUpdate) {
+            this.labelComponent.onUpdate(delta);
+        }
+    }
+
     /**
      * 组件销毁
      */
@@ -584,11 +940,21 @@ export class ImageMarker extends Component {
         // 清除所有图片点位
         this.clearMarkers();
 
+        // 清除 Label3D 组件
+        if (this.labelComponent) {
+            this.labelComponent.onDispose();
+            this.remove(this.labelComponent);
+            this.labelComponent = null;
+        }
+
         // 清除纹理缓存
         this.textureCache.forEach((texture) => {
             texture.dispose();
         });
         this.textureCache.clear();
+
+        // 清除动画
+        this.positionAnimations.clear();
     }
 }
 

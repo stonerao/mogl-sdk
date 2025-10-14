@@ -64,6 +64,33 @@
                     </label>
                 </div>
 
+                <div class="form-group">
+                    <label>
+                        <input v-model="markerConfig.showLabel" type="checkbox" />
+                        显示文字标签
+                    </label>
+                </div>
+
+                <div v-if="markerConfig.showLabel" class="form-group">
+                    <label>标签文字:</label>
+                    <input
+                        v-model="markerConfig.labelText"
+                        type="text"
+                        placeholder="输入标签文字"
+                    />
+                </div>
+
+                <div v-if="markerConfig.showLabel" class="form-group">
+                    <label>标签偏移 Y: {{ markerConfig.labelOffset.y }}</label>
+                    <input
+                        v-model.number="markerConfig.labelOffset.y"
+                        type="range"
+                        min="0"
+                        max="5"
+                        step="0.5"
+                    />
+                </div>
+
                 <button
                     @click="addRandomMarker"
                     class="btn-primary"
@@ -92,6 +119,14 @@
                             <button @click="toggleMarkerState(marker.id)" class="btn-toggle">
                                 切换
                             </button>
+                            <button
+                                v-if="marker.label"
+                                @click="toggleLabel(marker.id)"
+                                class="btn-toggle"
+                            >
+                                标签
+                            </button>
+                            <button @click="moveMarker(marker.id)" class="btn-toggle">移动</button>
                             <button @click="removeMarker(marker.id)" class="btn-remove">
                                 删除
                             </button>
@@ -152,7 +187,10 @@ const markerConfig = reactive({
     color: '#ffffff',
     opacity: 1.0,
     offset: { x: 0, y: 0, z: 0 },
-    sizeAttenuation: true
+    sizeAttenuation: true,
+    showLabel: true,
+    labelText: '点位',
+    labelOffset: { x: 0, y: 2, z: 0 }
 });
 
 // 可用的图片状态
@@ -204,7 +242,7 @@ await scene.add('GridHelper', {
   divisions: 40
 });
 
-// 添加图片点位组件
+// 添加图片点位组件（带标签）
 const imageMarker = await scene.add('ImageMarker', {
   name: 'image-markers',
   markers: [
@@ -220,7 +258,17 @@ const imageMarker = await scene.add('ImageMarker', {
       },
       size: 5,
       sizeAttenuation: true,
-      opacity: 1.0
+      opacity: 1.0,
+      // 添加文字标签
+      label: {
+        text: '重要地点',
+        offset: { x: 0, y: 2, z: 0 },
+        fontSize: 16,
+        color: '#ffffff',
+        backgroundColor: 'rgba(0, 0, 0, 0.6)',
+        borderColor: '#00ff00',
+        visible: true
+      }
     }
   ]
 });
@@ -234,13 +282,21 @@ imageMarker.on('markerStateChanged', (data) => {
   console.log('状态切换:', data.oldState, '->', data.newState);
 });
 
-// 添加新点位
+imageMarker.on('positionUpdated', (data) => {
+  console.log('位置已更新:', data.markerId, data.newPosition);
+});
+
+// 添加新点位（带标签）
 await imageMarker.addMarker({
   id: 'marker2',
   position: { x: 10, y: 5, z: 0 },
   type: 'plane',
   images: {
     state1: '/images/camera.png'
+  },
+  label: {
+    text: '监控点',
+    offset: { x: 0, y: 2, z: 0 }
   }
 });
 
@@ -251,7 +307,22 @@ await imageMarker.updateState('marker1', 'state2');
 imageMarker.updateMarker('marker1', {
   size: 8,
   color: '#ff0000'
-});`;
+});
+
+// 更新点位位置（带动画）
+imageMarker.updatePosition('marker1', { x: 5, y: 8, z: 5 }, {
+  duration: 1000,  // 1秒动画
+  easing: 'easeInOut'
+});
+
+// 更新标签文字
+await imageMarker.updateLabel('marker1', {
+  text: '新的文字'
+});
+
+// 显示/隐藏标签
+imageMarker.showLabel('marker1');
+imageMarker.hideLabel('marker1');`;
 
 // 添加日志
 const addLog = (message) => {
@@ -385,6 +456,15 @@ const initScene = async () => {
             addLog(`鼠标移出: ${data.markerId}`);
         });
 
+        // 监听位置更新事件
+        imageMarkerComponent.on('positionUpdated', (data) => {
+            addLog(
+                `位置已更新: ${data.markerId} -> (${data.newPosition.x.toFixed(
+                    1
+                )}, ${data.newPosition.y.toFixed(1)}, ${data.newPosition.z.toFixed(1)})`
+            );
+        });
+
         // 更新统计
         updateStats();
 
@@ -438,7 +518,7 @@ const addRandomMarker = async () => {
     const z = (Math.random() - 0.5) * range * 2;
     const y = 3 + Math.random() * 5;
 
-    await imageMarkerComponent.addMarker({
+    const markerData = {
         id: newId,
         position: { x, y, z },
         type: markerConfig.type,
@@ -450,7 +530,23 @@ const addRandomMarker = async () => {
         sizeAttenuation: markerConfig.sizeAttenuation,
         offset: markerConfig.offset,
         userData: { name: `点位 ${markerCounter}` }
-    });
+    };
+
+    // 添加标签配置（如果启用）
+    if (markerConfig.showLabel) {
+        markerData.label = {
+            text: markerConfig.labelText || `点位 ${markerCounter}`,
+            offset: markerConfig.labelOffset,
+            fontSize: 16,
+            color: '#ffffff',
+            backgroundColor: 'rgba(0, 0, 0, 0.6)',
+            borderColor: '#00ff00',
+            borderWidth: 1,
+            visible: true
+        };
+    }
+
+    await imageMarkerComponent.addMarker(markerData);
 
     addLog(`添加点位: ${newId}`);
     updateStats();
@@ -486,6 +582,50 @@ const clearAllMarkers = () => {
     imageMarkerComponent.clearMarkers();
     addLog('清除所有点位');
     updateStats();
+};
+
+// 切换标签显示/隐藏
+const toggleLabel = (markerId) => {
+    if (!imageMarkerComponent) return;
+
+    const marker = imageMarkerComponent.getMarker(markerId);
+    if (!marker || !marker.label) return;
+
+    // 检查标签是否可见（通过内部状态）
+    const labelInfo = imageMarkerComponent.markerLabels.get(markerId);
+    if (!labelInfo) return;
+
+    if (labelInfo.visible) {
+        imageMarkerComponent.hideLabel(markerId);
+        addLog(`隐藏标签: ${markerId}`);
+    } else {
+        imageMarkerComponent.showLabel(markerId);
+        addLog(`显示标签: ${markerId}`);
+    }
+};
+
+// 移动点位（带动画）
+const moveMarker = (markerId) => {
+    if (!imageMarkerComponent) return;
+
+    const marker = imageMarkerComponent.getMarker(markerId);
+    if (!marker) return;
+
+    // 生成随机新位置
+    const range = 15;
+    const newPosition = {
+        x: (Math.random() - 0.5) * range * 2,
+        y: 3 + Math.random() * 5,
+        z: (Math.random() - 0.5) * range * 2
+    };
+
+    // 使用动画更新位置
+    imageMarkerComponent.updatePosition(markerId, newPosition, {
+        duration: 1000, // 1秒动画
+        easing: 'easeInOut'
+    });
+
+    addLog(`移动点位: ${markerId}`);
 };
 
 // 组件挂载
