@@ -21,6 +21,7 @@ const Label3DDemo = () => import('../views/examples/Label3DDemo.vue');
 const MigrationLineDemo = () => import('../views/examples/MigrationLineDemo.vue');
 const AreaBlockDemo = () => import('../views/examples/AreaBlockDemo.vue');
 const ImageMarkerDemo = () => import('../views/examples/ImageMarkerDemo.vue');
+const PipelineDemo = () => import('../views/examples/PipelineDemo.vue');
 
 const routes = [
     {
@@ -137,6 +138,15 @@ const routes = [
         meta: {
             title: '12 - 图片点位组件',
             category: 'advanced'
+        }
+    },
+    {
+        path: '/examples/13-pipeline',
+        name: 'PipelineDemo',
+        component: PipelineDemo,
+        meta: {
+            title: '13 - Pipeline',
+            category: 'effects'
         }
     },
     {

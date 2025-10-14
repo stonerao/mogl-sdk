@@ -144,6 +144,14 @@ const examples = ref([
         icon: '📍',
         category: 'advanced',
         route: '/examples/12-image-marker'
+    },
+    {
+        id: 13,
+        title: '13 - Pipeline',
+        description: '管道效果组件 - 路径管道生成、进度控制、流光效果',
+        icon: '🔧',
+        category: 'effects',
+        route: '/examples/13-pipeline'
     }
 ]);
 
