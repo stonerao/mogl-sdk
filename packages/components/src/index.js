@@ -44,3 +44,9 @@ export { TransformControls } from './controls/TransformControls/index.js';
 export { GridHelper } from './helpers/GridHelper/index.js';
 export { AxesHelper } from './helpers/AxesHelper/index.js';
 export { BoundingBoxHelper } from './helpers/BoundingBoxHelper/index.js';
+
+// 空间查询组件
+export { BVHQuery } from './spatial/BVHQuery/index.js';
+
+// 几何体组件
+export { ExtrudedPolygon } from './geometry/ExtrudedPolygon/index.js';

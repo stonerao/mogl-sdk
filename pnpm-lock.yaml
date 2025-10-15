@@ -56,6 +56,9 @@ importers:
       '@w3d/utils':
         specifier: workspace:*
         version: link:../utils
+      three-mesh-bvh:
+        specifier: ^0.9.1
+        version: 0.9.1(three@0.180.0)
     devDependencies:
       three:
         specifier: ^0.180.0
@@ -97,6 +100,9 @@ importers:
       vue:
         specifier: ^3.4.0
         version: 3.5.22(typescript@5.9.3)
+      vue-i18n:
+        specifier: '9'
+        version: 9.14.5(vue@3.5.22(typescript@5.9.3))
       vue-router:
         specifier: ^4.2.0
         version: 4.5.1(vue@3.5.22(typescript@5.9.3))
@@ -424,6 +430,18 @@ packages:
     peerDependenciesMeta:
       '@types/node':
         optional: true
+
+  '@intlify/core-base@9.14.5':
+    resolution: {integrity: sha512-5ah5FqZG4pOoHjkvs8mjtv+gPKYU0zCISaYNjBNNqYiaITxW8ZtVih3GS/oTOqN8d9/mDLyrjD46GBApNxmlsA==, tarball: https://registry.npmmirror.com/@intlify/core-base/-/core-base-9.14.5.tgz}
+    engines: {node: '>= 16'}
+
+  '@intlify/message-compiler@9.14.5':
+    resolution: {integrity: sha512-IHzgEu61/YIpQV5Pc3aRWScDcnFKWvQA9kigcINcCBXN8mbW+vk9SK+lDxA6STzKQsVJxUPg9ACC52pKKo3SVQ==, tarball: https://registry.npmmirror.com/@intlify/message-compiler/-/message-compiler-9.14.5.tgz}
+    engines: {node: '>= 16'}
+
+  '@intlify/shared@9.14.5':
+    resolution: {integrity: sha512-9gB+E53BYuAEMhbCAxVgG38EZrk59sxBtv3jSizNL2hEWlgjBjAw1AwpLHtNaeda12pe6W20OGEa0TwuMSRbyQ==, tarball: https://registry.npmmirror.com/@intlify/shared/-/shared-9.14.5.tgz}
+    engines: {node: '>= 16'}
 
   '@isaacs/cliui@8.0.2':
     resolution: {integrity: sha512-O8jcjabXaleOG9DQ0+ARXWZBTfnP4WNAqzuiJK7ll44AmxGKv/J2M4TPjxjY3znBCfvBXFzucm1twdyFybFqEA==, tarball: https://registry.npmmirror.com/@isaacs/cliui/-/cliui-8.0.2.tgz}
@@ -3077,6 +3095,11 @@ packages:
   text-table@0.2.0:
     resolution: {integrity: sha512-N+8UisAXDGk8PFXP4HAzVR9nbfmVJ3zYLAWiTIoqC5v5isinhr+r5uaO8+7r3BMfuNIufIsA7RdpVgacC2cSpw==, tarball: https://registry.npmmirror.com/text-table/-/text-table-0.2.0.tgz}
 
+  three-mesh-bvh@0.9.1:
+    resolution: {integrity: sha512-WNT+m9jGQgtp4YdtwEnl4oFylNVifRf7iphlwWdJ4bJu7oNkY0xHIyntep9OzHuR1hpe/pyAP840gB/EsYDJfg==, tarball: https://registry.npmmirror.com/three-mesh-bvh/-/three-mesh-bvh-0.9.1.tgz}
+    peerDependencies:
+      three: '>= 0.159.0'
+
   three@0.180.0:
     resolution: {integrity: sha512-o+qycAMZrh+TsE01GqWUxUIKR1AL0S8pq7zDkYOQw8GqfX8b8VoCKYUoHbhiX5j+7hr8XsuHDVU6+gkQJQKg9w==, tarball: https://registry.npmmirror.com/three/-/three-0.180.0.tgz}
 
@@ -3298,6 +3321,12 @@ packages:
         optional: true
       jsdom:
         optional: true
+
+  vue-i18n@9.14.5:
+    resolution: {integrity: sha512-0jQ9Em3ymWngyiIkj0+c/k7WgaPO+TNzjKSNq9BvBQaKJECqn9cd9fL4tkDhB5G1QBskGl9YxxbDAhgbFtpe2g==, tarball: https://registry.npmmirror.com/vue-i18n/-/vue-i18n-9.14.5.tgz}
+    engines: {node: '>= 16'}
+    peerDependencies:
+      vue: ^3.0.0
 
   vue-router@4.5.1:
     resolution: {integrity: sha512-ogAF3P97NPm8fJsE4by9dwSYtDwXIY1nFY9T6DyQnGHd1E2Da94w9JIolpe42LJGIl0DwOHBi8TcRPlPGwbTtw==, tarball: https://registry.npmmirror.com/vue-router/-/vue-router-4.5.1.tgz}
@@ -3783,6 +3812,18 @@ snapshots:
     dependencies:
       chardet: 2.1.0
       iconv-lite: 0.7.0
+
+  '@intlify/core-base@9.14.5':
+    dependencies:
+      '@intlify/message-compiler': 9.14.5
+      '@intlify/shared': 9.14.5
+
+  '@intlify/message-compiler@9.14.5':
+    dependencies:
+      '@intlify/shared': 9.14.5
+      source-map-js: 1.2.1
+
+  '@intlify/shared@9.14.5': {}
 
   '@isaacs/cliui@8.0.2':
     dependencies:
@@ -6791,6 +6832,10 @@ snapshots:
 
   text-table@0.2.0: {}
 
+  three-mesh-bvh@0.9.1(three@0.180.0):
+    dependencies:
+      three: 0.180.0
+
   three@0.180.0: {}
 
   through2@2.0.5:
@@ -6978,6 +7023,13 @@ snapshots:
       - sugarss
       - supports-color
       - terser
+
+  vue-i18n@9.14.5(vue@3.5.22(typescript@5.9.3)):
+    dependencies:
+      '@intlify/core-base': 9.14.5
+      '@intlify/shared': 9.14.5
+      '@vue/devtools-api': 6.6.4
+      vue: 3.5.22(typescript@5.9.3)
 
   vue-router@4.5.1(vue@3.5.22(typescript@5.9.3)):
     dependencies:

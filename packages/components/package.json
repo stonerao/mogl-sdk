@@ -21,11 +21,12 @@
         "build": "vite build"
     },
     "peerDependencies": {
-        "three": "^0.180.0",
-        "@w3d/core": "workspace:*"
+        "@w3d/core": "workspace:*",
+        "three": "^0.180.0"
     },
     "dependencies": {
-        "@w3d/utils": "workspace:*"
+        "@w3d/utils": "workspace:*",
+        "three-mesh-bvh": "^0.9.1"
     },
     "devDependencies": {
         "three": "^0.180.0",

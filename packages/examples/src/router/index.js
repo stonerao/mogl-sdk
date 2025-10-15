@@ -22,6 +22,8 @@ const MigrationLineDemo = () => import('../views/examples/MigrationLineDemo.vue'
 const AreaBlockDemo = () => import('../views/examples/AreaBlockDemo.vue');
 const ImageMarkerDemo = () => import('../views/examples/ImageMarkerDemo.vue');
 const PipelineDemo = () => import('../views/examples/PipelineDemo.vue');
+const BVHQueryDemo = () => import('../views/examples/BVHQueryDemo.vue');
+const ExtrudedPolygonDemo = () => import('../views/examples/ExtrudedPolygonDemo.vue');
 
 const routes = [
     {
@@ -147,6 +149,24 @@ const routes = [
         meta: {
             title: '13 - Pipeline',
             category: 'effects'
+        }
+    },
+    {
+        path: '/examples/14-bvh-query',
+        name: 'BVHQueryDemo',
+        component: BVHQueryDemo,
+        meta: {
+            title: '14 - BVH Query',
+            category: 'advanced'
+        }
+    },
+    {
+        path: '/examples/15-extruded-polygon',
+        name: 'ExtrudedPolygonDemo',
+        component: ExtrudedPolygonDemo,
+        meta: {
+            title: '15 - Extruded Polygon',
+            category: 'geometry'
         }
     },
     {
