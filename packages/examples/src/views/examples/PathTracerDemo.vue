@@ -2,231 +2,154 @@
     <SplitLayout :code="sourceCode" language="javascript" title="18 - Path Tracer">
         <div class="scene-container" ref="sceneContainer">
             <!-- 加载状态 -->
-            <div v-if="isLoading" class="loading-overlay">
-                <div class="loading-content">
-                    <div class="loading-spinner"></div>
-                    <div class="loading-text">{{ loadingText }}</div>
-                    <div class="loading-progress">
-                        <div class="progress-bar">
-                            <div
-                                class="progress-fill"
-                                :style="{ width: loadingProgress + '%' }"
-                            ></div>
-                        </div>
-                        <span class="progress-text">{{ loadingProgress }}%</span>
-                    </div>
-                </div>
-            </div>
+            <template v-if="isLoading">
+                <GuiLoading :progress="loadingProgress" :text="loadingText" />
+            </template>
 
             <!-- 渲染进度 -->
-            <div v-if="isRendering" class="render-overlay">
-                <div class="render-info">
-                    <div class="render-title">GPU 路径追踪渲染中...</div>
-                    <div class="render-progress">
-                        <div class="progress-bar">
-                            <div
-                                class="progress-fill"
-                                :style="{ width: renderProgress + '%' }"
-                            ></div>
-                        </div>
-                        <span class="progress-text">{{ renderProgress }}%</span>
-                    </div>
-                    <div class="render-stats">
-                        <span>采样数: {{ currentSamples }} / {{ targetSamples }}</span>
-                    </div>
-                </div>
-            </div>
+            <template v-if="isRendering">
+                <GuiLoading :progress="renderProgress" text="GPU 路径追踪渲染中..." />
+            </template>
 
             <!-- 控制面板 -->
-            <div class="control-panel">
-                <!-- 渲染控制 -->
-                <div class="control-section">
-                    <h4>渲染控制</h4>
-                    <div class="render-controls">
+            <template v-if="!isLoading">
+                <GuiPanel title="路径追踪控制" width="wide">
+                    <!-- 渲染控制 -->
+                    <GuiSection title="渲染控制">
                         <div class="button-group">
-                            <button @click="startRender" :disabled="!pathTracer || isRendering">
-                                开始渲染
-                            </button>
-                            <button @click="pauseRender" :disabled="!pathTracer || !isRendering">
-                                暂停
-                            </button>
-                            <button @click="resumeRender" :disabled="!pathTracer || isRendering">
-                                继续
-                            </button>
-                            <button @click="resetRender" :disabled="!pathTracer">重置</button>
-                        </div>
-                        <div class="button-group">
-                            <button
-                                @click="downloadRender"
+                            <GuiButton
+                                label="开始渲染"
+                                :disabled="!pathTracer || isRendering"
+                                @click="startRender"
+                            />
+                            <GuiButton
+                                label="暂停"
+                                variant="secondary"
+                                :disabled="!pathTracer || !isRendering"
+                                @click="pauseRender"
+                            />
+                            <GuiButton
+                                label="继续"
+                                variant="secondary"
+                                :disabled="!pathTracer || isRendering"
+                                @click="resumeRender"
+                            />
+                            <GuiButton
+                                label="重置"
+                                variant="secondary"
                                 :disabled="!pathTracer"
-                                class="download-btn"
-                            >
-                                下载图片
-                            </button>
+                                @click="resetRender"
+                            />
+                            <GuiButton
+                                label="下载图片"
+                                variant="secondary"
+                                :disabled="!pathTracer"
+                                @click="downloadRender"
+                            />
                         </div>
-                    </div>
-                </div>
+                    </GuiSection>
 
-                <!-- 渲染设置 -->
-                <div class="control-section">
-                    <h4>渲染设置</h4>
-                    <div class="param-group">
-                        <label>目标采样数</label>
-                        <input
-                            type="range"
-                            v-model.number="renderSettings.samples"
-                            @change="updateRenderSettings"
-                            min="10"
-                            max="500"
-                            step="10"
+                    <!-- 渲染设置 -->
+                    <GuiSection title="渲染设置">
+                        <GuiSlider
+                            label="目标采样数"
+                            v-model="renderSettings.samples"
+                            :min="10"
+                            :max="500"
+                            :step="10"
+                            @update:modelValue="updateRenderSettings"
                         />
-                        <span>{{ renderSettings.samples }}</span>
-                    </div>
-                    <div class="param-group">
-                        <label>分辨率缩放</label>
-                        <input
-                            type="range"
-                            v-model.number="renderSettings.resolutionScale"
-                            @change="updateRenderSettings"
-                            min="0.1"
-                            max="1.0"
-                            step="0.1"
+                        <GuiSlider
+                            label="分辨率缩放"
+                            v-model="renderSettings.resolutionScale"
+                            :min="0.1"
+                            :max="1.0"
+                            :step="0.1"
+                            :precision="1"
+                            @update:modelValue="updateRenderSettings"
                         />
-                        <span>{{ renderSettings.resolutionScale }}</span>
-                    </div>
-                    <div class="param-group">
-                        <label>分块数 (Tiles)</label>
-                        <input
-                            type="range"
-                            v-model.number="renderSettings.tiles"
-                            @change="updateRenderSettings"
-                            min="1"
-                            max="6"
-                            step="1"
+                        <GuiSlider
+                            label="分块数 (Tiles)"
+                            v-model="renderSettings.tiles"
+                            :min="1"
+                            :max="6"
+                            :step="1"
+                            @update:modelValue="updateRenderSettings"
                         />
-                        <span>{{ renderSettings.tiles }} x {{ renderSettings.tiles }}</span>
-                    </div>
-                    <div class="setting-group">
-                        <label>
-                            <input
-                                type="checkbox"
-                                v-model="renderSettings.toneMapping"
-                                @change="updateRenderSettings"
-                            />
-                            启用色调映射
-                        </label>
-                    </div>
-                    <div class="setting-group">
-                        <label>
-                            <input
-                                type="checkbox"
-                                v-model="renderSettings.transparentBackground"
-                                @change="updateRenderSettings"
-                            />
-                            透明背景
-                        </label>
-                    </div>
-                </div>
+                        <GuiCheckbox
+                            label="启用色调映射"
+                            v-model="renderSettings.toneMapping"
+                            @update:modelValue="updateRenderSettings"
+                        />
+                        <GuiCheckbox
+                            label="透明背景"
+                            v-model="renderSettings.transparentBackground"
+                            @update:modelValue="updateRenderSettings"
+                        />
+                    </GuiSection>
 
-                <!-- 地板设置 -->
-                <div class="control-section">
-                    <h4>地板设置</h4>
-                    <div class="setting-group">
-                        <label>
-                            <input
-                                type="checkbox"
-                                v-model="floorSettings.enabled"
-                                @change="recreatePathTracer"
+                    <!-- 地板设置 -->
+                    <GuiSection title="地板设置">
+                        <GuiCheckbox
+                            label="启用地板"
+                            v-model="floorSettings.enabled"
+                            @update:modelValue="recreatePathTracer"
+                        />
+                        <template v-if="floorSettings.enabled">
+                            <GuiSlider
+                                label="粗糙度"
+                                v-model="floorSettings.roughness"
+                                :min="0"
+                                :max="1"
+                                :step="0.01"
+                                :precision="2"
+                                @update:modelValue="updateFloorMaterial"
                             />
-                            启用地板
-                        </label>
-                    </div>
-                    <div v-if="floorSettings.enabled">
-                        <div class="param-group">
-                            <label>粗糙度</label>
-                            <input
-                                type="range"
-                                v-model.number="floorSettings.roughness"
-                                @change="updateFloorMaterial"
-                                min="0"
-                                max="1"
-                                step="0.01"
+                            <GuiSlider
+                                label="金属度"
+                                v-model="floorSettings.metalness"
+                                :min="0"
+                                :max="1"
+                                :step="0.01"
+                                :precision="2"
+                                @update:modelValue="updateFloorMaterial"
                             />
-                            <span>{{ floorSettings.roughness.toFixed(2) }}</span>
-                        </div>
-                        <div class="param-group">
-                            <label>金属度</label>
-                            <input
-                                type="range"
-                                v-model.number="floorSettings.metalness"
-                                @change="updateFloorMaterial"
-                                min="0"
-                                max="1"
-                                step="0.01"
-                            />
-                            <span>{{ floorSettings.metalness.toFixed(2) }}</span>
-                        </div>
-                    </div>
-                </div>
+                        </template>
+                    </GuiSection>
 
-                <!-- 材质调整 -->
-                <div class="control-section">
-                    <h4>材质调整</h4>
-                    <div class="setting-group">
-                        <label>
-                            <input
-                                type="checkbox"
-                                v-model="materialSettings.adjustMaterials"
-                                @change="recreatePathTracer"
+                    <!-- 材质调整 -->
+                    <GuiSection title="材质调整">
+                        <GuiCheckbox
+                            label="自动调整材质"
+                            v-model="materialSettings.adjustMaterials"
+                            @update:modelValue="recreatePathTracer"
+                        />
+                        <template v-if="materialSettings.adjustMaterials">
+                            <GuiSlider
+                                label="粗糙度缩放"
+                                v-model="materialSettings.roughnessScale"
+                                :min="0.1"
+                                :max="1.0"
+                                :step="0.05"
+                                :precision="2"
+                                @update:modelValue="recreatePathTracer"
                             />
-                            自动调整材质
-                        </label>
-                    </div>
-                    <div v-if="materialSettings.adjustMaterials">
-                        <div class="param-group">
-                            <label>粗糙度缩放</label>
-                            <input
-                                type="range"
-                                v-model.number="materialSettings.roughnessScale"
-                                @change="recreatePathTracer"
-                                min="0.1"
-                                max="1.0"
-                                step="0.05"
+                            <GuiCheckbox
+                                label="启用透射效果"
+                                v-model="materialSettings.enableTransmission"
+                                @update:modelValue="recreatePathTracer"
                             />
-                            <span>{{ materialSettings.roughnessScale.toFixed(2) }}</span>
-                        </div>
-                        <div class="setting-group">
-                            <label>
-                                <input
-                                    type="checkbox"
-                                    v-model="materialSettings.enableTransmission"
-                                    @change="recreatePathTracer"
-                                />
-                                启用透射效果
-                            </label>
-                        </div>
-                    </div>
-                </div>
+                        </template>
+                    </GuiSection>
 
-                <!-- 渲染信息 -->
-                <div class="control-section">
-                    <h4>渲染信息</h4>
-                    <div class="info-display">
-                        <div class="info-item">
-                            <span class="info-label">状态:</span>
-                            <span class="info-value">{{ renderStatus }}</span>
-                        </div>
-                        <div class="info-item">
-                            <span class="info-label">当前采样:</span>
-                            <span class="info-value">{{ currentSamples }}</span>
-                        </div>
-                        <div class="info-item">
-                            <span class="info-label">进度:</span>
-                            <span class="info-value">{{ renderProgress }}%</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
+                    <!-- 渲染信息 -->
+                    <GuiSection title="渲染信息">
+                        <GuiInfoItem label="状态" :value="renderStatus" />
+                        <GuiInfoItem label="当前采样" :value="currentSamples" />
+                        <GuiInfoItem label="进度" :value="`${renderProgress}%`" />
+                    </GuiSection>
+                </GuiPanel>
+            </template>
         </div>
     </SplitLayout>
 </template>
@@ -235,6 +158,15 @@
 import { ref, reactive, onMounted, onUnmounted } from 'vue';
 import { Scene } from '@w3d/core';
 import { PathTracer, ModelLoader, GridHelper, HDRLoader } from '@w3d/components';
+import {
+    GuiPanel,
+    GuiSection,
+    GuiSlider,
+    GuiCheckbox,
+    GuiButton,
+    GuiInfoItem,
+    GuiLoading
+} from '@/components/Gui';
 import SplitLayout from '../../components/SplitLayout.vue';
 
 const sceneContainer = ref(null);
@@ -602,7 +534,9 @@ onUnmounted(() => {
 });
 </script>
 
-<style scoped>
+<style scoped lang="less">
+@import '@/styles/gui.less';
+
 .scene-container {
     position: relative;
     width: 100%;
@@ -610,295 +544,10 @@ onUnmounted(() => {
     background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
 }
 
-/* 加载状态 */
-.loading-overlay {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.8);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 1000;
-}
-
-.loading-content {
-    text-align: center;
-    color: white;
-}
-
-.loading-spinner {
-    width: 50px;
-    height: 50px;
-    border: 4px solid rgba(255, 255, 255, 0.3);
-    border-top-color: #00ff88;
-    border-radius: 50%;
-    animation: spin 1s linear infinite;
-    margin: 0 auto 20px;
-}
-
-@keyframes spin {
-    to {
-        transform: rotate(360deg);
-    }
-}
-
-.loading-text {
-    font-size: 18px;
-    margin-bottom: 15px;
-}
-
-.loading-progress {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    justify-content: center;
-}
-
-.progress-bar {
-    width: 200px;
-    height: 8px;
-    background: rgba(255, 255, 255, 0.2);
-    border-radius: 4px;
-    overflow: hidden;
-}
-
-.progress-fill {
-    height: 100%;
-    background: linear-gradient(90deg, #00ff88, #00d4ff);
-    transition: width 0.3s ease;
-}
-
-.progress-text {
-    font-size: 14px;
-    min-width: 45px;
-}
-
-/* 渲染进度 */
-.render-overlay {
-    position: absolute;
-    top: 20px;
-    left: 50%;
-    transform: translateX(-50%);
-    background: rgba(0, 0, 0, 0.85);
-    padding: 20px 30px;
-    border-radius: 12px;
-    z-index: 100;
-    min-width: 300px;
-    backdrop-filter: blur(10px);
-}
-
-.render-info {
-    color: white;
-}
-
-.render-title {
-    font-size: 16px;
-    font-weight: 600;
-    margin-bottom: 15px;
-    text-align: center;
-    color: #00ff88;
-}
-
-.render-progress {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin-bottom: 10px;
-}
-
-.render-stats {
-    text-align: center;
-    font-size: 14px;
-    color: #aaa;
-}
-
-/* 控制面板 */
-.control-panel {
-    position: absolute;
-    top: 20px;
-    right: 20px;
-    width: 320px;
-    max-height: calc(100% - 40px);
-    background: rgba(0, 0, 0, 0.85);
-    border-radius: 12px;
-    padding: 20px;
-    overflow-y: auto;
-    backdrop-filter: blur(10px);
-    color: white;
-}
-
-.control-section {
-    margin-bottom: 25px;
-    padding-bottom: 20px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.control-section:last-child {
-    border-bottom: none;
-    margin-bottom: 0;
-}
-
-.control-section h4 {
-    margin: 0 0 15px 0;
-    font-size: 16px;
-    color: #00ff88;
-    font-weight: 600;
-}
-
 /* 按钮组 */
 .button-group {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 10px;
-    margin-bottom: 10px;
-}
-
-.button-group:last-child {
-    margin-bottom: 0;
-}
-
-.button-group button {
-    padding: 10px 15px;
-    background: linear-gradient(135deg, #00ff88, #00d4ff);
-    color: #000;
-    border: none;
-    border-radius: 6px;
-    cursor: pointer;
-    font-size: 14px;
-    font-weight: 600;
-    transition: all 0.3s ease;
-}
-
-.button-group button:hover:not(:disabled) {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0, 255, 136, 0.4);
-}
-
-.button-group button:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-}
-
-.download-btn {
-    background: linear-gradient(135deg, #ff6b6b, #ff8e53) !important;
-}
-
-.download-btn:hover:not(:disabled) {
-    box-shadow: 0 4px 12px rgba(255, 107, 107, 0.4) !important;
-}
-
-/* 参数控制 */
-.param-group {
-    margin-bottom: 15px;
-}
-
-.param-group:last-child {
-    margin-bottom: 0;
-}
-
-.param-group label {
-    display: block;
-    margin-bottom: 8px;
-    font-size: 13px;
-    color: #ccc;
-}
-
-.param-group input[type='range'] {
-    width: calc(100% - 60px);
-    margin-right: 10px;
-}
-
-.param-group span {
-    display: inline-block;
-    min-width: 50px;
-    text-align: right;
-    font-size: 13px;
-    color: #00ff88;
-}
-
-/* 设置组 */
-.setting-group {
-    margin-bottom: 12px;
-}
-
-.setting-group:last-child {
-    margin-bottom: 0;
-}
-
-.setting-group label {
     display: flex;
-    align-items: center;
-    cursor: pointer;
-    font-size: 13px;
-    color: #ccc;
-}
-
-.setting-group input[type='checkbox'] {
-    margin-right: 8px;
-    cursor: pointer;
-}
-
-/* 信息显示 */
-.info-display {
-    background: rgba(255, 255, 255, 0.05);
-    padding: 15px;
-    border-radius: 8px;
-}
-
-.info-item {
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 10px;
-    font-size: 13px;
-}
-
-.info-item:last-child {
-    margin-bottom: 0;
-}
-
-.info-label {
-    color: #aaa;
-}
-
-.info-value {
-    color: #00ff88;
-    font-weight: 600;
-}
-
-/* 滚动条样式 */
-.control-panel::-webkit-scrollbar {
-    width: 6px;
-}
-
-.control-panel::-webkit-scrollbar-track {
-    background: rgba(255, 255, 255, 0.05);
-    border-radius: 3px;
-}
-
-.control-panel::-webkit-scrollbar-thumb {
-    background: rgba(0, 255, 136, 0.3);
-    border-radius: 3px;
-}
-
-.control-panel::-webkit-scrollbar-thumb:hover {
-    background: rgba(0, 255, 136, 0.5);
-}
-
-/* 响应式 */
-@media (max-width: 768px) {
-    .control-panel {
-        width: calc(100% - 40px);
-        max-height: 50%;
-        top: auto;
-        bottom: 20px;
-    }
-
-    .render-overlay {
-        width: calc(100% - 40px);
-        min-width: auto;
-    }
+    flex-direction: column;
+    gap: 8px;
 }
 </style>

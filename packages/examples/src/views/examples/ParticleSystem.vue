@@ -2,410 +2,297 @@
     <SplitLayout :code="sourceCode" language="javascript" title="06 - Particle System">
         <div class="scene-container" ref="sceneContainer">
             <!-- 加载状态 -->
-            <div v-if="isLoading" class="loading-overlay">
-                <div class="loading-content">
-                    <div class="loading-spinner"></div>
-                    <div class="loading-text">{{ loadingText }}</div>
-                    <div class="loading-progress">
-                        <div class="progress-bar">
-                            <div
-                                class="progress-fill"
-                                :style="{ width: loadingProgress + '%' }"
-                            ></div>
-                        </div>
-                        <span class="progress-text">{{ loadingProgress }}%</span>
-                    </div>
-                </div>
-            </div>
+            <template v-if="isLoading">
+                <GuiLoading :progress="loadingProgress" :text="loadingText" />
+            </template>
 
             <!-- 控制面板 -->
-            <div class="control-panel">
-                <!-- 粒子参数控制 -->
-                <div class="control-section">
-                    <h4>粒子参数</h4>
-                    <div class="particle-controls">
-                        <div class="param-group">
-                            <label>粒子数量</label>
-                            <input
-                                type="range"
-                                v-model.number="particleSettings.count"
-                                @input="updateParticleCount"
-                                min="100"
-                                max="10000"
-                                step="100"
+            <template v-if="!isLoading">
+                <GuiPanel title="粒子系统控制" width="wide">
+                    <!-- 粒子参数控制 -->
+                    <GuiSection title="粒子参数">
+                        <GuiSlider
+                            label="粒子数量"
+                            v-model="particleSettings.count"
+                            :min="100"
+                            :max="10000"
+                            :step="100"
+                            @update:modelValue="updateParticleCount"
+                        />
+                        <GuiSlider
+                            label="粒子大小"
+                            v-model="particleSettings.size"
+                            :min="0.1"
+                            :max="5"
+                            :step="0.1"
+                            :precision="1"
+                            @update:modelValue="updateParticleSize"
+                        />
+                        <GuiSlider
+                            label="生命周期"
+                            v-model="particleSettings.lifetime"
+                            :min="1"
+                            :max="10"
+                            :step="0.5"
+                            :precision="1"
+                            suffix="s"
+                            @update:modelValue="updateParticleLifetime"
+                        />
+                        <GuiSlider
+                            label="发射速率"
+                            v-model="particleSettings.emissionRate"
+                            :min="10"
+                            :max="1000"
+                            :step="10"
+                            suffix="/s"
+                            @update:modelValue="updateEmissionRate"
+                        />
+                        <GuiColorPicker
+                            label="粒子颜色"
+                            v-model="particleSettings.color"
+                            @update:modelValue="updateParticleColor"
+                        />
+                    </GuiSection>
+
+                    <!-- 发射器配置 -->
+                    <GuiSection title="发射器配置">
+                        <GuiSelect
+                            label="发射器形状"
+                            v-model="emitterSettings.shape"
+                            :options="[
+                                { value: 'point', label: '点' },
+                                { value: 'sphere', label: '球体' },
+                                { value: 'box', label: '盒子' },
+                                { value: 'cone', label: '圆锥' }
+                            ]"
+                            @update:modelValue="updateEmitterShape"
+                        />
+                        <div class="position-grid">
+                            <GuiNumberInput
+                                label="X"
+                                v-model="emitterSettings.position.x"
+                                :step="0.1"
+                                @update:modelValue="updateEmitterPosition"
                             />
-                            <span>{{ particleSettings.count }}</span>
-                        </div>
-
-                        <div class="param-group">
-                            <label>粒子大小</label>
-                            <input
-                                type="range"
-                                v-model.number="particleSettings.size"
-                                @input="updateParticleSize"
-                                min="0.1"
-                                max="5"
-                                step="0.1"
+                            <GuiNumberInput
+                                label="Y"
+                                v-model="emitterSettings.position.y"
+                                :step="0.1"
+                                @update:modelValue="updateEmitterPosition"
                             />
-                            <span>{{ particleSettings.size }}</span>
-                        </div>
-
-                        <div class="param-group">
-                            <label>生命周期</label>
-                            <input
-                                type="range"
-                                v-model.number="particleSettings.lifetime"
-                                @input="updateParticleLifetime"
-                                min="1"
-                                max="10"
-                                step="0.5"
-                            />
-                            <span>{{ particleSettings.lifetime }}s</span>
-                        </div>
-
-                        <div class="param-group">
-                            <label>发射速率</label>
-                            <input
-                                type="range"
-                                v-model.number="particleSettings.emissionRate"
-                                @input="updateEmissionRate"
-                                min="10"
-                                max="1000"
-                                step="10"
-                            />
-                            <span>{{ particleSettings.emissionRate }}/s</span>
-                        </div>
-
-                        <div class="color-control">
-                            <label>粒子颜色</label>
-                            <input
-                                type="color"
-                                v-model="particleSettings.color"
-                                @input="updateParticleColor"
+                            <GuiNumberInput
+                                label="Z"
+                                v-model="emitterSettings.position.z"
+                                :step="0.1"
+                                @update:modelValue="updateEmitterPosition"
                             />
                         </div>
-                    </div>
-                </div>
+                        <GuiSlider
+                            label="发射范围"
+                            v-model="emitterSettings.range"
+                            :min="0.1"
+                            :max="5"
+                            :step="0.1"
+                            :precision="1"
+                            @update:modelValue="updateEmitterRange"
+                        />
+                        <GuiSlider
+                            label="初始速度 (最小)"
+                            v-model="emitterSettings.velocity.min"
+                            :min="0"
+                            :max="20"
+                            :step="0.5"
+                            :precision="1"
+                            @update:modelValue="updateVelocity"
+                        />
+                        <GuiSlider
+                            label="初始速度 (最大)"
+                            v-model="emitterSettings.velocity.max"
+                            :min="0"
+                            :max="20"
+                            :step="0.5"
+                            :precision="1"
+                            @update:modelValue="updateVelocity"
+                        />
+                    </GuiSection>
 
-                <!-- 发射器配置 -->
-                <div class="control-section">
-                    <h4>发射器配置</h4>
-                    <div class="emitter-controls">
-                        <div class="setting-group">
-                            <label>发射器形状</label>
-                            <select v-model="emitterSettings.shape" @change="updateEmitterShape">
-                                <option value="point">点</option>
-                                <option value="sphere">球体</option>
-                                <option value="box">盒子</option>
-                                <option value="cone">圆锥</option>
-                            </select>
+                    <!-- 物理设置 -->
+                    <GuiSection title="物理设置">
+                        <GuiSlider
+                            label="重力"
+                            v-model="physicsSettings.gravity"
+                            :min="-20"
+                            :max="20"
+                            :step="0.5"
+                            :precision="1"
+                            @update:modelValue="updateGravity"
+                        />
+                        <GuiSlider
+                            label="阻力"
+                            v-model="physicsSettings.damping"
+                            :min="0"
+                            :max="1"
+                            :step="0.01"
+                            :precision="2"
+                            @update:modelValue="updateDamping"
+                        />
+                        <GuiSelect
+                            label="混合模式"
+                            v-model="physicsSettings.blendMode"
+                            :options="[
+                                { value: 'normal', label: '正常' },
+                                { value: 'additive', label: '叠加' },
+                                { value: 'multiply', label: '相乘' },
+                                { value: 'screen', label: '滤色' }
+                            ]"
+                            @update:modelValue="updateBlendMode"
+                        />
+                    </GuiSection>
+
+                    <!-- 预设效果 -->
+                    <GuiSection title="预设效果">
+                        <div class="button-group">
+                            <GuiButton label="🔥 火焰" @click="loadPresetEffect('fire')" />
+                            <GuiButton label="💨 烟雾" @click="loadPresetEffect('smoke')" />
+                            <GuiButton label="🌧️ 雨" @click="loadPresetEffect('rain')" />
+                            <GuiButton label="❄️ 雪" @click="loadPresetEffect('snow')" />
+                            <GuiButton label="⭐ 星星" @click="loadPresetEffect('stars')" />
+                            <GuiButton label="💥 爆炸" @click="loadPresetEffect('explosion')" />
                         </div>
+                    </GuiSection>
 
-                        <div class="position-controls">
-                            <label>发射器位置</label>
-                            <div class="position-inputs">
-                                <div class="input-group">
-                                    <label>X</label>
-                                    <input
-                                        type="number"
-                                        v-model.number="emitterSettings.position.x"
-                                        @input="updateEmitterPosition"
-                                        step="0.1"
-                                    />
-                                </div>
-                                <div class="input-group">
-                                    <label>Y</label>
-                                    <input
-                                        type="number"
-                                        v-model.number="emitterSettings.position.y"
-                                        @input="updateEmitterPosition"
-                                        step="0.1"
-                                    />
-                                </div>
-                                <div class="input-group">
-                                    <label>Z</label>
-                                    <input
-                                        type="number"
-                                        v-model.number="emitterSettings.position.z"
-                                        @input="updateEmitterPosition"
-                                        step="0.1"
-                                    />
-                                </div>
+                    <!-- 纹理设置 -->
+                    <GuiSection title="纹理设置">
+                        <GuiTextInput
+                            label="纹理路径"
+                            v-model="textureSettings.path"
+                            placeholder="/images/lensflare0.png"
+                            @change="updateTexture"
+                        />
+                        <GuiSlider
+                            label="纹理重复 X"
+                            v-model="textureSettings.repeatX"
+                            :min="0.1"
+                            :max="5"
+                            :step="0.1"
+                            :precision="1"
+                            @update:modelValue="updateTextureRepeat"
+                        />
+                        <GuiSlider
+                            label="纹理重复 Y"
+                            v-model="textureSettings.repeatY"
+                            :min="0.1"
+                            :max="5"
+                            :step="0.1"
+                            :precision="1"
+                            @update:modelValue="updateTextureRepeat"
+                        />
+                        <template v-if="textureStatus">
+                            <div :class="['texture-status', textureStatus.type]">
+                                {{ textureStatus.message }}
                             </div>
-                        </div>
+                        </template>
+                    </GuiSection>
 
-                        <div class="param-group">
-                            <label>发射范围</label>
-                            <input
-                                type="range"
-                                v-model.number="emitterSettings.range"
-                                @input="updateEmitterRange"
-                                min="0.1"
-                                max="5"
-                                step="0.1"
+                    <!-- Shader 设置 -->
+                    <GuiSection title="自定义 Shader">
+                        <GuiCheckbox
+                            label="启用自定义 Shader"
+                            v-model="shaderSettings.useCustomShader"
+                            @update:modelValue="updateShaderMode"
+                        />
+
+                        <template v-if="shaderSettings.useCustomShader">
+                            <GuiSelect
+                                label="Shader 类型"
+                                v-model="shaderSettings.type"
+                                :options="[
+                                    { value: 'glow', label: '发光效果' },
+                                    { value: 'sparkle', label: '闪烁效果' },
+                                    { value: 'fire', label: '火焰效果' },
+                                    { value: 'smoke', label: '烟雾效果' }
+                                ]"
+                                @update:modelValue="updateShaderType"
                             />
-                            <span>{{ emitterSettings.range }}</span>
-                        </div>
 
-                        <div class="velocity-controls">
-                            <label>初始速度</label>
-                            <div class="param-group">
-                                <label>最小</label>
-                                <input
-                                    type="range"
-                                    v-model.number="emitterSettings.velocity.min"
-                                    @input="updateVelocity"
-                                    min="0"
-                                    max="20"
-                                    step="0.5"
+                            <template v-if="shaderSettings.type === 'glow'">
+                                <GuiSlider
+                                    label="发光强度"
+                                    v-model="shaderSettings.glowIntensity"
+                                    :min="0.1"
+                                    :max="3"
+                                    :step="0.1"
+                                    :precision="1"
+                                    @update:modelValue="updateShaderUniforms"
                                 />
-                                <span>{{ emitterSettings.velocity.min }}</span>
-                            </div>
-                            <div class="param-group">
-                                <label>最大</label>
-                                <input
-                                    type="range"
-                                    v-model.number="emitterSettings.velocity.max"
-                                    @input="updateVelocity"
-                                    min="0"
-                                    max="20"
-                                    step="0.5"
+                            </template>
+
+                            <template v-if="shaderSettings.type === 'sparkle'">
+                                <GuiSlider
+                                    label="闪烁频率"
+                                    v-model="shaderSettings.sparkleFrequency"
+                                    :min="1"
+                                    :max="20"
+                                    :step="1"
+                                    @update:modelValue="updateShaderUniforms"
                                 />
-                                <span>{{ emitterSettings.velocity.max }}</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                            </template>
 
-                <!-- 物理设置 -->
-                <div class="control-section">
-                    <h4>物理设置</h4>
-                    <div class="physics-controls">
-                        <div class="param-group">
-                            <label>重力</label>
-                            <input
-                                type="range"
-                                v-model.number="physicsSettings.gravity"
-                                @input="updateGravity"
-                                min="-20"
-                                max="20"
-                                step="0.5"
-                            />
-                            <span>{{ physicsSettings.gravity }}</span>
-                        </div>
-
-                        <div class="param-group">
-                            <label>阻力</label>
-                            <input
-                                type="range"
-                                v-model.number="physicsSettings.damping"
-                                @input="updateDamping"
-                                min="0"
-                                max="1"
-                                step="0.01"
-                            />
-                            <span>{{ physicsSettings.damping.toFixed(2) }}</span>
-                        </div>
-
-                        <div class="setting-group">
-                            <label>混合模式</label>
-                            <select v-model="physicsSettings.blendMode" @change="updateBlendMode">
-                                <option value="normal">正常</option>
-                                <option value="additive">叠加</option>
-                                <option value="multiply">相乘</option>
-                                <option value="screen">滤色</option>
-                            </select>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- 预设效果 -->
-                <div class="control-section">
-                    <h4>预设效果</h4>
-                    <div class="preset-effects">
-                        <button @click="loadPresetEffect('fire')" class="preset-btn">
-                            🔥 火焰
-                        </button>
-                        <button @click="loadPresetEffect('smoke')" class="preset-btn">
-                            💨 烟雾
-                        </button>
-                        <button @click="loadPresetEffect('rain')" class="preset-btn">🌧️ 雨</button>
-                        <button @click="loadPresetEffect('snow')" class="preset-btn">❄️ 雪</button>
-                        <button @click="loadPresetEffect('stars')" class="preset-btn">
-                            ⭐ 星星
-                        </button>
-                        <button @click="loadPresetEffect('explosion')" class="preset-btn">
-                            💥 爆炸
-                        </button>
-                    </div>
-                </div>
-
-                <!-- 纹理设置 -->
-                <div class="control-section">
-                    <h4>纹理设置</h4>
-                    <div class="texture-controls">
-                        <div class="setting-group">
-                            <label>纹理路径</label>
-                            <input
-                                type="text"
-                                v-model="textureSettings.path"
-                                @change="updateTexture"
-                                placeholder="/images/particle.png"
-                                class="texture-input"
-                            />
-                        </div>
-
-                        <div class="setting-group">
-                            <label>纹理重复 X</label>
-                            <input
-                                type="range"
-                                v-model.number="textureSettings.repeatX"
-                                @input="updateTextureRepeat"
-                                min="0.1"
-                                max="5"
-                                step="0.1"
-                            />
-                            <span>{{ textureSettings.repeatX.toFixed(1) }}</span>
-                        </div>
-
-                        <div class="setting-group">
-                            <label>纹理重复 Y</label>
-                            <input
-                                type="range"
-                                v-model.number="textureSettings.repeatY"
-                                @input="updateTextureRepeat"
-                                min="0.1"
-                                max="5"
-                                step="0.1"
-                            />
-                            <span>{{ textureSettings.repeatY.toFixed(1) }}</span>
-                        </div>
-
-                        <div class="texture-status" v-if="textureStatus">
-                            <span :class="textureStatus.type">{{ textureStatus.message }}</span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Shader 设置 -->
-                <div class="control-section">
-                    <h4>自定义 Shader</h4>
-                    <div class="shader-controls">
-                        <div class="setting-group">
-                            <label>
-                                <input
-                                    type="checkbox"
-                                    v-model="shaderSettings.useCustomShader"
-                                    @change="updateShaderMode"
-                                />
-                                启用自定义 Shader
-                            </label>
-                        </div>
-
-                        <div v-if="shaderSettings.useCustomShader" class="shader-options">
-                            <div class="setting-group">
-                                <label>Shader 类型</label>
-                                <select v-model="shaderSettings.type" @change="updateShaderType">
-                                    <option value="glow">发光效果</option>
-                                    <option value="sparkle">闪烁效果</option>
-                                    <option value="fire">火焰效果</option>
-                                    <option value="smoke">烟雾效果</option>
-                                </select>
-                            </div>
-
-                            <div class="setting-group" v-if="shaderSettings.type === 'glow'">
-                                <label>发光强度</label>
-                                <input
-                                    type="range"
-                                    v-model.number="shaderSettings.glowIntensity"
-                                    @input="updateShaderUniforms"
-                                    min="0.1"
-                                    max="3"
-                                    step="0.1"
-                                />
-                                <span>{{ shaderSettings.glowIntensity.toFixed(1) }}</span>
-                            </div>
-
-                            <div class="setting-group" v-if="shaderSettings.type === 'sparkle'">
-                                <label>闪烁频率</label>
-                                <input
-                                    type="range"
-                                    v-model.number="shaderSettings.sparkleFrequency"
-                                    @input="updateShaderUniforms"
-                                    min="1"
-                                    max="20"
-                                    step="1"
-                                />
-                                <span>{{ shaderSettings.sparkleFrequency }}</span>
-                            </div>
-
-                            <div
-                                class="setting-group"
+                            <template
                                 v-if="
                                     shaderSettings.type === 'fire' ||
                                     shaderSettings.type === 'smoke'
                                 "
                             >
-                                <label>噪声缩放</label>
-                                <input
-                                    type="range"
-                                    v-model.number="shaderSettings.noiseScale"
-                                    @input="updateShaderUniforms"
-                                    min="0.1"
-                                    max="5"
-                                    step="0.1"
+                                <GuiSlider
+                                    label="噪声缩放"
+                                    v-model="shaderSettings.noiseScale"
+                                    :min="0.1"
+                                    :max="5"
+                                    :step="0.1"
+                                    :precision="1"
+                                    @update:modelValue="updateShaderUniforms"
                                 />
-                                <span>{{ shaderSettings.noiseScale.toFixed(1) }}</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                            </template>
+                        </template>
+                    </GuiSection>
 
-                <!-- 控制按钮 -->
-                <div class="control-section">
-                    <h4>控制</h4>
-                    <div class="control-buttons">
-                        <button
-                            @click="startParticles"
-                            class="start-btn"
-                            :disabled="!particleSystem"
-                        >
-                            {{ isEmitting ? '停止发射' : '开始发射' }}
-                        </button>
-                        <button
-                            @click="clearParticles"
-                            class="clear-btn"
-                            :disabled="!particleSystem"
-                        >
-                            清除粒子
-                        </button>
-                        <button @click="resetSettings" class="reset-btn">重置设置</button>
-                    </div>
-                </div>
+                    <!-- 控制按钮 -->
+                    <GuiSection title="控制">
+                        <div class="button-group">
+                            <GuiButton
+                                :label="isEmitting ? '停止发射' : '开始发射'"
+                                :disabled="!particleSystem"
+                                @click="startParticles"
+                            />
+                            <GuiButton
+                                label="清除粒子"
+                                variant="secondary"
+                                :disabled="!particleSystem"
+                                @click="clearParticles"
+                            />
+                            <GuiButton
+                                label="重置设置"
+                                variant="secondary"
+                                @click="resetSettings"
+                            />
+                        </div>
+                    </GuiSection>
 
-                <!-- 粒子信息 -->
-                <div class="control-section" v-if="particleSystem">
-                    <h4>粒子信息</h4>
-                    <div class="particle-info">
-                        <div class="info-item">
-                            <span>活跃粒子：</span>
-                            <span class="info-value">{{ activeParticleCount }}</span>
-                        </div>
-                        <div class="info-item">
-                            <span>发射状态：</span>
-                            <span class="info-value">{{ isEmitting ? '发射中' : '已停止' }}</span>
-                        </div>
-                        <div class="info-item">
-                            <span>当前帧率：</span>
-                            <span class="info-value">{{ currentFPS }} FPS</span>
-                        </div>
-                        <div class="info-item">
-                            <span>渲染模式：</span>
-                            <span class="info-value">{{ physicsSettings.blendMode }}</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
+                    <!-- 粒子信息 -->
+                    <template v-if="particleSystem">
+                        <GuiSection title="粒子信息">
+                            <GuiInfoItem label="活跃粒子" :value="activeParticleCount" />
+                            <GuiInfoItem
+                                label="发射状态"
+                                :value="isEmitting ? '发射中' : '已停止'"
+                            />
+                            <GuiInfoItem label="当前帧率" :value="`${currentFPS} FPS`" />
+                            <GuiInfoItem label="渲染模式" :value="physicsSettings.blendMode" />
+                        </GuiSection>
+                    </template>
+                </GuiPanel>
+            </template>
         </div>
     </SplitLayout>
 </template>
@@ -414,6 +301,19 @@
 import { ref, reactive, computed, onMounted, onUnmounted } from 'vue';
 import { Scene } from '@w3d/core';
 import { GridHelper, ParticleSystem } from '@w3d/components';
+import {
+    GuiPanel,
+    GuiSection,
+    GuiSlider,
+    GuiColorPicker,
+    GuiSelect,
+    GuiCheckbox,
+    GuiButton,
+    GuiInfoItem,
+    GuiLoading,
+    GuiNumberInput,
+    GuiTextInput
+} from '@/components/Gui';
 import SplitLayout from '../../components/SplitLayout.vue';
 
 const sceneContainer = ref(null);
@@ -541,7 +441,7 @@ const texturedParticles = await scene.add('ParticleSystem', {
   size: 2.0,
   color: '#ffffff',
   lifetime: 4.0,
-  texture: '/images/particle.png',  // 纹理路径
+  texture: '/images/lensflare0.png',  // 纹理路径
   textureRepeat: [1, 1],           // 纹理重复
   emitter: {
     shape: 'sphere',
@@ -796,9 +696,6 @@ const initScene = async () => {
         loadingProgress.value = 100;
         loadingText.value = '完成';
 
-        // 启动渲染循环
-        startRenderLoop();
-
         // 延迟隐藏加载状态
         setTimeout(() => {
             isLoading.value = false;
@@ -855,59 +752,9 @@ const createParticleSystem = async () => {
                 uNoiseScale: shaderSettings.noiseScale
             }
         });
-
-        // 监听纹理加载事件
-        particleSystem.on('textureLoadStart', (data) => {
-            textureStatus.value = { type: 'loading', message: '正在加载纹理...' };
-        });
-
-        particleSystem.on('textureLoaded', (data) => {
-            textureStatus.value = { type: 'success', message: '纹理加载成功' };
-            setTimeout(() => {
-                textureStatus.value = null;
-            }, 3000);
-        });
-
-        particleSystem.on('textureLoadError', (data) => {
-            textureStatus.value = { type: 'error', message: '纹理加载失败' };
-            setTimeout(() => {
-                textureStatus.value = null;
-            }, 5000);
-        });
-
-        console.log('粒子系统创建成功:', particleSystem);
     } catch (error) {
         console.error('创建粒子系统失败:', error);
     }
-};
-// 启动渲染循环
-const startRenderLoop = () => {
-    let lastTime = performance.now();
-
-    const animate = () => {
-        if (!scene) return;
-
-        const currentTime = performance.now();
-        const deltaTime = (currentTime - lastTime) / 1000;
-        lastTime = currentTime;
-
-        // 更新FPS
-        currentFPS.value = Math.round(1 / deltaTime);
-
-        // 更新活跃粒子数量
-        if (particleSystem) {
-            const stats = particleSystem.getStats();
-            activeParticleCount.value = stats.activeParticles;
-            isEmitting.value = stats.isEmitting;
-        }
-
-        // 渲染场景
-        scene.render();
-
-        animationFrameId = requestAnimationFrame(animate);
-    };
-
-    animate();
 };
 
 // 控制方法
@@ -949,7 +796,8 @@ const resetSettings = () => {
 
     // 重新创建粒子系统
     if (particleSystem) {
-        scene.remove(particleSystem);
+        scene.remove('main-particles');
+        particleSystem = null;
         createParticleSystem();
     }
 };
@@ -959,7 +807,8 @@ const updateParticleCount = () => {
     if (!particleSystem) return;
 
     // 重新创建粒子系统
-    scene.remove(particleSystem);
+    scene.remove('main-particles');
+    particleSystem = null;
     createParticleSystem();
 };
 
@@ -1209,19 +1058,20 @@ const cleanup = () => {
     }
 
     if (particleSystem && scene) {
-        scene.remove(particleSystem);
+        scene.remove('main-particles');
+        particleSystem = null;
     }
 
     if (scene) {
-        scene.destroy();
+        scene.dispose();
         scene = null;
     }
-
-    particleSystem = null;
 };
 </script>
 
-<style scoped>
+<style scoped lang="less">
+@import '@/styles/gui.less';
+
 /* 场景容器 */
 .scene-container {
     position: relative;
@@ -1231,445 +1081,46 @@ const cleanup = () => {
     overflow: hidden;
 }
 
-/* 加载状态 */
-.loading-overlay {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(0, 0, 0, 0.8);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 1000;
-}
-
-.loading-content {
-    text-align: center;
-    color: white;
-}
-
-.loading-spinner {
-    width: 40px;
-    height: 40px;
-    border: 4px solid rgba(255, 255, 255, 0.3);
-    border-top: 4px solid #00ff88;
-    border-radius: 50%;
-    animation: spin 1s linear infinite;
-    margin: 0 auto 20px;
-}
-
-.loading-text {
-    font-size: 16px;
-    margin-bottom: 15px;
-    color: #ffffff;
-}
-
-.loading-progress {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    justify-content: center;
-}
-
-.progress-bar {
-    width: 200px;
-    height: 4px;
-    background: rgba(255, 255, 255, 0.2);
-    border-radius: 2px;
-    overflow: hidden;
-}
-
-.progress-fill {
-    height: 100%;
-    background: linear-gradient(90deg, #00ff88, #00cc6a);
-    border-radius: 2px;
-    transition: width 0.3s ease;
-}
-
-.progress-text {
-    font-size: 14px;
-    color: #00ff88;
-    min-width: 40px;
-}
-
-/* 控制面板 */
-.control-panel {
-    position: absolute;
-    top: 20px;
-    right: 20px;
-    width: 320px;
-    max-height: calc(100vh - 40px);
-    background: rgba(30, 30, 30, 0.95);
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 12px;
-    padding: 20px;
-    overflow-y: auto;
-    z-index: 100;
-}
-
-.control-section {
-    margin-bottom: 25px;
-}
-
-.control-section:last-child {
-    margin-bottom: 0;
-}
-
-.control-section h4 {
-    margin: 0 0 15px 0;
-    color: #00ff88;
-    font-size: 16px;
-    font-weight: 600;
-    border-bottom: 1px solid rgba(0, 255, 136, 0.3);
-    padding-bottom: 8px;
-}
-
-/* 粒子控制 */
-.particle-controls {
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-}
-
-.param-group {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
-.param-group label {
-    color: #ffffff;
-    font-size: 14px;
-    font-weight: 500;
-    min-width: 80px;
-}
-
-.param-group input[type='range'] {
-    flex: 1;
-    height: 4px;
-    background: rgba(255, 255, 255, 0.2);
-    border-radius: 2px;
-    outline: none;
-    cursor: pointer;
-}
-
-.param-group input[type='range']::-webkit-slider-thumb {
-    appearance: none;
-    width: 16px;
-    height: 16px;
-    background: #00ff88;
-    border-radius: 50%;
-    cursor: pointer;
-}
-
-.param-group input[type='range']::-moz-range-thumb {
-    width: 16px;
-    height: 16px;
-    background: #00ff88;
-    border-radius: 50%;
-    border: none;
-    cursor: pointer;
-}
-
-.param-group span {
-    color: #00ff88;
-    font-size: 12px;
-    min-width: 60px;
-    text-align: right;
-}
-
-.color-control {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
-.color-control label {
-    color: #ffffff;
-    font-size: 14px;
-    font-weight: 500;
-    min-width: 80px;
-}
-
-.color-control input[type='color'] {
-    width: 40px;
-    height: 30px;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    background: transparent;
-}
-
-/* 发射器控制 */
-.emitter-controls {
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-}
-
-.setting-group {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-}
-
-.position-controls {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-}
-
-.position-inputs {
+/* 位置网格布局 */
+.position-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 8px;
+    gap: 10px;
+    margin-bottom: 15px;
 }
 
-.input-group {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-}
-
-.input-group label {
-    color: #ffffff;
-    font-size: 12px;
-    text-align: center;
-}
-
-.input-group input[type='number'] {
-    padding: 6px 8px;
-    background: rgba(255, 255, 255, 0.1);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    border-radius: 4px;
-    color: #ffffff;
-    font-size: 12px;
-    text-align: center;
-}
-
-.velocity-controls {
+/* 按钮组 */
+.button-group {
     display: flex;
     flex-direction: column;
     gap: 8px;
 }
 
-.velocity-controls > label {
-    color: #ffffff;
-    font-size: 14px;
-    font-weight: 500;
-}
-
-/* 物理控制 */
-.physics-controls {
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-}
-
-/* 预设效果 */
-.preset-effects {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 8px;
-}
-
-.preset-btn {
-    padding: 10px 12px;
-    background: rgba(255, 255, 255, 0.1);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    border-radius: 6px;
-    color: #ffffff;
-    font-size: 12px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    text-align: center;
-}
-
-.preset-btn:hover {
-    background: rgba(0, 255, 136, 0.2);
-    border-color: #00ff88;
-}
-
-/* 控制按钮 */
-.control-buttons {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-}
-
-.start-btn,
-.clear-btn,
-.reset-btn {
-    padding: 10px 16px;
-    border: none;
-    border-radius: 6px;
-    font-size: 14px;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all 0.3s ease;
-}
-
-.start-btn {
-    background: linear-gradient(135deg, #00ff88, #00cc6a);
-    color: #000000;
-}
-
-.start-btn:hover:not(:disabled) {
-    background: linear-gradient(135deg, #00cc6a, #00aa55);
-    transform: translateY(-1px);
-}
-
-.clear-btn,
-.reset-btn {
-    background: rgba(255, 255, 255, 0.1);
-    color: #ffffff;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-}
-
-.clear-btn:hover:not(:disabled),
-.reset-btn:hover:not(:disabled) {
-    background: rgba(255, 255, 255, 0.2);
-    transform: translateY(-1px);
-}
-
-.start-btn:disabled,
-.clear-btn:disabled,
-.reset-btn:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-    transform: none;
-}
-
-/* 粒子信息 */
-.particle-info {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-}
-
-.info-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    color: #ffffff;
-    font-size: 12px;
-}
-
-.info-value {
-    color: #00ff88;
-    font-weight: 500;
-}
-
-/* 滚动条样式 */
-.control-panel::-webkit-scrollbar {
-    width: 6px;
-}
-
-.control-panel::-webkit-scrollbar-track {
-    background: rgba(255, 255, 255, 0.1);
-    border-radius: 3px;
-}
-
-.control-panel::-webkit-scrollbar-thumb {
-    background: rgba(0, 255, 136, 0.5);
-    border-radius: 3px;
-}
-
-.control-panel::-webkit-scrollbar-thumb:hover {
-    background: rgba(0, 255, 136, 0.7);
-}
-
-.setting-group label {
-    color: #ffffff;
-    font-size: 14px;
-    font-weight: 500;
-}
-
-.setting-group select {
-    padding: 8px 12px;
-    background: rgba(255, 255, 255, 0.1);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    border-radius: 6px;
-    color: #ffffff;
-    font-size: 14px;
-}
-
-/* 纹理控件样式 */
-.texture-controls {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-}
-
-.texture-input {
-    width: 100%;
-    padding: 8px 12px;
-    background: rgba(255, 255, 255, 0.1);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    border-radius: 4px;
-    color: #ffffff;
-    font-size: 12px;
-    outline: none;
-    transition: all 0.3s ease;
-}
-
-.texture-input:focus {
-    border-color: #00ff88;
-    background: rgba(255, 255, 255, 0.15);
-}
-
-.texture-input::placeholder {
-    color: rgba(255, 255, 255, 0.5);
-}
-
+/* 纹理状态 */
 .texture-status {
-    padding: 6px 10px;
+    padding: 8px;
     border-radius: 4px;
-    font-size: 11px;
+    font-size: 12px;
     text-align: center;
+    margin-top: 8px;
 }
 
-.texture-status .loading {
+.texture-status.loading {
     background: rgba(255, 193, 7, 0.2);
     color: #ffc107;
     border: 1px solid rgba(255, 193, 7, 0.3);
 }
 
-.texture-status .success {
+.texture-status.success {
     background: rgba(40, 167, 69, 0.2);
     color: #28a745;
     border: 1px solid rgba(40, 167, 69, 0.3);
 }
 
-.texture-status .error {
+.texture-status.error {
     background: rgba(220, 53, 69, 0.2);
     color: #dc3545;
     border: 1px solid rgba(220, 53, 69, 0.3);
-}
-
-/* Shader 控件样式 */
-.shader-controls {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-}
-
-.shader-options {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    padding: 12px;
-    background: rgba(255, 255, 255, 0.05);
-    border-radius: 6px;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.setting-group label input[type='checkbox'] {
-    margin-right: 8px;
-    accent-color: #00ff88;
 }
 
 /* 动画 */

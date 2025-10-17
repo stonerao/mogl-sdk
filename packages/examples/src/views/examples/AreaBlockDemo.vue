@@ -1,145 +1,98 @@
 <template>
     <SplitLayout :code="sourceCode" language="javascript" title="AreaBlock - 区域块组件">
-        <!-- 3D 场景容器 -->
         <div ref="sceneContainer" class="scene-container"></div>
 
-        <!-- 控制面板 -->
-        <div class="control-panel">
-            <h3 class="panel-title">区域块控制</h3>
+        <GuiPanel title="区域块控制">
+            <GuiSection title="区域块配置">
+                <GuiColorPicker label="区域颜色" v-model="areaConfig.color" />
+                <GuiSlider
+                    label="墙壁高度"
+                    v-model="areaConfig.wallHeight"
+                    :min="1"
+                    :max="20"
+                    :step="1"
+                />
+                <GuiSlider
+                    label="墙壁透明度"
+                    v-model="areaConfig.wallOpacity"
+                    :min="0.1"
+                    :max="1"
+                    :step="0.05"
+                    :precision="2"
+                />
+                <GuiSlider
+                    label="底部透明度"
+                    v-model="areaConfig.bottomOpacity"
+                    :min="0.1"
+                    :max="1"
+                    :step="0.05"
+                    :precision="2"
+                />
+                <GuiSlider
+                    label="边框宽度"
+                    v-model="areaConfig.borderWidth"
+                    :min="1"
+                    :max="10"
+                    :step="1"
+                />
+                <GuiSlider
+                    label="动画速度"
+                    v-model="areaConfig.animationSpeed"
+                    :min="0.1"
+                    :max="3"
+                    :step="0.1"
+                    :precision="1"
+                />
+                <GuiSelect
+                    label="显示模式"
+                    v-model="displayMode"
+                    :options="[
+                        { value: 'all', label: '墙壁+底部' },
+                        { value: 'wall', label: '只显示墙壁' },
+                        { value: 'bottom', label: '只显示底部' },
+                        { value: 'border', label: '只显示边框' }
+                    ]"
+                />
+                <GuiSelect
+                    label="形状类型"
+                    v-model="areaShapeType"
+                    :options="[
+                        { value: 'square', label: '正方形' },
+                        { value: 'triangle', label: '三角形' },
+                        { value: 'hexagon', label: '六边形' },
+                        { value: 'random', label: '随机多边形' }
+                    ]"
+                />
+                <GuiButton label="添加区域块" block @click="addRandomArea" />
+                <GuiButton label="清除所有区域块" variant="danger" block @click="clearAllAreas" />
 
-            <!-- 区域块配置 -->
-            <div class="section">
-                <h4>区域块配置</h4>
-
-                <div class="form-group">
-                    <label>区域颜色:</label>
-                    <input v-model="areaConfig.color" type="color" />
-                </div>
-
-                <div class="form-group">
-                    <label>墙壁高度: {{ areaConfig.wallHeight }}</label>
-                    <input
-                        v-model.number="areaConfig.wallHeight"
-                        type="range"
-                        min="1"
-                        max="20"
-                        step="1"
-                    />
-                </div>
-
-                <div class="form-group">
-                    <label>墙壁透明度: {{ areaConfig.wallOpacity.toFixed(2) }}</label>
-                    <input
-                        v-model.number="areaConfig.wallOpacity"
-                        type="range"
-                        min="0.1"
-                        max="1"
-                        step="0.05"
-                    />
-                </div>
-
-                <div class="form-group">
-                    <label>底部透明度: {{ areaConfig.bottomOpacity.toFixed(2) }}</label>
-                    <input
-                        v-model.number="areaConfig.bottomOpacity"
-                        type="range"
-                        min="0.1"
-                        max="1"
-                        step="0.05"
-                    />
-                </div>
-
-                <div class="form-group">
-                    <label>边框宽度: {{ areaConfig.borderWidth }}</label>
-                    <input
-                        v-model.number="areaConfig.borderWidth"
-                        type="range"
-                        min="1"
-                        max="10"
-                        step="1"
-                    />
-                </div>
-
-                <div class="form-group">
-                    <label>动画速度: {{ areaConfig.animationSpeed.toFixed(1) }}</label>
-                    <input
-                        v-model.number="areaConfig.animationSpeed"
-                        type="range"
-                        min="0.1"
-                        max="3"
-                        step="0.1"
-                    />
-                </div>
-
-                <div class="form-group">
-                    <label>显示模式:</label>
-                    <select v-model="displayMode">
-                        <option value="all">墙壁+底部</option>
-                        <option value="wall">只显示墙壁</option>
-                        <option value="bottom">只显示底部</option>
-                        <option value="border">只显示边框</option>
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label>形状类型:</label>
-                    <select v-model="areaShapeType">
-                        <option value="square">正方形</option>
-                        <option value="triangle">三角形</option>
-                        <option value="hexagon">六边形</option>
-                        <option value="random">随机多边形</option>
-                    </select>
-                </div>
-
-                <button
-                    @click="addRandomArea"
-                    class="btn-primary"
-                    style="width: 100%; margin-bottom: 10px"
-                >
-                    添加区域块
-                </button>
-
-                <button @click="clearAllAreas" class="btn-danger" style="width: 100%">
-                    清除所有区域块
-                </button>
-
-                <!-- 区域块列表 -->
-                <div v-if="areaList.length > 0" style="margin-top: 15px">
-                    <h5 style="font-size: 12px; color: #00ff00; margin-bottom: 8px">
-                        区域块列表 ({{ areaList.length }})
-                    </h5>
+                <div v-if="areaList.length > 0" class="area-list">
+                    <h5 class="list-title">区域块列表 ({{ areaList.length }})</h5>
                     <div v-for="area in areaList" :key="area.id" class="area-item">
                         <span class="area-name">{{ area.userData?.name || area.id }}</span>
-                        <button @click="removeArea(area.id)" class="btn-remove">删除</button>
+                        <GuiButton
+                            label="删除"
+                            variant="danger"
+                            size="small"
+                            @click="removeArea(area.id)"
+                        />
                     </div>
                 </div>
-            </div>
+            </GuiSection>
 
-            <!-- 性能统计 -->
-            <div class="section">
-                <h4>性能统计</h4>
-                <div class="stats">
-                    <div class="stat-item">
-                        <span>FPS:</span>
-                        <span class="value">{{ fps }}</span>
-                    </div>
-                    <div class="stat-item">
-                        <span>区域块数量:</span>
-                        <span class="value">{{ areaCount }}</span>
-                    </div>
-                </div>
-            </div>
+            <GuiSection title="性能统计">
+                <GuiInfoItem label="FPS:" :value="fps" />
+                <GuiInfoItem label="区域块数量:" :value="areaCount" />
+            </GuiSection>
 
-            <!-- 事件日志 -->
-            <div class="section">
-                <h4>事件日志</h4>
+            <GuiSection title="事件日志">
                 <div class="event-log">
                     <div v-for="(log, index) in eventLogs" :key="index" class="log-item">
                         {{ log }}
                     </div>
                 </div>
-            </div>
-        </div>
+            </GuiSection>
+        </GuiPanel>
     </SplitLayout>
 </template>
 
@@ -149,6 +102,15 @@ import { Scene } from '@w3d/core';
 import { AreaBlock, GridHelper } from '@w3d/components';
 import * as THREE from 'three';
 import SplitLayout from '../../components/SplitLayout.vue';
+import {
+    GuiPanel,
+    GuiSection,
+    GuiSlider,
+    GuiColorPicker,
+    GuiSelect,
+    GuiButton,
+    GuiInfoItem
+} from '@/components/Gui';
 
 const sceneContainer = ref(null);
 const fps = ref(60);
@@ -595,178 +557,23 @@ onUnmounted(() => {
 });
 </script>
 
-<style scoped>
+<style scoped lang="less">
+@import '@/styles/gui.less';
+
 .scene-container {
     width: 100%;
     height: 100%;
     position: relative;
 }
 
-.control-panel {
-    position: absolute;
-    top: 20px;
-    right: 20px;
-    background: rgba(0, 0, 0, 0.85);
-    padding: 20px;
-    border-radius: 8px;
-    color: white;
-    max-width: 340px;
-    max-height: calc(100% - 40px);
-    overflow-y: auto;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+.area-list {
+    margin-top: 15px;
 }
 
-.panel-title {
-    margin: 0 0 20px 0;
-    font-size: 18px;
+.list-title {
+    font-size: 12px;
     color: #00ff00;
-    text-align: center;
-    border-bottom: 2px solid #00ff00;
-    padding-bottom: 10px;
-}
-
-.section {
-    margin-bottom: 20px;
-    padding-bottom: 15px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.section:last-child {
-    border-bottom: none;
-}
-
-.section h4 {
-    margin: 0 0 15px 0;
-    font-size: 14px;
-    color: #00ff00;
-    font-weight: normal;
-}
-
-.form-group {
-    margin-bottom: 12px;
-}
-
-.form-group label {
-    display: block;
-    margin-bottom: 6px;
-    font-size: 12px;
-    color: #ccc;
-}
-
-.form-group input[type='range'] {
-    width: 100%;
-    height: 4px;
-    background: rgba(255, 255, 255, 0.2);
-    border-radius: 2px;
-    outline: none;
-}
-
-.form-group input[type='range']::-webkit-slider-thumb {
-    -webkit-appearance: none;
-    appearance: none;
-    width: 14px;
-    height: 14px;
-    background: #00ff00;
-    cursor: pointer;
-    border-radius: 50%;
-}
-
-.form-group input[type='range']::-moz-range-thumb {
-    width: 14px;
-    height: 14px;
-    background: #00ff00;
-    cursor: pointer;
-    border-radius: 50%;
-    border: none;
-}
-
-.form-group input[type='color'] {
-    width: 100%;
-    height: 32px;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    border-radius: 4px;
-    background: transparent;
-    cursor: pointer;
-}
-
-.form-group input[type='checkbox'] {
-    margin-right: 8px;
-    cursor: pointer;
-}
-
-.form-group select {
-    width: 100%;
-    padding: 6px 10px;
-    background: rgba(255, 255, 255, 0.1);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    border-radius: 4px;
-    color: white;
-    font-size: 12px;
-    cursor: pointer;
-}
-
-.form-group select option {
-    background: #1a1a1a;
-    color: white;
-}
-
-.btn-primary,
-.btn-secondary,
-.btn-danger {
-    padding: 8px 16px;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 12px;
-    transition: all 0.2s;
-}
-
-.btn-primary {
-    background: #00ff00;
-    color: black;
-}
-
-.btn-primary:hover {
-    background: #00cc00;
-    transform: translateY(-1px);
-}
-
-.btn-secondary {
-    background: rgba(255, 255, 255, 0.2);
-    color: white;
-}
-
-.btn-secondary:hover {
-    background: rgba(255, 255, 255, 0.3);
-}
-
-.btn-danger {
-    background: rgba(255, 0, 0, 0.3);
-    color: white;
-}
-
-.btn-danger:hover {
-    background: rgba(255, 0, 0, 0.5);
-}
-
-.stats {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-}
-
-.stat-item {
-    display: flex;
-    justify-content: space-between;
-    padding: 6px 10px;
-    background: rgba(255, 255, 255, 0.05);
-    border-radius: 4px;
-    font-size: 12px;
-}
-
-.stat-item .value {
-    color: #00ff00;
-    font-weight: bold;
+    margin-bottom: 8px;
 }
 
 .event-log {
@@ -774,19 +581,19 @@ onUnmounted(() => {
     overflow-y: auto;
     font-size: 11px;
     font-family: monospace;
+    .scrollbar-style();
 }
 
 .log-item {
     padding: 4px 0;
     border-bottom: 1px solid rgba(255, 255, 255, 0.05);
     color: #aaa;
+
+    &:last-child {
+        border-bottom: none;
+    }
 }
 
-.log-item:last-child {
-    border-bottom: none;
-}
-
-/* 区域块列表样式 */
 .area-item {
     display: flex;
     justify-content: space-between;
@@ -804,44 +611,5 @@ onUnmounted(() => {
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-}
-
-.btn-remove {
-    padding: 2px 8px;
-    font-size: 11px;
-    background: rgba(255, 0, 0, 0.3);
-    color: white;
-    border: 1px solid rgba(255, 0, 0, 0.5);
-    border-radius: 3px;
-    cursor: pointer;
-    transition: all 0.2s;
-}
-
-.btn-remove:hover {
-    background: rgba(255, 0, 0, 0.5);
-    border-color: rgba(255, 0, 0, 0.8);
-}
-
-/* 滚动条样式 */
-.control-panel::-webkit-scrollbar,
-.event-log::-webkit-scrollbar {
-    width: 6px;
-}
-
-.control-panel::-webkit-scrollbar-track,
-.event-log::-webkit-scrollbar-track {
-    background: rgba(255, 255, 255, 0.05);
-    border-radius: 3px;
-}
-
-.control-panel::-webkit-scrollbar-thumb,
-.event-log::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.2);
-    border-radius: 3px;
-}
-
-.control-panel::-webkit-scrollbar-thumb:hover,
-.event-log::-webkit-scrollbar-thumb:hover {
-    background: rgba(255, 255, 255, 0.3);
 }
 </style>

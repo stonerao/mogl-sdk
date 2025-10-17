@@ -1,283 +1,177 @@
 <template>
     <SplitLayout :code="sourceCode" language="javascript" title="05 - Path Animations">
         <div class="scene-container" ref="sceneContainer">
-            <!-- 加载状态 -->
-            <div v-if="isLoading" class="loading-overlay">
-                <div class="loading-content">
-                    <div class="loading-spinner"></div>
-                    <div class="loading-text">{{ loadingText || '加载中...' }}</div>
-                    <div class="loading-progress">
-                        <div class="progress-bar">
-                            <div
-                                class="progress-fill"
-                                :style="{ width: `${loadingProgress || 0}%` }"
-                            ></div>
-                        </div>
-                        <span class="progress-text">{{ loadingProgress || 0 }}%</span>
+            <GuiLoading
+                :visible="isLoading"
+                :text="loadingText || '加载中...'"
+                :showProgress="true"
+                :progress="loadingProgress || 0"
+            />
+
+            <GuiPanel title="路径动画">
+                <GuiSection title="播放控制">
+                    <div class="playback-controls">
+                        <GuiButton
+                            :label="animationStatus.isPlaying ? '暂停' : '播放'"
+                            @click="playAnimation"
+                        />
+                        <GuiButton label="停止" variant="secondary" @click="stopAnimation" />
+                        <GuiButton label="重置" variant="secondary" @click="resetAnimation" />
                     </div>
-                </div>
-            </div>
 
-            <!-- 控制面板 -->
-            <div class="control-panel">
-                <!-- 路径动画播放控制 -->
-                <div class="control-section">
-                    <h4>路径动画控制</h4>
-                    <div class="animation-controls">
-                        <div class="playback-controls">
-                            <button
-                                @click="playAnimation"
-                                class="play-btn"
-                                :disabled="!pathAnimation"
-                            >
-                                {{ animationStatus.isPlaying ? '暂停' : '播放' }}
-                            </button>
-                            <button
-                                @click="stopAnimation"
-                                class="stop-btn"
-                                :disabled="!pathAnimation"
-                            >
-                                停止
-                            </button>
-                            <button
-                                @click="resetAnimation"
-                                class="reset-btn"
-                                :disabled="!pathAnimation"
-                            >
-                                重置
-                            </button>
-                        </div>
-
-                        <!-- 动画状态显示 -->
-                        <div class="status-display">
-                            <div class="status-item">
-                                <span>状态:</span>
-                                <span
-                                    class="value"
-                                    :class="{
-                                        playing: animationStatus.isPlaying,
-                                        paused: animationStatus.isPaused
-                                    }"
-                                >
-                                    {{
-                                        animationStatus.isPlaying
-                                            ? '播放中'
-                                            : animationStatus.isPaused
-                                            ? '已暂停'
-                                            : '已停止'
-                                    }}
-                                </span>
-                            </div>
-                            <div class="status-item">
-                                <span>进度:</span>
-                                <span class="value"
-                                    >{{ (animationStatus.progress * 100).toFixed(1) }}%</span
-                                >
-                            </div>
-                        </div>
-
-                        <!-- 进度控制 -->
-                        <div class="progress-control">
-                            <label>动画进度</label>
-                            <div class="param-group">
-                                <input
-                                    type="range"
-                                    :value="animationStatus.progress"
-                                    @input="seekToProgress"
-                                    min="0"
-                                    max="1"
-                                    step="0.01"
-                                    :disabled="!pathAnimation"
-                                />
-                                <span>{{ (animationStatus.progress * 100).toFixed(1) }}%</span>
-                            </div>
-                        </div>
-
-                        <!-- 速度控制 -->
-                        <div class="speed-control">
-                            <label>移动速度</label>
-                            <div class="param-group">
-                                <input
-                                    type="range"
-                                    v-model.number="pathSettings.speed"
-                                    @input="updateSpeed"
-                                    min="0.1"
-                                    max="10"
-                                    step="0.1"
-                                />
-                                <span>{{ pathSettings.speed }} 单位/秒</span>
-                            </div>
-                        </div>
+                    <div class="status-display">
+                        <GuiInfoItem
+                            label="状态:"
+                            :value="
+                                animationStatus.isPlaying
+                                    ? '播放中'
+                                    : animationStatus.isPaused
+                                    ? '已暂停'
+                                    : '已停止'
+                            "
+                        />
+                        <GuiInfoItem
+                            label="进度:"
+                            :value="`${(animationStatus.progress * 100).toFixed(1)}%`"
+                        />
                     </div>
-                </div>
 
-                <!-- 循环模式控制 -->
-                <div class="control-section">
-                    <h4>循环模式</h4>
-                    <div class="loop-controls">
-                        <div class="setting-group">
-                            <label>
-                                <input
-                                    type="radio"
-                                    v-model="pathSettings.loopMode"
-                                    value="none"
-                                    @change="updateLoopMode"
-                                />
-                                单次播放
-                            </label>
-                        </div>
-                        <div class="setting-group">
-                            <label>
-                                <input
-                                    type="radio"
-                                    v-model="pathSettings.loopMode"
-                                    value="loop"
-                                    @change="updateLoopMode"
-                                />
-                                循环播放
-                            </label>
-                        </div>
-                        <div class="setting-group">
-                            <label>
-                                <input
-                                    type="radio"
-                                    v-model="pathSettings.loopMode"
-                                    value="pingPong"
-                                    @change="updateLoopMode"
-                                />
-                                往返播放
-                            </label>
-                        </div>
+                    <GuiSlider
+                        label="动画进度"
+                        :modelValue="animationStatus.progress"
+                        @update:modelValue="seekToProgress"
+                        :min="0"
+                        :max="1"
+                        :step="0.01"
+                        :precision="3"
+                        suffix="%"
+                    />
+                    <GuiSlider
+                        label="移动速度"
+                        v-model="pathSettings.speed"
+                        @change="updateSpeed"
+                        :min="0.1"
+                        :max="10"
+                        :step="0.1"
+                        :precision="1"
+                        suffix=" 单位/秒"
+                    />
+                </GuiSection>
+
+                <GuiSection title="循环模式">
+                    <GuiRadio
+                        v-model="pathSettings.loopMode"
+                        @change="updateLoopMode"
+                        :options="[
+                            { value: 'none', label: '单次播放' },
+                            { value: 'loop', label: '循环播放' },
+                            { value: 'pingPong', label: '往返播放' }
+                        ]"
+                    />
+                </GuiSection>
+
+                <GuiSection title="对象朝向">
+                    <GuiSelect
+                        label="朝向模式"
+                        v-model="pathSettings.lookAtDirection"
+                        @change="updateLookAtDirection"
+                        :options="[
+                            { value: 'forward', label: '朝向运动方向' },
+                            { value: 'backward', label: '朝向运动反方向' },
+                            { value: 'up', label: '朝向上方 (+Y)' },
+                            { value: 'down', label: '朝向下方 (-Y)' },
+                            { value: 'fixed', label: '固定朝向' },
+                            { value: 'custom', label: '自定义朝向' }
+                        ]"
+                    />
+
+                    <div v-if="pathSettings.lookAtDirection === 'custom'" class="custom-rotation">
+                        <GuiSlider
+                            label="X 旋转"
+                            v-model="customRotation.x"
+                            @change="updateCustomRotation"
+                            :min="-180"
+                            :max="180"
+                            :step="1"
+                            suffix="°"
+                        />
+                        <GuiSlider
+                            label="Y 旋转"
+                            v-model="customRotation.y"
+                            @change="updateCustomRotation"
+                            :min="-180"
+                            :max="180"
+                            :step="1"
+                            suffix="°"
+                        />
+                        <GuiSlider
+                            label="Z 旋转"
+                            v-model="customRotation.z"
+                            @change="updateCustomRotation"
+                            :min="-180"
+                            :max="180"
+                            :step="1"
+                            suffix="°"
+                        />
                     </div>
-                </div>
+                </GuiSection>
 
-                <!-- 朝向控制 -->
-                <div class="control-section">
-                    <h4>对象朝向</h4>
-                    <div class="look-at-controls">
-                        <div class="param-group">
-                            <label>朝向模式</label>
-                            <select
-                                v-model="pathSettings.lookAtDirection"
-                                @change="updateLookAtDirection"
-                            >
-                                <option value="forward">朝向运动方向</option>
-                                <option value="backward">朝向运动反方向</option>
-                                <option value="up">朝向上方 (+Y)</option>
-                                <option value="down">朝向下方 (-Y)</option>
-                                <option value="fixed">固定朝向</option>
-                                <option value="custom">自定义朝向</option>
-                            </select>
-                        </div>
+                <GuiSection title="缓动效果">
+                    <GuiSelect
+                        label="缓动函数"
+                        v-model="pathSettings.easing"
+                        @change="updateEasing"
+                        :options="[
+                            { value: 'linear', label: '线性 (Linear)' },
+                            { value: 'easeIn', label: '加速 (Ease In)' },
+                            { value: 'easeOut', label: '减速 (Ease Out)' },
+                            { value: 'easeInOut', label: '平滑 (Ease In Out)' }
+                        ]"
+                    />
+                </GuiSection>
 
-                        <!-- 自定义朝向角度 -->
-                        <div
-                            v-if="pathSettings.lookAtDirection === 'custom'"
-                            class="custom-rotation"
-                        >
-                            <div class="param-group">
-                                <label>X 旋转 (度)</label>
-                                <input
-                                    type="range"
-                                    v-model.number="customRotation.x"
-                                    @input="updateCustomRotation"
-                                    min="-180"
-                                    max="180"
-                                    step="1"
-                                />
-                                <span>{{ customRotation.x }}°</span>
-                            </div>
-                            <div class="param-group">
-                                <label>Y 旋转 (度)</label>
-                                <input
-                                    type="range"
-                                    v-model.number="customRotation.y"
-                                    @input="updateCustomRotation"
-                                    min="-180"
-                                    max="180"
-                                    step="1"
-                                />
-                                <span>{{ customRotation.y }}°</span>
-                            </div>
-                            <div class="param-group">
-                                <label>Z 旋转 (度)</label>
-                                <input
-                                    type="range"
-                                    v-model.number="customRotation.z"
-                                    @input="updateCustomRotation"
-                                    min="-180"
-                                    max="180"
-                                    step="1"
-                                />
-                                <span>{{ customRotation.z }}°</span>
-                            </div>
-                        </div>
+                <GuiSection title="预设路径">
+                    <div class="preset-buttons">
+                        <GuiButton
+                            label="直线路径"
+                            variant="secondary"
+                            @click="loadPresetPath('line')"
+                        />
+                        <GuiButton
+                            label="三角形路径"
+                            variant="secondary"
+                            @click="loadPresetPath('triangle')"
+                        />
+                        <GuiButton
+                            label="矩形路径"
+                            variant="secondary"
+                            @click="loadPresetPath('rectangle')"
+                        />
+                        <GuiButton
+                            label="圆形路径"
+                            variant="secondary"
+                            @click="loadPresetPath('circle')"
+                        />
+                        <GuiButton
+                            label="螺旋路径"
+                            variant="secondary"
+                            @click="loadPresetPath('spiral')"
+                        />
                     </div>
-                </div>
+                </GuiSection>
 
-                <!-- 缓动函数 -->
-                <div class="control-section">
-                    <h4>缓动效果</h4>
-                    <div class="easing-controls">
-                        <div class="param-group">
-                            <label>缓动函数</label>
-                            <select v-model="pathSettings.easing" @change="updateEasing">
-                                <option value="linear">线性 (Linear)</option>
-                                <option value="easeIn">加速 (Ease In)</option>
-                                <option value="easeOut">减速 (Ease Out)</option>
-                                <option value="easeInOut">平滑 (Ease In Out)</option>
-                            </select>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- 预设路径 -->
-                <div class="control-section">
-                    <h4>预设路径</h4>
-                    <div class="preset-controls">
-                        <div class="preset-buttons">
-                            <button @click="loadPresetPath('line')" class="preset-btn">
-                                直线路径
-                            </button>
-                            <button @click="loadPresetPath('triangle')" class="preset-btn">
-                                三角形路径
-                            </button>
-                            <button @click="loadPresetPath('rectangle')" class="preset-btn">
-                                矩形路径
-                            </button>
-                            <button @click="loadPresetPath('circle')" class="preset-btn">
-                                圆形路径
-                            </button>
-                            <button @click="loadPresetPath('spiral')" class="preset-btn">
-                                螺旋路径
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- 路径信息 -->
-                <div class="control-section" v-if="pathAnimation">
-                    <h4>路径信息</h4>
-                    <div class="path-info">
-                        <div class="info-item">
-                            <span>路径点数:</span>
-                            <span class="value">{{ currentPath.length }}</span>
-                        </div>
-                        <div class="info-item">
-                            <span>总距离:</span>
-                            <span class="value"
-                                >{{ animationStatus.totalDistance.toFixed(2) }} 单位</span
-                            >
-                        </div>
-                        <div class="info-item">
-                            <span>当前距离:</span>
-                            <span class="value"
-                                >{{ animationStatus.currentDistance.toFixed(2) }} 单位</span
-                            >
-                        </div>
-                    </div>
-                </div>
-            </div>
+                <GuiSection title="路径信息">
+                    <GuiInfoItem label="路径点数:" :value="currentPath.length" />
+                    <GuiInfoItem
+                        label="总距离:"
+                        :value="`${animationStatus.totalDistance.toFixed(2)} 单位`"
+                    />
+                    <GuiInfoItem
+                        label="当前距离:"
+                        :value="`${animationStatus.currentDistance.toFixed(2)} 单位`"
+                    />
+                </GuiSection>
+            </GuiPanel>
         </div>
     </SplitLayout>
 </template>
@@ -287,6 +181,16 @@ import { ref, reactive, computed, onMounted, onUnmounted } from 'vue';
 import { Scene } from '@w3d/core';
 import { PathAnimation, GridHelper } from '@w3d/components';
 import SplitLayout from '../../components/SplitLayout.vue';
+import {
+    GuiPanel,
+    GuiSection,
+    GuiSlider,
+    GuiSelect,
+    GuiButton,
+    GuiInfoItem,
+    GuiLoading,
+    GuiRadio
+} from '@/components/Gui';
 import * as THREE from 'three';
 
 // 基础状态
@@ -812,7 +716,7 @@ const cleanup = () => {
     }
 
     if (scene) {
-        scene.destroy();
+        scene.dispose();
         scene = null;
     }
 
@@ -836,143 +740,19 @@ onUnmounted(() => {
 });
 </script>
 
-<style scoped>
+<style scoped lang="less">
+@import '@/styles/gui.less';
+
 .scene-container {
     width: 100%;
     height: 100%;
     position: relative;
 }
 
-.loading-overlay {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(0, 0, 0, 0.8);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 1000;
-}
-
-.loading-content {
-    text-align: center;
-    color: white;
-}
-
-.loading-spinner {
-    width: 40px;
-    height: 40px;
-    border: 3px solid rgba(0, 255, 136, 0.3);
-    border-top: 3px solid #00ff88;
-    border-radius: 50%;
-    animation: spin 1s linear infinite;
-    margin: 0 auto 15px;
-}
-
-@keyframes spin {
-    0% {
-        transform: rotate(0deg);
-    }
-    100% {
-        transform: rotate(360deg);
-    }
-}
-
-.loading-text {
-    font-size: 14px;
-    margin-bottom: 15px;
-    color: #00ff88;
-}
-
-.progress-bar {
-    width: 200px;
-    height: 4px;
-    background: rgba(255, 255, 255, 0.2);
-    border-radius: 2px;
-    overflow: hidden;
-    margin: 0 auto 10px;
-}
-
-.progress-fill {
-    height: 100%;
-    background: linear-gradient(90deg, #00ff88, #00cc6a);
-    transition: width 0.3s ease;
-}
-
-.progress-text {
-    font-size: 12px;
-    color: #00ff88;
-}
-
-.control-panel {
-    position: absolute;
-    top: 20px;
-    right: 20px;
-    width: 320px;
-    max-height: calc(100vh - 40px);
-    background: rgba(30, 30, 30, 0.95);
-    backdrop-filter: blur(10px);
-    border-radius: 12px;
-    border: 1px solid rgba(0, 255, 136, 0.2);
-    color: white;
-    overflow-y: auto;
-    z-index: 100;
-}
-
-.control-section {
-    padding: 20px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.control-section:last-child {
-    border-bottom: none;
-}
-
-.control-section h4 {
-    margin: 0 0 15px 0;
-    color: #00ff88;
-    font-size: 14px;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-}
-
-.animation-controls {
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-}
-
 .playback-controls {
-    display: flex;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
     gap: 10px;
-}
-
-.playback-controls button {
-    flex: 1;
-    padding: 8px 12px;
-    background: linear-gradient(135deg, #00ff88, #00cc6a);
-    color: black;
-    border: none;
-    border-radius: 6px;
-    font-size: 12px;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all 0.2s ease;
-}
-
-.playback-controls button:hover:not(:disabled) {
-    background: linear-gradient(135deg, #00cc6a, #00aa55);
-    transform: translateY(-1px);
-}
-
-.playback-controls button:disabled {
-    background: rgba(255, 255, 255, 0.1);
-    color: rgba(255, 255, 255, 0.5);
-    cursor: not-allowed;
-    transform: none;
 }
 
 .status-display {
@@ -983,232 +763,21 @@ onUnmounted(() => {
     background: rgba(0, 0, 0, 0.3);
     border-radius: 6px;
     border: 1px solid rgba(0, 255, 136, 0.1);
-}
-
-.status-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    font-size: 12px;
-}
-
-.status-item .value {
-    color: #00ff88;
-    font-weight: 500;
-}
-
-.status-item .value.playing {
-    color: #00ff88;
-}
-
-.status-item .value.paused {
-    color: #ffaa00;
-}
-
-.param-group {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-}
-
-.param-group label {
-    font-size: 12px;
-    color: rgba(255, 255, 255, 0.8);
-    font-weight: 500;
-}
-
-.param-group input[type='range'] {
-    width: 100%;
-    height: 4px;
-    background: rgba(255, 255, 255, 0.2);
-    border-radius: 2px;
-    outline: none;
-    -webkit-appearance: none;
-}
-
-.param-group input[type='range']::-webkit-slider-thumb {
-    -webkit-appearance: none;
-    width: 16px;
-    height: 16px;
-    background: #00ff88;
-    border-radius: 50%;
-    cursor: pointer;
-    transition: all 0.2s ease;
-}
-
-.param-group input[type='range']::-webkit-slider-thumb:hover {
-    background: #00cc6a;
-    transform: scale(1.1);
-}
-
-.param-group span {
-    font-size: 11px;
-    color: #00ff88;
-    text-align: center;
-    font-weight: 500;
-}
-
-.loop-controls {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-}
-
-.setting-group {
-    display: flex;
-    align-items: center;
-}
-
-.setting-group label {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 12px;
-    color: rgba(255, 255, 255, 0.8);
-    cursor: pointer;
-    transition: color 0.2s ease;
-}
-
-.setting-group label:hover {
-    color: white;
-}
-
-.setting-group input[type='radio'],
-.setting-group input[type='checkbox'] {
-    width: 16px;
-    height: 16px;
-    accent-color: #00ff88;
-}
-
-.look-at-controls select,
-.easing-controls select {
-    width: 100%;
-    padding: 8px 12px;
-    background: rgba(0, 0, 0, 0.5);
-    border: 1px solid rgba(0, 255, 136, 0.3);
-    border-radius: 6px;
-    color: white;
-    font-size: 12px;
-    outline: none;
-    transition: border-color 0.2s ease;
-}
-
-.look-at-controls select:focus,
-.easing-controls select:focus {
-    border-color: #00ff88;
-}
-
-.look-at-controls select option,
-.easing-controls select option {
-    background: #1a1a1a;
-    color: white;
+    margin-top: 10px;
 }
 
 .custom-rotation {
     margin-top: 15px;
     padding-top: 15px;
     border-top: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.custom-rotation .param-group {
-    margin-bottom: 12px;
-}
-
-.custom-rotation .param-group:last-child {
-    margin-bottom: 0;
-}
-
-/* 滚动条样式 */
-.control-panel::-webkit-scrollbar {
-    width: 6px;
-}
-
-.control-panel::-webkit-scrollbar-track {
-    background: rgba(255, 255, 255, 0.1);
-    border-radius: 3px;
-}
-
-.control-panel::-webkit-scrollbar-thumb {
-    background: rgba(0, 255, 136, 0.5);
-    border-radius: 3px;
-}
-
-.control-panel::-webkit-scrollbar-thumb:hover {
-    background: rgba(0, 255, 136, 0.7);
-}
-
-/* 预设路径按钮样式 */
-.preset-controls {
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 12px;
 }
 
 .preset-buttons {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 8px;
-}
-
-.preset-btn {
-    padding: 8px 12px;
-    background: rgba(0, 0, 0, 0.5);
-    border: 1px solid rgba(0, 255, 136, 0.3);
-    border-radius: 6px;
-    color: white;
-    font-size: 11px;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all 0.2s ease;
-}
-
-.preset-btn:hover {
-    background: rgba(0, 255, 136, 0.1);
-    border-color: #00ff88;
-    transform: translateY(-1px);
-}
-
-.preset-btn:active {
-    transform: translateY(0);
-}
-
-/* 路径信息样式 */
-.path-info {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-}
-
-.info-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    font-size: 12px;
-    padding: 6px 0;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-}
-
-.info-item:last-child {
-    border-bottom: none;
-}
-
-.info-item span:first-child {
-    color: rgba(255, 255, 255, 0.7);
-}
-
-.info-item .value {
-    color: #00ff88;
-    font-weight: 500;
-}
-
-/* 修复 appearance 兼容性 */
-.param-group input[type='range'] {
-    width: 100%;
-    height: 4px;
-    background: rgba(255, 255, 255, 0.2);
-    border-radius: 2px;
-    outline: none;
-    -webkit-appearance: none;
-    appearance: none;
 }
 </style>

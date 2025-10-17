@@ -2,357 +2,220 @@
     <SplitLayout :code="sourceCode" language="javascript" title="03 - Lighting">
         <div class="scene-container" ref="sceneContainer">
             <!-- 加载状态 -->
-            <div v-if="isLoading" class="loading-overlay">
-                <div class="loading-content">
-                    <div class="loading-spinner"></div>
-                    <div class="loading-text">{{ loadingText }}</div>
-                    <div class="loading-progress">
-                        <div class="progress-bar">
-                            <div
-                                class="progress-fill"
-                                :style="{ width: loadingProgress + '%' }"
-                            ></div>
-                        </div>
-                        <span class="progress-text">{{ loadingProgress }}%</span>
-                    </div>
-                </div>
-            </div>
+            <template v-if="isLoading">
+                <GuiLoading :progress="loadingProgress" :text="loadingText" />
+            </template>
 
             <!-- 控制面板 -->
-            <div class="control-panel">
-                <!-- 环境光控制 -->
-                <div class="control-section">
-                    <h4>环境光 (Ambient Light)</h4>
-                    <div class="light-controls">
-                        <div class="setting-group">
-                            <label>
-                                <input
-                                    type="checkbox"
-                                    v-model="ambientLight.enabled"
-                                    @change="updateAmbientLight"
-                                />
-                                启用环境光
-                            </label>
-                        </div>
-                        <div class="param-group">
-                            <label>强度</label>
-                            <input
-                                type="range"
-                                v-model.number="ambientLight.intensity"
-                                @input="updateAmbientLight"
-                                min="0"
-                                max="2"
-                                step="0.1"
-                                :disabled="!ambientLight.enabled"
+            <template v-if="!isLoading">
+                <GuiPanel title="灯光控制" width="wide">
+                    <!-- 环境光控制 -->
+                    <GuiSection title="环境光 (Ambient Light)">
+                        <GuiCheckbox
+                            label="启用环境光"
+                            v-model="ambientLight.enabled"
+                            @update:modelValue="updateAmbientLight"
+                        />
+                        <template v-if="ambientLight.enabled">
+                            <GuiSlider
+                                label="强度"
+                                v-model="ambientLight.intensity"
+                                :min="0"
+                                :max="2"
+                                :step="0.1"
+                                @update:modelValue="updateAmbientLight"
                             />
-                            <span>{{ ambientLight.intensity }}</span>
-                        </div>
-                        <div class="param-group">
-                            <label>颜色</label>
-                            <input
-                                type="color"
+                            <GuiColorPicker
+                                label="颜色"
                                 v-model="ambientLight.color"
-                                @input="updateAmbientLight"
-                                :disabled="!ambientLight.enabled"
+                                @update:modelValue="updateAmbientLight"
                             />
-                        </div>
-                    </div>
-                </div>
+                        </template>
+                    </GuiSection>
 
-                <!-- 平行光控制 -->
-                <div class="control-section">
-                    <h4>平行光 (Directional Light)</h4>
-                    <div class="light-controls">
-                        <div class="setting-group">
-                            <label>
-                                <input
-                                    type="checkbox"
-                                    v-model="directionalLight.enabled"
-                                    @change="updateDirectionalLight"
-                                />
-                                启用平行光
-                            </label>
-                        </div>
-                        <div class="param-group">
-                            <label>强度</label>
-                            <input
-                                type="range"
-                                v-model.number="directionalLight.intensity"
-                                @input="updateDirectionalLight"
-                                min="0"
-                                max="3"
-                                step="0.1"
-                                :disabled="!directionalLight.enabled"
+                    <!-- 平行光控制 -->
+                    <GuiSection title="平行光 (Directional Light)">
+                        <GuiCheckbox
+                            label="启用平行光"
+                            v-model="directionalLight.enabled"
+                            @update:modelValue="updateDirectionalLight"
+                        />
+                        <template v-if="directionalLight.enabled">
+                            <GuiSlider
+                                label="强度"
+                                v-model="directionalLight.intensity"
+                                :min="0"
+                                :max="3"
+                                :step="0.1"
+                                @update:modelValue="updateDirectionalLight"
                             />
-                            <span>{{ directionalLight.intensity }}</span>
-                        </div>
-                        <div class="param-group">
-                            <label>颜色</label>
-                            <input
-                                type="color"
+                            <GuiColorPicker
+                                label="颜色"
                                 v-model="directionalLight.color"
-                                @input="updateDirectionalLight"
-                                :disabled="!directionalLight.enabled"
+                                @update:modelValue="updateDirectionalLight"
                             />
-                        </div>
-                        <div class="position-controls">
-                            <div class="input-group">
-                                <label>X</label>
-                                <input
-                                    type="number"
-                                    v-model.number="directionalLight.position.x"
-                                    @input="updateDirectionalLight"
-                                    step="1"
-                                    :disabled="!directionalLight.enabled"
+                            <div class="position-grid">
+                                <GuiNumberInput
+                                    label="位置 X"
+                                    v-model="directionalLight.position.x"
+                                    :step="1"
+                                    @update:modelValue="updateDirectionalLight"
+                                />
+                                <GuiNumberInput
+                                    label="位置 Y"
+                                    v-model="directionalLight.position.y"
+                                    :step="1"
+                                    @update:modelValue="updateDirectionalLight"
+                                />
+                                <GuiNumberInput
+                                    label="位置 Z"
+                                    v-model="directionalLight.position.z"
+                                    :step="1"
+                                    @update:modelValue="updateDirectionalLight"
                                 />
                             </div>
-                            <div class="input-group">
-                                <label>Y</label>
-                                <input
-                                    type="number"
-                                    v-model.number="directionalLight.position.y"
-                                    @input="updateDirectionalLight"
-                                    step="1"
-                                    :disabled="!directionalLight.enabled"
-                                />
-                            </div>
-                            <div class="input-group">
-                                <label>Z</label>
-                                <input
-                                    type="number"
-                                    v-model.number="directionalLight.position.z"
-                                    @input="updateDirectionalLight"
-                                    step="1"
-                                    :disabled="!directionalLight.enabled"
-                                />
-                            </div>
-                        </div>
-                        <div class="setting-group">
-                            <label>
-                                <input
-                                    type="checkbox"
-                                    v-model="directionalLight.castShadow"
-                                    @change="updateDirectionalLight"
-                                    :disabled="!directionalLight.enabled"
-                                />
-                                投射阴影
-                            </label>
-                        </div>
-                    </div>
-                </div>
+                            <GuiCheckbox
+                                label="投射阴影"
+                                v-model="directionalLight.castShadow"
+                                @update:modelValue="updateDirectionalLight"
+                            />
+                        </template>
+                    </GuiSection>
 
-                <!-- 点光源控制 -->
-                <div class="control-section">
-                    <h4>点光源 (Point Light)</h4>
-                    <div class="light-controls">
-                        <div class="setting-group">
-                            <label>
-                                <input
-                                    type="checkbox"
-                                    v-model="pointLight.enabled"
-                                    @change="updatePointLight"
-                                />
-                                启用点光源
-                            </label>
-                        </div>
-                        <div class="param-group">
-                            <label>强度</label>
-                            <input
-                                type="range"
-                                v-model.number="pointLight.intensity"
-                                @input="updatePointLight"
-                                min="0"
-                                max="5"
-                                step="0.1"
-                                :disabled="!pointLight.enabled"
+                    <!-- 点光源控制 -->
+                    <GuiSection title="点光源 (Point Light)">
+                        <GuiCheckbox
+                            label="启用点光源"
+                            v-model="pointLight.enabled"
+                            @update:modelValue="updatePointLight"
+                        />
+                        <template v-if="pointLight.enabled">
+                            <GuiSlider
+                                label="强度"
+                                v-model="pointLight.intensity"
+                                :min="0"
+                                :max="5"
+                                :step="0.1"
+                                @update:modelValue="updatePointLight"
                             />
-                            <span>{{ pointLight.intensity }}</span>
-                        </div>
-                        <div class="param-group">
-                            <label>颜色</label>
-                            <input
-                                type="color"
+                            <GuiColorPicker
+                                label="颜色"
                                 v-model="pointLight.color"
-                                @input="updatePointLight"
-                                :disabled="!pointLight.enabled"
+                                @update:modelValue="updatePointLight"
                             />
-                        </div>
-                        <div class="position-controls">
-                            <div class="input-group">
-                                <label>X</label>
-                                <input
-                                    type="number"
-                                    v-model.number="pointLight.position.x"
-                                    @input="updatePointLight"
-                                    step="1"
-                                    :disabled="!pointLight.enabled"
+                            <div class="position-grid">
+                                <GuiNumberInput
+                                    label="位置 X"
+                                    v-model="pointLight.position.x"
+                                    :step="1"
+                                    @update:modelValue="updatePointLight"
+                                />
+                                <GuiNumberInput
+                                    label="位置 Y"
+                                    v-model="pointLight.position.y"
+                                    :step="1"
+                                    @update:modelValue="updatePointLight"
+                                />
+                                <GuiNumberInput
+                                    label="位置 Z"
+                                    v-model="pointLight.position.z"
+                                    :step="1"
+                                    @update:modelValue="updatePointLight"
                                 />
                             </div>
-                            <div class="input-group">
-                                <label>Y</label>
-                                <input
-                                    type="number"
-                                    v-model.number="pointLight.position.y"
-                                    @input="updatePointLight"
-                                    step="1"
-                                    :disabled="!pointLight.enabled"
-                                />
-                            </div>
-                            <div class="input-group">
-                                <label>Z</label>
-                                <input
-                                    type="number"
-                                    v-model.number="pointLight.position.z"
-                                    @input="updatePointLight"
-                                    step="1"
-                                    :disabled="!pointLight.enabled"
-                                />
-                            </div>
-                        </div>
-                        <div class="param-group">
-                            <label>距离</label>
-                            <input
-                                type="range"
-                                v-model.number="pointLight.distance"
-                                @input="updatePointLight"
-                                min="0"
-                                max="100"
-                                step="1"
-                                :disabled="!pointLight.enabled"
+                            <GuiSlider
+                                label="距离"
+                                v-model="pointLight.distance"
+                                :min="0"
+                                :max="100"
+                                :step="1"
+                                @update:modelValue="updatePointLight"
                             />
-                            <span>{{ pointLight.distance }}</span>
-                        </div>
-                        <div class="param-group">
-                            <label>衰减</label>
-                            <input
-                                type="range"
-                                v-model.number="pointLight.decay"
-                                @input="updatePointLight"
-                                min="0"
-                                max="5"
-                                step="0.1"
-                                :disabled="!pointLight.enabled"
+                            <GuiSlider
+                                label="衰减"
+                                v-model="pointLight.decay"
+                                :min="0"
+                                :max="5"
+                                :step="0.1"
+                                @update:modelValue="updatePointLight"
                             />
-                            <span>{{ pointLight.decay }}</span>
-                        </div>
-                    </div>
-                </div>
+                        </template>
+                    </GuiSection>
 
-                <!-- 聚光灯控制 -->
-                <div class="control-section">
-                    <h4>聚光灯 (Spot Light)</h4>
-                    <div class="light-controls">
-                        <div class="setting-group">
-                            <label>
-                                <input
-                                    type="checkbox"
-                                    v-model="spotLight.enabled"
-                                    @change="updateSpotLight"
-                                />
-                                启用聚光灯
-                            </label>
-                        </div>
-                        <div class="param-group">
-                            <label>强度</label>
-                            <input
-                                type="range"
-                                v-model.number="spotLight.intensity"
-                                @input="updateSpotLight"
-                                min="0"
-                                max="5"
-                                step="0.1"
-                                :disabled="!spotLight.enabled"
+                    <!-- 聚光灯控制 -->
+                    <GuiSection title="聚光灯 (Spot Light)">
+                        <GuiCheckbox
+                            label="启用聚光灯"
+                            v-model="spotLight.enabled"
+                            @update:modelValue="updateSpotLight"
+                        />
+                        <template v-if="spotLight.enabled">
+                            <GuiSlider
+                                label="强度"
+                                v-model="spotLight.intensity"
+                                :min="0"
+                                :max="5"
+                                :step="0.1"
+                                @update:modelValue="updateSpotLight"
                             />
-                            <span>{{ spotLight.intensity }}</span>
-                        </div>
-                        <div class="param-group">
-                            <label>颜色</label>
-                            <input
-                                type="color"
+                            <GuiColorPicker
+                                label="颜色"
                                 v-model="spotLight.color"
-                                @input="updateSpotLight"
-                                :disabled="!spotLight.enabled"
+                                @update:modelValue="updateSpotLight"
                             />
-                        </div>
-                        <div class="position-controls">
-                            <div class="input-group">
-                                <label>X</label>
-                                <input
-                                    type="number"
-                                    v-model.number="spotLight.position.x"
-                                    @input="updateSpotLight"
-                                    step="1"
-                                    :disabled="!spotLight.enabled"
+                            <div class="position-grid">
+                                <GuiNumberInput
+                                    label="位置 X"
+                                    v-model="spotLight.position.x"
+                                    :step="1"
+                                    @update:modelValue="updateSpotLight"
+                                />
+                                <GuiNumberInput
+                                    label="位置 Y"
+                                    v-model="spotLight.position.y"
+                                    :step="1"
+                                    @update:modelValue="updateSpotLight"
+                                />
+                                <GuiNumberInput
+                                    label="位置 Z"
+                                    v-model="spotLight.position.z"
+                                    :step="1"
+                                    @update:modelValue="updateSpotLight"
                                 />
                             </div>
-                            <div class="input-group">
-                                <label>Y</label>
-                                <input
-                                    type="number"
-                                    v-model.number="spotLight.position.y"
-                                    @input="updateSpotLight"
-                                    step="1"
-                                    :disabled="!spotLight.enabled"
-                                />
-                            </div>
-                            <div class="input-group">
-                                <label>Z</label>
-                                <input
-                                    type="number"
-                                    v-model.number="spotLight.position.z"
-                                    @input="updateSpotLight"
-                                    step="1"
-                                    :disabled="!spotLight.enabled"
-                                />
-                            </div>
-                        </div>
-                        <div class="param-group">
-                            <label>角度</label>
-                            <input
-                                type="range"
-                                v-model.number="spotLight.angle"
-                                @input="updateSpotLight"
-                                min="0.1"
-                                max="1.57"
-                                step="0.01"
-                                :disabled="!spotLight.enabled"
+                            <GuiSlider
+                                label="角度"
+                                v-model="spotLight.angle"
+                                :min="0.1"
+                                :max="1.57"
+                                :step="0.01"
+                                :precision="2"
+                                @update:modelValue="updateSpotLight"
                             />
-                            <span>{{ Math.round((spotLight.angle * 180) / Math.PI) }}°</span>
-                        </div>
-                        <div class="param-group">
-                            <label>边缘模糊</label>
-                            <input
-                                type="range"
-                                v-model.number="spotLight.penumbra"
-                                @input="updateSpotLight"
-                                min="0"
-                                max="1"
-                                step="0.01"
-                                :disabled="!spotLight.enabled"
+                            <GuiSlider
+                                label="边缘模糊"
+                                v-model="spotLight.penumbra"
+                                :min="0"
+                                :max="1"
+                                :step="0.01"
+                                :precision="2"
+                                @update:modelValue="updateSpotLight"
                             />
-                            <span>{{ spotLight.penumbra }}</span>
-                        </div>
-                    </div>
-                </div>
+                        </template>
+                    </GuiSection>
 
-                <!-- 预设配置 -->
-                <div class="control-section">
-                    <h4>预设配置</h4>
-                    <div class="preset-buttons">
-                        <button @click="setLightingPreset('daylight')" class="preset-btn">
-                            日光
-                        </button>
-                        <button @click="setLightingPreset('sunset')" class="preset-btn">
-                            夕阳
-                        </button>
-                        <button @click="setLightingPreset('night')" class="preset-btn">夜晚</button>
-                        <button @click="setLightingPreset('studio')" class="preset-btn">
-                            工作室
-                        </button>
-                        <button @click="resetLighting" class="reset-btn">重置</button>
-                    </div>
-                </div>
-            </div>
+                    <!-- 预设配置 -->
+                    <GuiSection title="预设配置">
+                        <div class="preset-buttons">
+                            <GuiButton label="日光" @click="setLightingPreset('daylight')" />
+                            <GuiButton label="夕阳" @click="setLightingPreset('sunset')" />
+                            <GuiButton label="夜晚" @click="setLightingPreset('night')" />
+                            <GuiButton label="工作室" @click="setLightingPreset('studio')" />
+                            <GuiButton label="重置" variant="secondary" @click="resetLighting" />
+                        </div>
+                    </GuiSection>
+                </GuiPanel>
+            </template>
         </div>
     </SplitLayout>
 </template>
@@ -361,6 +224,16 @@
 import { ref, reactive, onMounted, onUnmounted } from 'vue';
 import { Scene } from '@w3d/core';
 import { GridHelper } from '@w3d/components';
+import {
+    GuiPanel,
+    GuiSection,
+    GuiLoading,
+    GuiCheckbox,
+    GuiSlider,
+    GuiColorPicker,
+    GuiNumberInput,
+    GuiButton
+} from '@/components/Gui';
 import SplitLayout from '../../components/SplitLayout.vue';
 import * as THREE from 'three';
 
@@ -987,299 +860,25 @@ const cleanup = () => {
 };
 </script>
 
-<style scoped>
+<style scoped lang="less">
+@import '@/styles/gui.less';
 .scene-container {
     width: 100%;
     height: 100%;
     position: relative;
 }
 
-.loading-overlay {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.8);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 1000;
-}
-
-.loading-content {
-    text-align: center;
-    color: white;
-}
-
-.loading-spinner {
-    width: 50px;
-    height: 50px;
-    border: 3px solid rgba(255, 255, 255, 0.3);
-    border-top: 3px solid #00ff88;
-    border-radius: 50%;
-    animation: spin 1s linear infinite;
-    margin: 0 auto 20px;
-}
-
-@keyframes spin {
-    0% {
-        transform: rotate(0deg);
-    }
-    100% {
-        transform: rotate(360deg);
-    }
-}
-
-.loading-text {
-    font-size: 16px;
-    margin-bottom: 15px;
-    color: #00ff88;
-}
-
-.loading-progress {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
-.progress-bar {
-    width: 200px;
-    height: 4px;
-    background: rgba(255, 255, 255, 0.2);
-    border-radius: 2px;
-    overflow: hidden;
-}
-
-.progress-fill {
-    height: 100%;
-    background: linear-gradient(90deg, #00ff88, #00ccff);
-    transition: width 0.3s ease;
-}
-
-.progress-text {
-    font-size: 12px;
-    color: rgba(255, 255, 255, 0.8);
-    min-width: 35px;
-}
-
-.control-panel {
-    position: absolute;
-    top: 20px;
-    right: 20px;
-    width: 320px;
-    max-height: calc(100vh - 40px);
-    background: rgba(0, 0, 0, 0.85);
-    backdrop-filter: blur(10px);
-    border-radius: 12px;
-    padding: 20px;
-    color: white;
-    overflow-y: auto;
-    z-index: 100;
-}
-
-.control-section {
-    margin-bottom: 25px;
-    padding-bottom: 20px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.control-section:last-child {
-    border-bottom: none;
-    margin-bottom: 0;
-}
-
-.control-section h4 {
-    margin: 0 0 15px 0;
-    font-size: 16px;
-    color: #00ff88;
-    font-weight: 500;
-}
-
-.light-controls {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-}
-
-.position-controls {
+.position-grid {
     display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-columns: repeat(3, 1fr);
     gap: 10px;
-    margin-top: 10px;
-}
-
-.input-group {
-    display: flex;
-    flex-direction: column;
-    gap: 5px;
-}
-
-.input-group label {
-    font-size: 12px;
-    color: rgba(255, 255, 255, 0.8);
-    font-weight: 500;
-}
-
-.input-group input[type='number'] {
-    padding: 8px;
-    background: rgba(255, 255, 255, 0.1);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    border-radius: 6px;
-    color: white;
-    font-size: 13px;
-    text-align: center;
-}
-
-.input-group input[type='number']:focus {
-    outline: none;
-    border-color: #00ff88;
-}
-
-.input-group input[type='number']:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-}
-
-.param-group {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-}
-
-.param-group label {
-    font-size: 13px;
-    color: rgba(255, 255, 255, 0.9);
-    font-weight: 500;
-}
-
-.param-group input[type='range'] {
-    width: 100%;
-    height: 6px;
-    background: rgba(255, 255, 255, 0.2);
-    border-radius: 3px;
-    outline: none;
-    -webkit-appearance: none;
-    appearance: none;
-}
-
-.param-group input[type='range']:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-}
-
-.param-group input[type='range']::-webkit-slider-thumb {
-    -webkit-appearance: none;
-    width: 16px;
-    height: 16px;
-    background: #00ff88;
-    border-radius: 50%;
-    cursor: pointer;
-}
-
-.param-group input[type='range']::-moz-range-thumb {
-    width: 16px;
-    height: 16px;
-    background: #00ff88;
-    border-radius: 50%;
-    cursor: pointer;
-    border: none;
-}
-
-.param-group input[type='color'] {
-    width: 100%;
-    height: 35px;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    border-radius: 6px;
-    background: transparent;
-    cursor: pointer;
-}
-
-.param-group input[type='color']:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-}
-
-.param-group span {
-    font-size: 12px;
-    color: #00ccff;
-    font-weight: 500;
-    text-align: right;
-}
-
-.setting-group {
-    display: flex;
-    align-items: center;
-    justify-content: flex-start;
-    margin-bottom: 8px;
-}
-
-.setting-group label {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 13px;
-    color: rgba(255, 255, 255, 0.9);
-    cursor: pointer;
-}
-
-.setting-group input[type='checkbox'] {
-    width: 16px;
-    height: 16px;
-    accent-color: #00ff88;
+    margin-bottom: 10px;
 }
 
 .preset-buttons {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
+    display: flex;
+    flex-direction: column;
     gap: 8px;
-}
-
-.preset-btn,
-.reset-btn {
-    padding: 8px 12px;
-    background: linear-gradient(135deg, #00ff88, #00ccff);
-    border: none;
-    border-radius: 6px;
-    color: white;
-    font-size: 12px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    font-weight: 500;
-}
-
-.preset-btn:hover,
-.reset-btn:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(0, 255, 136, 0.3);
-}
-
-.reset-btn {
-    grid-column: 1 / -1;
-    background: linear-gradient(135deg, #ff6b6b, #ee5a24);
-}
-
-.reset-btn:hover {
-    box-shadow: 0 4px 12px rgba(255, 107, 107, 0.3);
-}
-
-/* 滚动条样式 */
-.control-panel::-webkit-scrollbar {
-    width: 6px;
-}
-
-.control-panel::-webkit-scrollbar-track {
-    background: rgba(255, 255, 255, 0.1);
-    border-radius: 3px;
-}
-
-.control-panel::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.3);
-    border-radius: 3px;
-}
-
-.control-panel::-webkit-scrollbar-thumb:hover {
-    background: rgba(255, 255, 255, 0.5);
 }
 </style>
 

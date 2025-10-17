@@ -4,162 +4,129 @@
         <div ref="sceneContainer" class="scene-container"></div>
 
         <!-- 控制面板 -->
-        <div class="control-panel">
-            <h3 class="panel-title">图片点位控制</h3>
-
+        <GuiPanel title="图片点位控制" width="wide">
             <!-- 点位配置 -->
-            <div class="section">
-                <h4>点位配置</h4>
+            <GuiSection title="点位配置">
+                <GuiSelect
+                    label="渲染类型"
+                    v-model="markerConfig.type"
+                    :options="[
+                        { value: 'sprite', label: 'Sprite' },
+                        { value: 'plane', label: 'Plane' }
+                    ]"
+                />
 
-                <div class="form-group">
-                    <label>渲染类型:</label>
-                    <select v-model="markerConfig.type">
-                        <option value="sprite">Sprite</option>
-                        <option value="plane">Plane</option>
-                    </select>
-                </div>
+                <GuiSlider
+                    label="图片大小"
+                    v-model="markerConfig.size"
+                    :min="1"
+                    :max="20"
+                    :step="0.5"
+                />
 
-                <div class="form-group">
-                    <label>图片大小: {{ markerConfig.size }}</label>
-                    <input
-                        v-model.number="markerConfig.size"
-                        type="range"
-                        min="1"
-                        max="20"
-                        step="0.5"
-                    />
-                </div>
+                <GuiColorPicker label="颜色叠加" v-model="markerConfig.color" />
 
-                <div class="form-group">
-                    <label>颜色叠加:</label>
-                    <input v-model="markerConfig.color" type="color" />
-                </div>
+                <GuiSlider
+                    label="透明度"
+                    v-model="markerConfig.opacity"
+                    :min="0.1"
+                    :max="1"
+                    :step="0.05"
+                    :precision="2"
+                />
 
-                <div class="form-group">
-                    <label>透明度: {{ markerConfig.opacity.toFixed(2) }}</label>
-                    <input
-                        v-model.number="markerConfig.opacity"
-                        type="range"
-                        min="0.1"
-                        max="1"
-                        step="0.05"
-                    />
-                </div>
+                <GuiSlider
+                    label="位置偏移 Y"
+                    v-model="markerConfig.offset.y"
+                    :min="-10"
+                    :max="10"
+                    :step="0.5"
+                />
 
-                <div class="form-group">
-                    <label>位置偏移 Y: {{ markerConfig.offset.y }}</label>
-                    <input
-                        v-model.number="markerConfig.offset.y"
-                        type="range"
-                        min="-10"
-                        max="10"
-                        step="0.5"
-                    />
-                </div>
+                <GuiCheckbox
+                    label="大小随距离衰减 (Sprite)"
+                    v-model="markerConfig.sizeAttenuation"
+                />
 
-                <div class="form-group">
-                    <label>
-                        <input v-model="markerConfig.sizeAttenuation" type="checkbox" />
-                        大小随距离衰减 (Sprite)
-                    </label>
-                </div>
+                <GuiCheckbox label="显示文字标签" v-model="markerConfig.showLabel" />
 
-                <div class="form-group">
-                    <label>
-                        <input v-model="markerConfig.showLabel" type="checkbox" />
-                        显示文字标签
-                    </label>
-                </div>
-
-                <div v-if="markerConfig.showLabel" class="form-group">
-                    <label>标签文字:</label>
-                    <input
+                <template v-if="markerConfig.showLabel">
+                    <GuiTextInput
+                        label="标签文字"
                         v-model="markerConfig.labelText"
-                        type="text"
                         placeholder="输入标签文字"
                     />
-                </div>
 
-                <div v-if="markerConfig.showLabel" class="form-group">
-                    <label>标签偏移 Y: {{ markerConfig.labelOffset.y }}</label>
-                    <input
-                        v-model.number="markerConfig.labelOffset.y"
-                        type="range"
-                        min="0"
-                        max="5"
-                        step="0.5"
+                    <GuiSlider
+                        label="标签偏移 Y"
+                        v-model="markerConfig.labelOffset.y"
+                        :min="0"
+                        :max="5"
+                        :step="0.5"
                     />
+                </template>
+
+                <div class="button-group">
+                    <GuiButton label="添加点位" @click="addRandomMarker" />
+                    <GuiButton label="清除所有点位" variant="secondary" @click="clearAllMarkers" />
                 </div>
+            </GuiSection>
 
-                <button
-                    @click="addRandomMarker"
-                    class="btn-primary"
-                    style="width: 100%; margin-bottom: 10px"
-                >
-                    添加点位
-                </button>
-
-                <button @click="clearAllMarkers" class="btn-danger" style="width: 100%">
-                    清除所有点位
-                </button>
-
-                <!-- 点位列表 -->
-                <div v-if="markerList.length > 0" style="margin-top: 15px">
-                    <h5 style="font-size: 12px; color: #00ff00; margin-bottom: 8px">
-                        点位列表 ({{ markerList.length }})
-                    </h5>
-                    <div v-for="marker in markerList" :key="marker.id" class="marker-item">
-                        <div class="marker-info">
-                            <span class="marker-name">{{
-                                marker.userData?.name || marker.id
-                            }}</span>
-                            <span class="marker-state">状态: {{ marker.state }}</span>
-                        </div>
-                        <div class="marker-actions">
-                            <button @click="toggleMarkerState(marker.id)" class="btn-toggle">
-                                切换
-                            </button>
-                            <button
-                                v-if="marker.label"
-                                @click="toggleLabel(marker.id)"
-                                class="btn-toggle"
-                            >
-                                标签
-                            </button>
-                            <button @click="moveMarker(marker.id)" class="btn-toggle">移动</button>
-                            <button @click="removeMarker(marker.id)" class="btn-remove">
-                                删除
-                            </button>
+            <!-- 点位列表 -->
+            <template v-if="markerList.length > 0">
+                <GuiSection title="点位列表">
+                    <div class="marker-list">
+                        <div v-for="marker in markerList" :key="marker.id" class="marker-item">
+                            <div class="marker-info">
+                                <span class="marker-name">{{
+                                    marker.userData?.name || marker.id
+                                }}</span>
+                                <span class="marker-state">{{ marker.state }}</span>
+                            </div>
+                            <div class="marker-actions">
+                                <GuiButton
+                                    label="切换"
+                                    size="small"
+                                    @click="toggleMarkerState(marker.id)"
+                                />
+                                <GuiButton
+                                    v-if="marker.label"
+                                    label="标签"
+                                    size="small"
+                                    @click="toggleLabel(marker.id)"
+                                />
+                                <GuiButton
+                                    label="移动"
+                                    size="small"
+                                    @click="moveMarker(marker.id)"
+                                />
+                                <GuiButton
+                                    label="删除"
+                                    size="small"
+                                    variant="secondary"
+                                    @click="removeMarker(marker.id)"
+                                />
+                            </div>
                         </div>
                     </div>
-                </div>
-            </div>
+                </GuiSection>
+            </template>
 
             <!-- 性能统计 -->
-            <div class="section">
-                <h4>性能统计</h4>
-                <div class="stats">
-                    <div class="stat-item">
-                        <span>FPS:</span>
-                        <span class="value">{{ fps }}</span>
-                    </div>
-                    <div class="stat-item">
-                        <span>点位数量:</span>
-                        <span class="value">{{ markerCount }}</span>
-                    </div>
-                </div>
-            </div>
+            <GuiSection title="性能统计">
+                <GuiInfoItem label="FPS" :value="fps" />
+                <GuiInfoItem label="点位数量" :value="markerCount" />
+            </GuiSection>
 
             <!-- 事件日志 -->
-            <div class="section">
-                <h4>事件日志</h4>
+            <GuiSection title="事件日志">
                 <div class="event-log">
                     <div v-for="(log, index) in eventLogs" :key="index" class="log-item">
                         {{ log }}
                     </div>
                 </div>
-            </div>
-        </div>
+            </GuiSection>
+        </GuiPanel>
     </SplitLayout>
 </template>
 
@@ -167,6 +134,17 @@
 import { ref, reactive, onMounted, onUnmounted } from 'vue';
 import { Scene } from '@w3d/core';
 import { ImageMarker, GridHelper } from '@w3d/components';
+import {
+    GuiPanel,
+    GuiSection,
+    GuiSelect,
+    GuiSlider,
+    GuiColorPicker,
+    GuiCheckbox,
+    GuiTextInput,
+    GuiButton,
+    GuiInfoItem
+} from '@/components/Gui';
 import SplitLayout from '../../components/SplitLayout.vue';
 
 const sceneContainer = ref(null);
@@ -644,215 +622,30 @@ onUnmounted(() => {
 });
 </script>
 
-<style scoped>
+<style scoped lang="less">
+@import '@/styles/gui.less';
 .scene-container {
     width: 100%;
     height: 100%;
     position: relative;
 }
 
-.control-panel {
-    position: absolute;
-    top: 20px;
-    right: 20px;
-    background: rgba(0, 0, 0, 0.85);
-    padding: 20px;
-    border-radius: 8px;
-    color: white;
-    max-width: 340px;
-    max-height: calc(100% - 40px);
-    overflow-y: auto;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+.button-group {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 10px;
 }
 
-.panel-title {
-    margin: 0 0 20px 0;
-    font-size: 18px;
-    color: #00ff00;
-    text-align: center;
-    border-bottom: 2px solid #00ff00;
-    padding-bottom: 10px;
-}
-
-.section {
-    margin-bottom: 20px;
-    padding-bottom: 15px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.section:last-child {
-    border-bottom: none;
-}
-
-.section h4 {
-    margin: 0 0 15px 0;
-    font-size: 14px;
-    color: #00ff00;
-    font-weight: normal;
-}
-
-.form-group {
-    margin-bottom: 12px;
-}
-
-.form-group label {
-    display: block;
-    margin-bottom: 6px;
-    font-size: 12px;
-    color: #ccc;
-}
-
-.form-group input[type='range'] {
-    width: 100%;
-    height: 4px;
-    background: rgba(255, 255, 255, 0.2);
-    border-radius: 2px;
-    outline: none;
-}
-
-.form-group input[type='range']::-webkit-slider-thumb {
-    -webkit-appearance: none;
-    appearance: none;
-    width: 14px;
-    height: 14px;
-    background: #00ff00;
-    cursor: pointer;
-    border-radius: 50%;
-}
-
-.form-group input[type='range']::-moz-range-thumb {
-    width: 14px;
-    height: 14px;
-    background: #00ff00;
-    cursor: pointer;
-    border-radius: 50%;
-    border: none;
-}
-
-.form-group input[type='color'] {
-    width: 100%;
-    height: 32px;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    border-radius: 4px;
-    background: transparent;
-    cursor: pointer;
-}
-
-.form-group select {
-    width: 100%;
-    padding: 6px 10px;
-    background: rgba(255, 255, 255, 0.1);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    border-radius: 4px;
-    color: white;
-    font-size: 12px;
-    cursor: pointer;
-}
-
-.form-group select option {
-    background: #1a1a1a;
-    color: white;
-}
-
-.btn-primary,
-.btn-danger,
-.btn-toggle,
-.btn-remove {
-    padding: 8px 16px;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 12px;
-    transition: all 0.2s;
-}
-
-.btn-primary {
-    background: #00ff00;
-    color: black;
-}
-
-.btn-primary:hover {
-    background: #00cc00;
-    transform: translateY(-1px);
-}
-
-.btn-danger {
-    background: rgba(255, 0, 0, 0.3);
-    color: white;
-}
-
-.btn-danger:hover {
-    background: rgba(255, 0, 0, 0.5);
-}
-
-.btn-toggle {
-    padding: 2px 8px;
-    font-size: 11px;
-    background: rgba(0, 255, 0, 0.3);
-    color: white;
-    border: 1px solid rgba(0, 255, 0, 0.5);
-    margin-right: 4px;
-}
-
-.btn-toggle:hover {
-    background: rgba(0, 255, 0, 0.5);
-}
-
-.btn-remove {
-    padding: 2px 8px;
-    font-size: 11px;
-    background: rgba(255, 0, 0, 0.3);
-    color: white;
-    border: 1px solid rgba(255, 0, 0, 0.5);
-}
-
-.btn-remove:hover {
-    background: rgba(255, 0, 0, 0.5);
-}
-
-.stats {
+.marker-list {
     display: flex;
     flex-direction: column;
     gap: 8px;
 }
 
-.stat-item {
-    display: flex;
-    justify-content: space-between;
-    padding: 6px 10px;
-    background: rgba(255, 255, 255, 0.05);
-    border-radius: 4px;
-    font-size: 12px;
-}
-
-.stat-item .value {
-    color: #00ff00;
-    font-weight: bold;
-}
-
-.event-log {
-    max-height: 150px;
-    overflow-y: auto;
-    font-size: 11px;
-    font-family: monospace;
-}
-
-.log-item {
-    padding: 4px 0;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-    color: #aaa;
-}
-
-.log-item:last-child {
-    border-bottom: none;
-}
-
-/* 点位列表样式 */
 .marker-item {
     padding: 8px 10px;
     background: rgba(255, 255, 255, 0.05);
     border-radius: 4px;
-    margin-bottom: 6px;
 }
 
 .marker-info {
@@ -878,27 +671,22 @@ onUnmounted(() => {
     gap: 4px;
 }
 
-/* 滚动条样式 */
-.control-panel::-webkit-scrollbar,
-.event-log::-webkit-scrollbar {
-    width: 6px;
+.event-log {
+    max-height: 150px;
+    overflow-y: auto;
+    font-size: 11px;
+    font-family: monospace;
+    .scrollbar-style();
 }
 
-.control-panel::-webkit-scrollbar-track,
-.event-log::-webkit-scrollbar-track {
-    background: rgba(255, 255, 255, 0.05);
-    border-radius: 3px;
+.log-item {
+    padding: 4px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    color: #aaa;
 }
 
-.control-panel::-webkit-scrollbar-thumb,
-.event-log::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.2);
-    border-radius: 3px;
-}
-
-.control-panel::-webkit-scrollbar-thumb:hover,
-.event-log::-webkit-scrollbar-thumb:hover {
-    background: rgba(255, 255, 255, 0.3);
+.log-item:last-child {
+    border-bottom: none;
 }
 </style>
 

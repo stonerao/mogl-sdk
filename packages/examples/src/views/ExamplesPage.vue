@@ -124,7 +124,7 @@ const examples = ref([
         id: 8,
         key: '08-model-bake',
         category: 'advanced',
-        route: '/examples/08-henglaji-baked-lighting'
+        route: '/examples/08-model-bake'
     },
     {
         id: 9,

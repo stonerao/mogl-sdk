@@ -4,7 +4,7 @@ import { ModelLoader as CoreModelLoader } from '@w3d/core';
 
 export class InstancedModel extends Component {
     static defaultConfig = {
-        modelUrl: '/models/kache.glb',
+        modelUrl: '/models/ShaderBall.glb',
         instanceCount: 1000,
         positions: [],
         rotations: [],

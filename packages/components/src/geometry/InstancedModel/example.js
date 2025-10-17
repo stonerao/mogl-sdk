@@ -3,7 +3,7 @@ import * as THREE from 'three';
 
 async function example() {
     const instancedModel = new InstancedModel({
-        url: '/models/kache.glb',
+        url: '/models/ShaderBall.glb',
         count: 2000,
         dynamicUpdate: true
     });
@@ -42,7 +42,7 @@ async function example() {
 
 async function gridExample() {
     const instancedModel = new InstancedModel({
-        url: '/models/kache.glb',
+        url: '/models/ShaderBall.glb',
         count: 100
     });
 
@@ -74,7 +74,7 @@ async function gridExample() {
 
 async function animationExample(scene) {
     const instancedModel = new InstancedModel({
-        url: '/models/kache.glb',
+        url: '/models/ShaderBall.glb',
         count: 500
     });
 
@@ -132,4 +132,3 @@ async function animationExample(scene) {
 }
 
 export { example, gridExample, animationExample };
-

@@ -165,7 +165,9 @@ export class ParticleSystem extends Component {
 
         // 创建粒子系统
         this.particlePoints = new THREE.Points(this.geometry, this.material);
-        this.add(this.particlePoints);
+        this.componentScene.add(this.particlePoints);
+
+        console.log(this.componentScene);
     }
 
     /**
@@ -1120,7 +1122,7 @@ export class ParticleSystem extends Component {
             this.material.dispose();
         }
         if (this.particlePoints) {
-            this.remove(this.particlePoints);
+            this.componentScene.remove(this.particlePoints);
         }
 
         // 清理纹理资源

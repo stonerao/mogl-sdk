@@ -1,200 +1,131 @@
 <template>
     <SplitLayout :code="sourceCode" language="javascript" title="02 - Camera Controls">
         <div class="scene-container" ref="sceneContainer">
-            <!-- 加载状态 -->
-            <div v-if="isLoading" class="loading-overlay">
-                <div class="loading-content">
-                    <div class="loading-spinner"></div>
-                    <div class="loading-text">{{ loadingText }}</div>
-                    <div class="loading-progress">
-                        <div class="progress-bar">
-                            <div
-                                class="progress-fill"
-                                :style="{ width: loadingProgress + '%' }"
-                            ></div>
-                        </div>
-                        <span class="progress-text">{{ loadingProgress }}%</span>
-                    </div>
-                </div>
-            </div>
+            <GuiLoading
+                :visible="isLoading"
+                :text="loadingText"
+                :showProgress="true"
+                :progress="loadingProgress"
+            />
 
-            <!-- 控制面板 -->
-            <div class="control-panel">
-                <!-- 相机位置控制 -->
-                <div class="control-section">
-                    <h4>相机位置</h4>
+            <GuiPanel title="相机控制">
+                <GuiSection title="相机位置">
                     <div class="position-controls">
-                        <div class="input-group">
-                            <label>X</label>
-                            <input
-                                type="number"
-                                v-model.number="cameraPosition.x"
-                                @input="updateCameraPosition"
-                                step="1"
-                            />
-                        </div>
-                        <div class="input-group">
-                            <label>Y</label>
-                            <input
-                                type="number"
-                                v-model.number="cameraPosition.y"
-                                @input="updateCameraPosition"
-                                step="1"
-                            />
-                        </div>
-                        <div class="input-group">
-                            <label>Z</label>
-                            <input
-                                type="number"
-                                v-model.number="cameraPosition.z"
-                                @input="updateCameraPosition"
-                                step="1"
-                            />
-                        </div>
+                        <GuiNumberInput
+                            label="X"
+                            v-model="cameraPosition.x"
+                            @change="updateCameraPosition"
+                            :step="1"
+                        />
+                        <GuiNumberInput
+                            label="Y"
+                            v-model="cameraPosition.y"
+                            @change="updateCameraPosition"
+                            :step="1"
+                        />
+                        <GuiNumberInput
+                            label="Z"
+                            v-model="cameraPosition.z"
+                            @change="updateCameraPosition"
+                            :step="1"
+                        />
                     </div>
-                </div>
+                </GuiSection>
 
-                <!-- 相机参数 -->
-                <div class="control-section">
-                    <h4>相机参数</h4>
-                    <div class="camera-params">
-                        <div class="param-group">
-                            <label>视野角度 (FOV)</label>
-                            <input
-                                type="range"
-                                v-model.number="cameraParams.fov"
-                                @input="updateCameraParams"
-                                min="10"
-                                max="120"
-                                step="1"
-                            />
-                            <span>{{ cameraParams.fov }}°</span>
-                        </div>
-                        <div class="param-group">
-                            <label>近裁剪面</label>
-                            <input
-                                type="range"
-                                v-model.number="cameraParams.near"
-                                @input="updateCameraParams"
-                                min="0.1"
-                                max="10"
-                                step="0.1"
-                            />
-                            <span>{{ cameraParams.near }}</span>
-                        </div>
-                        <div class="param-group">
-                            <label>远裁剪面</label>
-                            <input
-                                type="range"
-                                v-model.number="cameraParams.far"
-                                @input="updateCameraParams"
-                                min="100"
-                                max="10000"
-                                step="100"
-                            />
-                            <span>{{ cameraParams.far }}</span>
-                        </div>
-                    </div>
-                </div>
+                <GuiSection title="相机参数">
+                    <GuiSlider
+                        label="视野角度 (FOV)"
+                        v-model="cameraParams.fov"
+                        :min="10"
+                        :max="120"
+                        :step="1"
+                        suffix="°"
+                        @change="updateCameraParams"
+                    />
+                    <GuiSlider
+                        label="近裁剪面"
+                        v-model="cameraParams.near"
+                        :min="0.1"
+                        :max="10"
+                        :step="0.1"
+                        :precision="1"
+                        @change="updateCameraParams"
+                    />
+                    <GuiSlider
+                        label="远裁剪面"
+                        v-model="cameraParams.far"
+                        :min="100"
+                        :max="10000"
+                        :step="100"
+                        :precision="0"
+                        @change="updateCameraParams"
+                    />
+                </GuiSection>
 
-                <!-- 控制器设置 -->
-                <div class="control-section">
-                    <h4>控制器设置</h4>
-                    <div class="controls-settings">
-                        <div class="setting-group">
-                            <label>
-                                <input
-                                    type="checkbox"
-                                    v-model="controlsSettings.enableDamping"
-                                    @change="updateControlsSettings"
-                                />
-                                启用阻尼
-                            </label>
-                        </div>
-                        <div class="setting-group">
-                            <label>阻尼系数</label>
-                            <input
-                                type="range"
-                                v-model.number="controlsSettings.dampingFactor"
-                                @input="updateControlsSettings"
-                                min="0.01"
-                                max="0.2"
-                                step="0.01"
-                                :disabled="!controlsSettings.enableDamping"
-                            />
-                            <span>{{ controlsSettings.dampingFactor }}</span>
-                        </div>
-                        <div class="setting-group">
-                            <label>
-                                <input
-                                    type="checkbox"
-                                    v-model="controlsSettings.autoRotate"
-                                    @change="updateControlsSettings"
-                                />
-                                自动旋转
-                            </label>
-                        </div>
-                        <div class="setting-group">
-                            <label>旋转速度</label>
-                            <input
-                                type="range"
-                                v-model.number="controlsSettings.autoRotateSpeed"
-                                @input="updateControlsSettings"
-                                min="0.5"
-                                max="10"
-                                step="0.5"
-                                :disabled="!controlsSettings.autoRotate"
-                            />
-                            <span>{{ controlsSettings.autoRotateSpeed }}</span>
-                        </div>
-                    </div>
-                </div>
+                <GuiSection title="控制器设置">
+                    <GuiCheckbox
+                        label="启用阻尼"
+                        v-model="controlsSettings.enableDamping"
+                        @change="updateControlsSettings"
+                    />
+                    <GuiSlider
+                        label="阻尼系数"
+                        v-model="controlsSettings.dampingFactor"
+                        :min="0.01"
+                        :max="0.2"
+                        :step="0.01"
+                        :precision="2"
+                        @change="updateControlsSettings"
+                        :disabled="!controlsSettings.enableDamping"
+                    />
+                    <GuiCheckbox
+                        label="自动旋转"
+                        v-model="controlsSettings.autoRotate"
+                        @change="updateControlsSettings"
+                    />
+                    <GuiSlider
+                        label="旋转速度"
+                        v-model="controlsSettings.autoRotateSpeed"
+                        :min="0.5"
+                        :max="10"
+                        :step="0.5"
+                        :precision="1"
+                        @change="updateControlsSettings"
+                        :disabled="!controlsSettings.autoRotate"
+                    />
+                </GuiSection>
 
-                <!-- 距离限制 -->
-                <div class="control-section">
-                    <h4>距离限制</h4>
-                    <div class="distance-controls">
-                        <div class="param-group">
-                            <label>最小距离</label>
-                            <input
-                                type="range"
-                                v-model.number="controlsSettings.minDistance"
-                                @input="updateControlsSettings"
-                                min="1"
-                                max="50"
-                                step="1"
-                            />
-                            <span>{{ controlsSettings.minDistance }}</span>
-                        </div>
-                        <div class="param-group">
-                            <label>最大距离</label>
-                            <input
-                                type="range"
-                                v-model.number="controlsSettings.maxDistance"
-                                @input="updateControlsSettings"
-                                min="100"
-                                max="2000"
-                                step="50"
-                            />
-                            <span>{{ controlsSettings.maxDistance }}</span>
-                        </div>
-                    </div>
-                </div>
+                <GuiSection title="距离限制">
+                    <GuiSlider
+                        label="最小距离"
+                        v-model="controlsSettings.minDistance"
+                        :min="1"
+                        :max="50"
+                        :step="1"
+                        @change="updateControlsSettings"
+                    />
+                    <GuiSlider
+                        label="最大距离"
+                        v-model="controlsSettings.maxDistance"
+                        :min="100"
+                        :max="2000"
+                        :step="50"
+                        @change="updateControlsSettings"
+                    />
+                </GuiSection>
 
-                <!-- 预设位置 -->
-                <div class="control-section">
-                    <h4>预设位置</h4>
+                <GuiSection title="预设位置">
                     <div class="preset-buttons">
-                        <button @click="setCameraPreset('front')" class="preset-btn">正面</button>
-                        <button @click="setCameraPreset('back')" class="preset-btn">背面</button>
-                        <button @click="setCameraPreset('left')" class="preset-btn">左侧</button>
-                        <button @click="setCameraPreset('right')" class="preset-btn">右侧</button>
-                        <button @click="setCameraPreset('top')" class="preset-btn">顶部</button>
-                        <button @click="setCameraPreset('bottom')" class="preset-btn">底部</button>
-                        <button @click="resetCamera" class="reset-btn">重置</button>
+                        <GuiButton label="正面" size="small" @click="setCameraPreset('front')" />
+                        <GuiButton label="背面" size="small" @click="setCameraPreset('back')" />
+                        <GuiButton label="左侧" size="small" @click="setCameraPreset('left')" />
+                        <GuiButton label="右侧" size="small" @click="setCameraPreset('right')" />
+                        <GuiButton label="顶部" size="small" @click="setCameraPreset('top')" />
+                        <GuiButton label="底部" size="small" @click="setCameraPreset('bottom')" />
                     </div>
-                </div>
-            </div>
+                    <GuiButton label="重置" variant="secondary" block @click="resetCamera" />
+                </GuiSection>
+            </GuiPanel>
         </div>
     </SplitLayout>
 </template>
@@ -204,6 +135,15 @@ import { ref, reactive, onMounted, onUnmounted } from 'vue';
 import { Scene } from '@w3d/core';
 import { GridHelper } from '@w3d/components';
 import SplitLayout from '../../components/SplitLayout.vue';
+import {
+    GuiPanel,
+    GuiSection,
+    GuiSlider,
+    GuiCheckbox,
+    GuiButton,
+    GuiLoading,
+    GuiNumberInput
+} from '@/components/Gui';
 import * as THREE from 'three';
 
 const sceneContainer = ref(null);
@@ -563,113 +503,13 @@ const cleanup = () => {
 };
 </script>
 
-<style scoped>
+<style scoped lang="less">
+@import '@/styles/gui.less';
+
 .scene-container {
     width: 100%;
     height: 100%;
     position: relative;
-}
-
-.loading-overlay {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.8);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 1000;
-}
-
-.loading-content {
-    text-align: center;
-    color: white;
-}
-
-.loading-spinner {
-    width: 50px;
-    height: 50px;
-    border: 3px solid rgba(255, 255, 255, 0.3);
-    border-top: 3px solid #00ff88;
-    border-radius: 50%;
-    animation: spin 1s linear infinite;
-    margin: 0 auto 20px;
-}
-
-@keyframes spin {
-    0% {
-        transform: rotate(0deg);
-    }
-    100% {
-        transform: rotate(360deg);
-    }
-}
-
-.loading-text {
-    font-size: 16px;
-    margin-bottom: 15px;
-    color: #00ff88;
-}
-
-.loading-progress {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
-.progress-bar {
-    width: 200px;
-    height: 4px;
-    background: rgba(255, 255, 255, 0.2);
-    border-radius: 2px;
-    overflow: hidden;
-}
-
-.progress-fill {
-    height: 100%;
-    background: linear-gradient(90deg, #00ff88, #00ccff);
-    transition: width 0.3s ease;
-}
-
-.progress-text {
-    font-size: 12px;
-    color: rgba(255, 255, 255, 0.8);
-    min-width: 35px;
-}
-
-.control-panel {
-    position: absolute;
-    top: 20px;
-    right: 20px;
-    width: 300px;
-    max-height: calc(100vh - 40px);
-    background: rgba(0, 0, 0, 0.8);
-    backdrop-filter: blur(10px);
-    border-radius: 12px;
-    padding: 20px;
-    color: white;
-    overflow-y: auto;
-    z-index: 100;
-}
-
-.control-section {
-    margin-bottom: 25px;
-    padding-bottom: 20px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.control-section:last-child {
-    border-bottom: none;
-    margin-bottom: 0;
-}
-
-.control-section h4 {
-    margin: 0 0 15px 0;
-    font-size: 16px;
-    color: #00ff88;
-    font-weight: 500;
 }
 
 .position-controls {
@@ -678,153 +518,11 @@ const cleanup = () => {
     gap: 10px;
 }
 
-.input-group {
-    display: flex;
-    flex-direction: column;
-    gap: 5px;
-}
-
-.input-group label {
-    font-size: 12px;
-    color: rgba(255, 255, 255, 0.8);
-    font-weight: 500;
-}
-
-.input-group input[type='number'] {
-    padding: 8px;
-    background: rgba(255, 255, 255, 0.1);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    border-radius: 6px;
-    color: white;
-    font-size: 13px;
-    text-align: center;
-}
-
-.input-group input[type='number']:focus {
-    outline: none;
-    border-color: #00ff88;
-}
-
-.param-group {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    margin-bottom: 15px;
-}
-
-.param-group label {
-    font-size: 13px;
-    color: rgba(255, 255, 255, 0.9);
-    font-weight: 500;
-}
-
-.param-group input[type='range'] {
-    width: 100%;
-    height: 6px;
-    background: rgba(255, 255, 255, 0.2);
-    border-radius: 3px;
-    outline: none;
-    -webkit-appearance: none;
-}
-
-.param-group input[type='range']::-webkit-slider-thumb {
-    -webkit-appearance: none;
-    width: 16px;
-    height: 16px;
-    background: #00ff88;
-    border-radius: 50%;
-    cursor: pointer;
-}
-
-.param-group input[type='range']::-moz-range-thumb {
-    width: 16px;
-    height: 16px;
-    background: #00ff88;
-    border-radius: 50%;
-    cursor: pointer;
-    border: none;
-}
-
-.param-group span {
-    font-size: 12px;
-    color: #00ccff;
-    font-weight: 500;
-    text-align: right;
-}
-
-.setting-group {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 12px;
-}
-
-.setting-group label {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 13px;
-    color: rgba(255, 255, 255, 0.9);
-    cursor: pointer;
-}
-
-.setting-group input[type='checkbox'] {
-    width: 16px;
-    height: 16px;
-    accent-color: #00ff88;
-}
-
 .preset-buttons {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 8px;
-}
-
-.preset-btn,
-.reset-btn {
-    padding: 8px 12px;
-    background: linear-gradient(135deg, #00ff88, #00ccff);
-    border: none;
-    border-radius: 6px;
-    color: white;
-    font-size: 12px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    font-weight: 500;
-}
-
-.preset-btn:hover,
-.reset-btn:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(0, 255, 136, 0.3);
-}
-
-.reset-btn {
-    grid-column: 1 / -1;
-    background: linear-gradient(135deg, #ff6b6b, #ee5a24);
-}
-
-.reset-btn:hover {
-    box-shadow: 0 4px 12px rgba(255, 107, 107, 0.3);
-}
-
-/* 滚动条样式 */
-.control-panel::-webkit-scrollbar {
-    width: 6px;
-}
-
-.control-panel::-webkit-scrollbar-track {
-    background: rgba(255, 255, 255, 0.1);
-    border-radius: 3px;
-}
-
-.control-panel::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.3);
-    border-radius: 3px;
-}
-
-.control-panel::-webkit-scrollbar-thumb:hover {
-    background: rgba(255, 255, 255, 0.5);
+    margin-bottom: 10px;
 }
 </style>
 

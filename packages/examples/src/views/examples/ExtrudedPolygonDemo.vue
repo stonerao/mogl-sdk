@@ -1,270 +1,176 @@
 <template>
     <SplitLayout :code="sourceCode" language="javascript" :title="$t('extrudedPolygon.title')">
-        <!-- 3D 场景容器 -->
-        <div ref="sceneContainer" class="scene-container"></div>
-
-        <!-- 控制面板 -->
-        <div class="control-panel">
-            <h3 class="panel-title">{{ $t('extrudedPolygon.controls') }}</h3>
-
-            <!-- 预设形状选择 -->
-            <div class="section">
-                <h4>{{ $t('extrudedPolygon.presetShapes') }}</h4>
-
-                <div class="form-group">
-                    <label>{{ $t('extrudedPolygon.selectShape') }}:</label>
-                    <select v-model="selectedPreset" @change="changePreset">
-                        <option value="rectangle">{{ $t('extrudedPolygon.rectangle') }}</option>
-                        <option value="pentagon">{{ $t('extrudedPolygon.pentagon') }}</option>
-                        <option value="hexagon">{{ $t('extrudedPolygon.hexagon') }}</option>
-                        <option value="star">{{ $t('extrudedPolygon.star') }}</option>
-                        <option value="custom">{{ $t('extrudedPolygon.custom') }}</option>
-                    </select>
-                </div>
-            </div>
-
-            <!-- 拉伸配置 -->
-            <div class="section">
-                <h4>{{ $t('extrudedPolygon.extrudeSettings') }}</h4>
-
-                <div class="form-group">
-                    <label
-                        >{{ $t('extrudedPolygon.height') }}:
-                        {{ polygonConfig.height.toFixed(1) }}</label
-                    >
-                    <input
-                        v-model.number="polygonConfig.height"
-                        type="range"
-                        min="1"
-                        max="20"
-                        step="0.5"
-                        @input="updatePolygon"
+        <div ref="sceneContainer" class="scene-container">
+            <GuiPanel :title="$t('extrudedPolygon.controls')">
+                <GuiSection :title="$t('extrudedPolygon.presetShapes')">
+                    <GuiSelect
+                        :label="$t('extrudedPolygon.selectShape')"
+                        v-model="selectedPreset"
+                        @change="changePreset"
+                        :options="[
+                            { value: 'rectangle', label: $t('extrudedPolygon.rectangle') },
+                            { value: 'pentagon', label: $t('extrudedPolygon.pentagon') },
+                            { value: 'hexagon', label: $t('extrudedPolygon.hexagon') },
+                            { value: 'star', label: $t('extrudedPolygon.star') },
+                            { value: 'custom', label: $t('extrudedPolygon.custom') }
+                        ]"
                     />
-                </div>
-            </div>
+                </GuiSection>
 
-            <!-- 侧面配置 -->
-            <div class="section">
-                <h4>侧面配置（拉伸的垂直面）</h4>
+                <GuiSection :title="$t('extrudedPolygon.extrudeSettings')">
+                    <GuiSlider
+                        :label="$t('extrudedPolygon.height')"
+                        v-model="polygonConfig.height"
+                        @change="updatePolygon"
+                        :min="1"
+                        :max="20"
+                        :step="0.5"
+                        :precision="1"
+                    />
+                </GuiSection>
 
-                <!-- 侧面纹理配置 -->
-                <div class="form-group">
-                    <label>
-                        <input
-                            v-model="polygonConfig.side.textureUrl"
-                            type="checkbox"
-                            :true-value="'/images/n_2.jpg'"
-                            :false-value="null"
+                <GuiSection title="侧面配置（拉伸的垂直面）">
+                    <GuiCheckbox
+                        label="启用侧面纹理"
+                        :modelValue="!!polygonConfig.side.textureUrl"
+                        @update:modelValue="
+                            (val) => {
+                                polygonConfig.side.textureUrl = val ? '/images/n_2.jpg' : null;
+                                updatePolygon();
+                            }
+                        "
+                    />
+
+                    <template v-if="polygonConfig.side.textureUrl">
+                        <GuiSlider
+                            label="侧面纹理重复 (U)"
+                            v-model="polygonConfig.side.textureRepeat[0]"
                             @change="updatePolygon"
+                            :min="1"
+                            :max="10"
+                            :step="1"
                         />
-                        启用侧面纹理
-                    </label>
-                </div>
+                        <GuiSlider
+                            label="侧面纹理重复 (V)"
+                            v-model="polygonConfig.side.textureRepeat[1]"
+                            @change="updatePolygon"
+                            :min="1"
+                            :max="10"
+                            :step="1"
+                        />
+                    </template>
 
-                <div v-if="polygonConfig.side.textureUrl" class="form-group">
-                    <label>侧面纹理重复 (U): {{ polygonConfig.side.textureRepeat[0] }}</label>
-                    <input
-                        v-model.number="polygonConfig.side.textureRepeat[0]"
-                        type="range"
-                        min="1"
-                        max="10"
-                        step="1"
-                        @input="updatePolygon"
-                    />
-                </div>
-
-                <div v-if="polygonConfig.side.textureUrl" class="form-group">
-                    <label>侧面纹理重复 (V): {{ polygonConfig.side.textureRepeat[1] }}</label>
-                    <input
-                        v-model.number="polygonConfig.side.textureRepeat[1]"
-                        type="range"
-                        min="1"
-                        max="10"
-                        step="1"
-                        @input="updatePolygon"
-                    />
-                </div>
-
-                <!-- 侧面渐变配置 -->
-                <div v-if="!polygonConfig.side.textureUrl" class="form-group">
-                    <label>
-                        <input
+                    <template v-if="!polygonConfig.side.textureUrl">
+                        <GuiCheckbox
+                            label="启用侧面渐变"
                             v-model="polygonConfig.side.useGradient"
-                            type="checkbox"
                             @change="updatePolygon"
                         />
-                        启用侧面渐变
-                    </label>
-                </div>
-
-                <div v-if="!polygonConfig.side.textureUrl" class="form-group">
-                    <label>侧面底部颜色:</label>
-                    <input
-                        v-model="polygonConfig.side.bottomColor"
-                        type="color"
-                        @input="updatePolygon"
-                    />
-                </div>
-
-                <div
-                    v-if="!polygonConfig.side.textureUrl && polygonConfig.side.useGradient"
-                    class="form-group"
-                >
-                    <label>侧面顶部颜色:</label>
-                    <input
-                        v-model="polygonConfig.side.topColor"
-                        type="color"
-                        @input="updatePolygon"
-                    />
-                </div>
-            </div>
-
-            <!-- 正面配置 -->
-            <div class="section">
-                <h4>正面配置（底部和顶部平面）</h4>
-
-                <!-- 正面纹理配置 -->
-                <div class="form-group">
-                    <label>
-                        <input
-                            v-model="polygonConfig.face.textureUrl"
-                            type="checkbox"
-                            :true-value="'/images/n_2.jpg'"
-                            :false-value="null"
+                        <GuiColorPicker
+                            label="侧面底部颜色"
+                            v-model="polygonConfig.side.bottomColor"
                             @change="updatePolygon"
                         />
-                        启用正面纹理
-                    </label>
-                </div>
+                        <GuiColorPicker
+                            v-if="polygonConfig.side.useGradient"
+                            label="侧面顶部颜色"
+                            v-model="polygonConfig.side.topColor"
+                            @change="updatePolygon"
+                        />
+                    </template>
+                </GuiSection>
 
-                <div v-if="polygonConfig.face.textureUrl" class="form-group">
-                    <label>正面纹理重复 (U): {{ polygonConfig.face.textureRepeat[0] }}</label>
-                    <input
-                        v-model.number="polygonConfig.face.textureRepeat[0]"
-                        type="range"
-                        min="1"
-                        max="10"
-                        step="1"
-                        @input="updatePolygon"
+                <GuiSection title="正面配置（底部和顶部平面）">
+                    <GuiCheckbox
+                        label="启用正面纹理"
+                        :modelValue="!!polygonConfig.face.textureUrl"
+                        @update:modelValue="
+                            (val) => {
+                                polygonConfig.face.textureUrl = val ? '/images/n_2.jpg' : null;
+                                updatePolygon();
+                            }
+                        "
                     />
-                </div>
 
-                <div v-if="polygonConfig.face.textureUrl" class="form-group">
-                    <label>正面纹理重复 (V): {{ polygonConfig.face.textureRepeat[1] }}</label>
-                    <input
-                        v-model.number="polygonConfig.face.textureRepeat[1]"
-                        type="range"
-                        min="1"
-                        max="10"
-                        step="1"
-                        @input="updatePolygon"
-                    />
-                </div>
+                    <template v-if="polygonConfig.face.textureUrl">
+                        <GuiSlider
+                            label="正面纹理重复 (U)"
+                            v-model="polygonConfig.face.textureRepeat[0]"
+                            @change="updatePolygon"
+                            :min="1"
+                            :max="10"
+                            :step="1"
+                        />
+                        <GuiSlider
+                            label="正面纹理重复 (V)"
+                            v-model="polygonConfig.face.textureRepeat[1]"
+                            @change="updatePolygon"
+                            :min="1"
+                            :max="10"
+                            :step="1"
+                        />
+                    </template>
 
-                <!-- 正面渐变配置 -->
-                <div v-if="!polygonConfig.face.textureUrl" class="form-group">
-                    <label>
-                        <input
+                    <template v-if="!polygonConfig.face.textureUrl">
+                        <GuiCheckbox
+                            label="启用正面渐变"
                             v-model="polygonConfig.face.useGradient"
-                            type="checkbox"
                             @change="updatePolygon"
                         />
-                        启用正面渐变
-                    </label>
-                </div>
-
-                <div v-if="!polygonConfig.face.textureUrl" class="form-group">
-                    <label>正面底部颜色:</label>
-                    <input
-                        v-model="polygonConfig.face.bottomColor"
-                        type="color"
-                        @input="updatePolygon"
-                    />
-                </div>
-
-                <div
-                    v-if="!polygonConfig.face.textureUrl && polygonConfig.face.useGradient"
-                    class="form-group"
-                >
-                    <label>正面顶部颜色:</label>
-                    <input
-                        v-model="polygonConfig.face.topColor"
-                        type="color"
-                        @input="updatePolygon"
-                    />
-                </div>
-
-                <div
-                    v-if="!polygonConfig.face.textureUrl && polygonConfig.face.useGradient"
-                    class="form-group"
-                >
-                    <label>正面渐变角度: {{ polygonConfig.face.gradientAngle }}°</label>
-                    <input
-                        v-model.number="polygonConfig.face.gradientAngle"
-                        type="range"
-                        min="0"
-                        max="360"
-                        step="15"
-                        @input="updatePolygon"
-                    />
-                </div>
-            </div>
-
-            <!-- 材质配置 -->
-            <div class="section">
-                <h4>{{ $t('extrudedPolygon.materialSettings') }}</h4>
-
-                <div class="form-group">
-                    <label
-                        >{{ $t('extrudedPolygon.opacity') }}:
-                        {{ polygonConfig.opacity.toFixed(2) }}</label
-                    >
-                    <input
-                        v-model.number="polygonConfig.opacity"
-                        type="range"
-                        min="0.1"
-                        max="1"
-                        step="0.05"
-                        @input="updatePolygon"
-                    />
-                </div>
-
-                <div class="form-group">
-                    <label>
-                        <input
-                            v-model="polygonConfig.wireframe"
-                            type="checkbox"
+                        <GuiColorPicker
+                            label="正面底部颜色"
+                            v-model="polygonConfig.face.bottomColor"
                             @change="updatePolygon"
                         />
-                        {{ $t('extrudedPolygon.wireframe') }}
-                    </label>
-                </div>
-            </div>
+                        <GuiColorPicker
+                            v-if="polygonConfig.face.useGradient"
+                            label="正面顶部颜色"
+                            v-model="polygonConfig.face.topColor"
+                            @change="updatePolygon"
+                        />
+                        <GuiSlider
+                            v-if="polygonConfig.face.useGradient"
+                            label="正面渐变角度"
+                            v-model="polygonConfig.face.gradientAngle"
+                            @change="updatePolygon"
+                            :min="0"
+                            :max="360"
+                            :step="15"
+                            suffix="°"
+                        />
+                    </template>
+                </GuiSection>
 
-            <!-- 统计信息 -->
-            <div class="section">
-                <h4>{{ $t('extrudedPolygon.stats') }}</h4>
-                <div class="stats">
-                    <div class="stat-item">
-                        <span>{{ $t('extrudedPolygon.vertices') }}:</span>
-                        <span class="value">{{ stats.vertices }}</span>
-                    </div>
-                    <div class="stat-item">
-                        <span>{{ $t('extrudedPolygon.faces') }}:</span>
-                        <span class="value">{{ stats.faces }}</span>
-                    </div>
-                </div>
-            </div>
+                <GuiSection :title="$t('extrudedPolygon.materialSettings')">
+                    <GuiSlider
+                        :label="$t('extrudedPolygon.opacity')"
+                        v-model="polygonConfig.opacity"
+                        @change="updatePolygon"
+                        :min="0.1"
+                        :max="1"
+                        :step="0.05"
+                        :precision="2"
+                    />
+                    <GuiCheckbox
+                        :label="$t('extrudedPolygon.wireframe')"
+                        v-model="polygonConfig.wireframe"
+                        @change="updatePolygon"
+                    />
+                </GuiSection>
 
-            <!-- 事件日志 -->
-            <div class="section">
-                <h4>事件日志</h4>
-                <div class="event-log">
-                    <div v-for="(log, index) in eventLogs" :key="index" class="log-item">
-                        {{ log }}
+                <GuiSection :title="$t('extrudedPolygon.stats')">
+                    <GuiInfoItem :label="$t('extrudedPolygon.vertices')" :value="stats.vertices" />
+                    <GuiInfoItem :label="$t('extrudedPolygon.faces')" :value="stats.faces" />
+                </GuiSection>
+
+                <GuiSection title="事件日志">
+                    <div class="event-log">
+                        <div v-for="(log, index) in eventLogs" :key="index" class="log-item">
+                            {{ log }}
+                        </div>
                     </div>
-                </div>
-            </div>
+                </GuiSection>
+            </GuiPanel>
         </div>
     </SplitLayout>
 </template>
@@ -275,6 +181,15 @@ import { useI18n } from 'vue-i18n';
 import { Scene } from '@w3d/core';
 import { ExtrudedPolygon, GridHelper } from '@w3d/components';
 import SplitLayout from '../../components/SplitLayout.vue';
+import {
+    GuiPanel,
+    GuiSection,
+    GuiSlider,
+    GuiColorPicker,
+    GuiSelect,
+    GuiCheckbox,
+    GuiInfoItem
+} from '@/components/Gui';
 
 const { t } = useI18n();
 
@@ -670,120 +585,13 @@ onUnmounted(() => {
 });
 </script>
 
-<style scoped>
+<style scoped lang="less">
+@import '@/styles/gui.less';
+
 .scene-container {
     width: 100%;
     height: 100%;
     position: relative;
-}
-
-.control-panel {
-    position: absolute;
-    top: 20px;
-    right: 20px;
-    width: 320px;
-    max-height: calc(100vh - 40px);
-    background: rgba(0, 0, 0, 0.85);
-    border: 1px solid #00ff00;
-    border-radius: 8px;
-    padding: 15px;
-    color: #00ff00;
-    font-family: 'Courier New', monospace;
-    overflow-y: auto;
-    backdrop-filter: blur(10px);
-}
-
-.panel-title {
-    margin: 0 0 15px 0;
-    font-size: 16px;
-    text-align: center;
-    border-bottom: 1px solid #00ff00;
-    padding-bottom: 10px;
-}
-
-.section {
-    margin-bottom: 20px;
-    padding-bottom: 15px;
-    border-bottom: 1px solid rgba(0, 255, 0, 0.3);
-}
-
-.section:last-child {
-    border-bottom: none;
-}
-
-.section h4 {
-    margin: 0 0 12px 0;
-    font-size: 13px;
-    color: #00ff00;
-}
-
-.form-group {
-    margin-bottom: 12px;
-}
-
-.form-group label {
-    display: block;
-    margin-bottom: 5px;
-    font-size: 11px;
-    color: #00ff00;
-}
-
-.form-group input[type='range'] {
-    width: 100%;
-    height: 4px;
-    background: rgba(0, 255, 0, 0.2);
-    border-radius: 2px;
-    outline: none;
-}
-
-.form-group input[type='range']::-webkit-slider-thumb {
-    width: 12px;
-    height: 12px;
-    background: #00ff00;
-    border-radius: 50%;
-    cursor: pointer;
-}
-
-.form-group input[type='color'] {
-    width: 100%;
-    height: 30px;
-    border: 1px solid #00ff00;
-    background: transparent;
-    cursor: pointer;
-}
-
-.form-group input[type='checkbox'] {
-    margin-right: 8px;
-}
-
-.form-group select {
-    width: 100%;
-    padding: 6px;
-    background: rgba(0, 255, 0, 0.1);
-    border: 1px solid #00ff00;
-    color: #00ff00;
-    font-family: 'Courier New', monospace;
-    font-size: 11px;
-}
-
-.stats {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-}
-
-.stat-item {
-    display: flex;
-    justify-content: space-between;
-    font-size: 11px;
-    padding: 5px;
-    background: rgba(0, 255, 0, 0.05);
-    border-radius: 3px;
-}
-
-.stat-item .value {
-    color: #00ffff;
-    font-weight: bold;
 }
 
 .event-log {
@@ -793,6 +601,7 @@ onUnmounted(() => {
     border: 1px solid rgba(0, 255, 0, 0.3);
     border-radius: 4px;
     padding: 8px;
+    .scrollbar-style();
 }
 
 .log-item {
@@ -801,32 +610,10 @@ onUnmounted(() => {
     margin-bottom: 4px;
     padding: 2px 0;
     border-bottom: 1px solid rgba(0, 255, 0, 0.1);
-}
 
-.log-item:last-child {
-    border-bottom: none;
-}
-
-/* 滚动条样式 */
-.control-panel::-webkit-scrollbar,
-.event-log::-webkit-scrollbar {
-    width: 6px;
-}
-
-.control-panel::-webkit-scrollbar-track,
-.event-log::-webkit-scrollbar-track {
-    background: rgba(0, 255, 0, 0.1);
-}
-
-.control-panel::-webkit-scrollbar-thumb,
-.event-log::-webkit-scrollbar-thumb {
-    background: rgba(0, 255, 0, 0.5);
-    border-radius: 3px;
-}
-
-.control-panel::-webkit-scrollbar-thumb:hover,
-.event-log::-webkit-scrollbar-thumb:hover {
-    background: rgba(0, 255, 0, 0.7);
+    &:last-child {
+        border-bottom: none;
+    }
 }
 </style>
 

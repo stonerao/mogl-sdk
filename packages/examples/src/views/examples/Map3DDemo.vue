@@ -4,84 +4,73 @@
         <div ref="sceneContainer" class="scene-container"></div>
 
         <!-- 控制面板 -->
-        <div class="control-panel">
-            <h3 class="panel-title">地图控制</h3>
-
+        <GuiPanel title="地图控制" width="wide">
             <!-- 地图选择 -->
-            <div class="control-group">
-                <label>选择地图:</label>
-                <select v-model="selectedMap" @change="changeMap" class="control-select">
-                    <option value="world">世界地图</option>
-                    <option value="china">中国地图</option>
-                    <option value="sichuan">四川省</option>
-                </select>
-            </div>
-
-            <!-- 入场动画 -->
-            <div class="control-group">
-                <label>入场动画:</label>
-                <select v-model="entryType" @change="updateEntryType" class="control-select">
-                    <option :value="0">无</option>
-                    <option :value="1">缩放</option>
-                    <option :value="2">翻滚</option>
-                    <option :value="3">拉伸</option>
-                </select>
-            </div>
-
-            <!-- 轮播控制 -->
-            <div class="control-group">
-                <label>
-                    <input type="checkbox" v-model="carouselEnabled" @change="toggleCarousel" />
-                    启用轮播
-                </label>
-            </div>
-
-            <!-- 侧面高度 -->
-            <div class="control-group">
-                <label>侧面高度: {{ sideHeight }}</label>
-                <input
-                    type="range"
-                    v-model.number="sideHeight"
-                    @input="updateSideHeight"
-                    min="0"
-                    max="20"
-                    step="1"
-                    class="control-slider"
+            <GuiSection title="地图选择">
+                <GuiSelect
+                    label="选择地图"
+                    v-model="selectedMap"
+                    :options="[
+                        { value: 'world', label: '世界地图' },
+                        { value: 'china', label: '中国地图' },
+                        { value: 'sichuan', label: '四川省' }
+                    ]"
+                    @update:modelValue="changeMap"
                 />
-            </div>
 
-            <!-- 区块颜色 -->
-            <div class="control-group">
-                <label>区块颜色:</label>
-                <input
-                    type="color"
+                <GuiSelect
+                    label="入场动画"
+                    v-model="entryType"
+                    :options="[
+                        { value: 0, label: '无' },
+                        { value: 1, label: '缩放' },
+                        { value: 2, label: '翻滚' },
+                        { value: 3, label: '拉伸' }
+                    ]"
+                    @update:modelValue="updateEntryType"
+                />
+            </GuiSection>
+
+            <!-- 配置选项 -->
+            <GuiSection title="配置选项">
+                <GuiCheckbox
+                    label="启用轮播"
+                    v-model="carouselEnabled"
+                    @update:modelValue="toggleCarousel"
+                />
+
+                <GuiSlider
+                    label="侧面高度"
+                    v-model="sideHeight"
+                    :min="0"
+                    :max="20"
+                    :step="1"
+                    @update:modelValue="updateSideHeight"
+                />
+
+                <GuiColorPicker
+                    label="区块颜色"
                     v-model="blockColor"
-                    @change="updateBlockColor"
-                    class="control-color"
+                    @update:modelValue="updateBlockColor"
                 />
-            </div>
+            </GuiSection>
 
             <!-- 信息显示 -->
-            <div class="info-section">
-                <h4>地图信息</h4>
-                <div class="info-item">
-                    <span>区域数量:</span>
-                    <span class="value">{{ areaCount }}</span>
-                </div>
-                <div class="info-item" v-if="currentArea">
-                    <span>当前区域:</span>
-                    <span class="value">{{ currentArea }}</span>
-                </div>
-            </div>
+            <GuiSection title="地图信息">
+                <GuiInfoItem label="区域数量" :value="areaCount" />
+                <template v-if="currentArea">
+                    <GuiInfoItem label="当前区域" :value="currentArea" />
+                </template>
+            </GuiSection>
 
             <!-- 操作按钮 -->
-            <div class="button-group">
-                <button @click="resetCamera" class="control-button">重置相机</button>
-                <button @click="toggleMap" class="control-button">
-                    {{ mapVisible ? '隐藏' : '显示' }}地图
-                </button>
-            </div>
-        </div>
+            <GuiSection title="操作">
+                <div class="button-group">
+                    <GuiButton label="重置相机" @click="resetCamera" />
+                    <GuiButton :label="mapVisible ? '隐藏地图' : '显示地图'" @click="toggleMap" />
+                </div>
+            </GuiSection>
+        </GuiPanel>
     </SplitLayout>
 </template>
 
@@ -89,6 +78,16 @@
 import { ref, onMounted, onUnmounted } from 'vue';
 import { Scene } from '@w3d/core';
 import { SvgMap3D } from '@w3d/components';
+import {
+    GuiPanel,
+    GuiSection,
+    GuiSelect,
+    GuiCheckbox,
+    GuiSlider,
+    GuiColorPicker,
+    GuiInfoItem,
+    GuiButton
+} from '@/components/Gui';
 import SplitLayout from '../../components/SplitLayout.vue';
 
 const sceneContainer = ref(null);
@@ -434,136 +433,18 @@ const cleanup = () => {
 };
 </script>
 
-<style scoped>
+<style scoped lang="less">
+@import '@/styles/gui.less';
 .scene-container {
     width: 100%;
     height: 100%;
     background: linear-gradient(to bottom, #0a0e27 0%, #1a1e3e 100%);
 }
 
-.control-panel {
-    position: absolute;
-    top: 60px;
-    right: 20px;
-    background: rgba(0, 0, 0, 0.85);
-    color: white;
-    padding: 20px;
-    border-radius: 8px;
-    font-size: 14px;
-    min-width: 280px;
-    max-width: 320px;
-    backdrop-filter: blur(10px);
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-}
-
-.panel-title {
-    font-size: 18px;
-    margin-bottom: 16px;
-    border-bottom: 2px solid var(--primary-color);
-    padding-bottom: 8px;
-    font-weight: 600;
-}
-
-.control-group {
-    margin: 16px 0;
-}
-
-.control-group label {
-    display: block;
-    margin-bottom: 8px;
-    opacity: 0.9;
-    font-size: 13px;
-}
-
-.control-select,
-.control-slider,
-.control-color {
-    width: 100%;
-    padding: 8px;
-    border-radius: 4px;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    background: rgba(255, 255, 255, 0.1);
-    color: white;
-    font-size: 13px;
-}
-
-.control-select {
-    cursor: pointer;
-}
-
-.control-select option {
-    background: #1a1e3e;
-    color: white;
-}
-
-.control-slider {
-    padding: 0;
-    height: 6px;
-    cursor: pointer;
-}
-
-.control-color {
-    height: 40px;
-    cursor: pointer;
-}
-
-.info-section {
-    margin: 20px 0;
-    padding: 12px;
-    background: rgba(255, 255, 255, 0.05);
-    border-radius: 4px;
-}
-
-.info-section h4 {
-    font-size: 14px;
-    margin-bottom: 10px;
-    color: var(--primary-color);
-}
-
-.info-item {
-    display: flex;
-    justify-content: space-between;
-    margin: 8px 0;
-    font-size: 13px;
-}
-
-.info-item span:first-child {
-    opacity: 0.8;
-}
-
-.info-item .value {
-    font-weight: bold;
-    color: var(--success-color);
-    font-family: 'Consolas', monospace;
-}
-
 .button-group {
     display: flex;
-    gap: 10px;
-    margin-top: 16px;
-}
-
-.control-button {
-    flex: 1;
-    padding: 10px;
-    background: var(--primary-color);
-    color: white;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 13px;
-    font-weight: 500;
-    transition: all 0.3s;
-}
-
-.control-button:hover {
-    background: var(--primary-hover-color);
-    transform: translateY(-1px);
-    box-shadow: 0 2px 8px rgba(37, 125, 249, 0.4);
-}
-
-.control-button:active {
-    transform: translateY(0);
+    flex-direction: column;
+    gap: 8px;
 }
 </style>
 

@@ -8,179 +8,150 @@
         <div ref="sceneContainer" class="scene-container"></div>
 
         <!-- 加载状态 -->
-        <div v-if="isLoading" class="loading-overlay">
-            <div class="loading-content">
-                <div class="loading-spinner"></div>
-                <p class="loading-text">{{ loadingText || '加载中...' }}</p>
-                <div class="loading-progress">
-                    <div class="progress-bar" :style="{ width: `${loadingProgress || 0}%` }"></div>
-                </div>
-            </div>
-        </div>
+        <GuiLoading v-if="isLoading" :progress="loadingProgress" :text="loadingText" />
 
         <!-- 控制面板 -->
-        <div class="control-panel">
-            <h3 class="panel-title">模型控制</h3>
-
+        <GuiPanel title="模型控制" width="wide">
             <!-- 模型信息 -->
-            <div class="info-section">
-                <h4>模型信息</h4>
-                <div class="info-item">
-                    <span>Mesh 数量:</span>
-                    <span class="value">{{ meshCount || 0 }}</span>
-                </div>
-                <div class="info-item">
-                    <span>当前选中:</span>
-                    <span class="value">{{ selectedMeshName || '无' }}</span>
-                </div>
-            </div>
+            <GuiSection title="模型信息">
+                <GuiInfoItem label="Mesh 数量" :value="meshCount || 0" />
+                <GuiInfoItem label="当前选中" :value="selectedMeshName || '无'" />
+            </GuiSection>
 
             <!-- Mesh 选择 -->
-            <div class="control-section">
-                <h4>选择 Mesh</h4>
-                <select v-model="selectedMeshName" @change="onMeshSelect" class="mesh-select">
-                    <option value="">请选择 Mesh</option>
-                    <option v-for="name in meshNames || []" :key="name" :value="name">
-                        {{ name }}
-                    </option>
-                </select>
-            </div>
+            <GuiSection title="选择 Mesh">
+                <GuiSelect
+                    label="Mesh"
+                    v-model="selectedMeshName"
+                    :options="[
+                        { value: '', label: '请选择 Mesh' },
+                        ...(meshNames || []).map((name) => ({ value: name, label: name }))
+                    ]"
+                    @update:modelValue="onMeshSelect"
+                />
+            </GuiSection>
 
             <!-- 变换控制 -->
-            <div v-if="selectedMesh" class="control-section">
-                <h4>变换控制</h4>
-
-                <!-- 位置控制 -->
-                <div class="transform-group">
-                    <label>位置 (Position)</label>
-                    <div class="input-group">
-                        <input
-                            type="number"
-                            v-model.number="meshTransform.position.x"
-                            @input="updateMeshTransform"
-                            step="0.1"
-                            placeholder="X"
+            <template v-if="selectedMesh">
+                <GuiSection title="变换控制">
+                    <!-- 位置控制 -->
+                    <div class="transform-grid">
+                        <GuiNumberInput
+                            label="位置 X"
+                            v-model="meshTransform.position.x"
+                            :step="0.1"
+                            @update:modelValue="updateMeshTransform"
                         />
-                        <input
-                            type="number"
-                            v-model.number="meshTransform.position.y"
-                            @input="updateMeshTransform"
-                            step="0.1"
-                            placeholder="Y"
+                        <GuiNumberInput
+                            label="位置 Y"
+                            v-model="meshTransform.position.y"
+                            :step="0.1"
+                            @update:modelValue="updateMeshTransform"
                         />
-                        <input
-                            type="number"
-                            v-model.number="meshTransform.position.z"
-                            @input="updateMeshTransform"
-                            step="0.1"
-                            placeholder="Z"
+                        <GuiNumberInput
+                            label="位置 Z"
+                            v-model="meshTransform.position.z"
+                            :step="0.1"
+                            @update:modelValue="updateMeshTransform"
                         />
                     </div>
-                </div>
 
-                <!-- 旋转控制 -->
-                <div class="transform-group">
-                    <label>旋转 (Rotation)</label>
-                    <div class="input-group">
-                        <input
-                            type="number"
-                            v-model.number="meshTransform.rotation.x"
-                            @input="updateMeshTransform"
-                            step="0.1"
-                            placeholder="X"
+                    <!-- 旋转控制 -->
+                    <div class="transform-grid">
+                        <GuiNumberInput
+                            label="旋转 X"
+                            v-model="meshTransform.rotation.x"
+                            :step="0.1"
+                            @update:modelValue="updateMeshTransform"
                         />
-                        <input
-                            type="number"
-                            v-model.number="meshTransform.rotation.y"
-                            @input="updateMeshTransform"
-                            step="0.1"
-                            placeholder="Y"
+                        <GuiNumberInput
+                            label="旋转 Y"
+                            v-model="meshTransform.rotation.y"
+                            :step="0.1"
+                            @update:modelValue="updateMeshTransform"
                         />
-                        <input
-                            type="number"
-                            v-model.number="meshTransform.rotation.z"
-                            @input="updateMeshTransform"
-                            step="0.1"
-                            placeholder="Z"
+                        <GuiNumberInput
+                            label="旋转 Z"
+                            v-model="meshTransform.rotation.z"
+                            :step="0.1"
+                            @update:modelValue="updateMeshTransform"
                         />
                     </div>
-                </div>
 
-                <!-- 缩放控制 -->
-                <div class="transform-group">
-                    <label>缩放 (Scale)</label>
-                    <div class="input-group">
-                        <input
-                            type="number"
-                            v-model.number="meshTransform.scale.x"
-                            @input="updateMeshTransform"
-                            step="0.1"
-                            min="0.1"
-                            placeholder="X"
+                    <!-- 缩放控制 -->
+                    <div class="transform-grid">
+                        <GuiNumberInput
+                            label="缩放 X"
+                            v-model="meshTransform.scale.x"
+                            :step="0.1"
+                            :min="0.1"
+                            @update:modelValue="updateMeshTransform"
                         />
-                        <input
-                            type="number"
-                            v-model.number="meshTransform.scale.y"
-                            @input="updateMeshTransform"
-                            step="0.1"
-                            min="0.1"
-                            placeholder="Y"
+                        <GuiNumberInput
+                            label="缩放 Y"
+                            v-model="meshTransform.scale.y"
+                            :step="0.1"
+                            :min="0.1"
+                            @update:modelValue="updateMeshTransform"
                         />
-                        <input
-                            type="number"
-                            v-model.number="meshTransform.scale.z"
-                            @input="updateMeshTransform"
-                            step="0.1"
-                            min="0.1"
-                            placeholder="Z"
+                        <GuiNumberInput
+                            label="缩放 Z"
+                            v-model="meshTransform.scale.z"
+                            :step="0.1"
+                            :min="0.1"
+                            @update:modelValue="updateMeshTransform"
                         />
                     </div>
-                </div>
 
-                <button @click="resetMeshTransform" class="reset-btn">重置变换</button>
-            </div>
+                    <GuiButton label="重置变换" @click="resetMeshTransform" />
+                </GuiSection>
+            </template>
 
             <!-- 交互配置 -->
-            <div class="control-section">
-                <h4>交互配置</h4>
-                <div class="interactive-config">
-                    <label>事件监听模式</label>
-                    <select v-model="interactiveMode" @change="updateInteractiveMode">
-                        <option value="disabled">禁用所有事件</option>
-                        <option value="all">启用所有 Mesh 事件</option>
-                        <option value="selected">仅选中的 Mesh</option>
-                    </select>
+            <GuiSection title="交互配置">
+                <GuiSelect
+                    label="事件监听模式"
+                    v-model="interactiveMode"
+                    :options="[
+                        { value: 'disabled', label: '禁用所有事件' },
+                        { value: 'all', label: '启用所有 Mesh 事件' },
+                        { value: 'selected', label: '仅选中的 Mesh' }
+                    ]"
+                    @update:modelValue="updateInteractiveMode"
+                />
 
-                    <div v-if="interactiveMode === 'selected'" class="selected-meshes">
-                        <label>选择可交互的 Mesh</label>
-                        <div class="mesh-checkboxes">
-                            <div
-                                v-for="meshName in availableMeshes || []"
-                                :key="meshName"
-                                class="mesh-checkbox"
-                            >
-                                <input
-                                    type="checkbox"
-                                    :id="`mesh-${meshName}`"
-                                    v-model="selectedInteractiveMeshes"
-                                    :value="meshName"
-                                    @change="updateInteractiveMode"
-                                />
-                                <label :for="`mesh-${meshName}`">{{ meshName }}</label>
-                            </div>
+                <template v-if="interactiveMode === 'selected'">
+                    <div class="mesh-selection">
+                        <div v-for="meshName in availableMeshes || []" :key="meshName">
+                            <GuiCheckbox
+                                :label="meshName"
+                                :modelValue="selectedInteractiveMeshes.includes(meshName)"
+                                @update:modelValue="
+                                    (val) => {
+                                        if (val) {
+                                            selectedInteractiveMeshes.push(meshName);
+                                        } else {
+                                            selectedInteractiveMeshes =
+                                                selectedInteractiveMeshes.filter(
+                                                    (m) => m !== meshName
+                                                );
+                                        }
+                                        updateInteractiveMode();
+                                    }
+                                "
+                            />
                         </div>
                     </div>
+                </template>
 
-                    <div class="interactive-info">
-                        <p>当前可交互对象数量: {{ currentInteractiveCount }}</p>
-                        <p v-if="performanceWarning" class="warning">⚠️ {{ performanceWarning }}</p>
-                    </div>
-                </div>
-            </div>
+                <GuiInfoItem label="可交互对象数量" :value="currentInteractiveCount" />
+                <template v-if="performanceWarning">
+                    <div class="warning-text">⚠️ {{ performanceWarning }}</div>
+                </template>
+            </GuiSection>
 
             <!-- 事件日志 -->
-            <div class="control-section">
-                <h4>事件日志</h4>
+            <GuiSection title="事件日志">
                 <div class="event-log">
                     <div
                         v-for="(event, index) in eventLog || []"
@@ -192,9 +163,9 @@
                         <span class="event-message">{{ event?.message || '' }}</span>
                     </div>
                 </div>
-                <button @click="clearEventLog" class="clear-btn">清空日志</button>
-            </div>
-        </div>
+                <GuiButton label="清空日志" @click="clearEventLog" />
+            </GuiSection>
+        </GuiPanel>
     </SplitLayout>
 </template>
 
@@ -202,6 +173,16 @@
 import { ref, reactive, computed, onMounted, onUnmounted } from 'vue';
 import { Scene } from '@w3d/core';
 import { ModelLoader, HDRLoader } from '@w3d/components';
+import {
+    GuiPanel,
+    GuiSection,
+    GuiLoading,
+    GuiInfoItem,
+    GuiSelect,
+    GuiNumberInput,
+    GuiButton,
+    GuiCheckbox
+} from '@/components/Gui';
 import SplitLayout from '../../components/SplitLayout.vue';
 
 const sceneContainer = ref(null);
@@ -271,7 +252,7 @@ const hdr = await scene.add('HDRLoader', {
 // 加载 GLB 模型（配置交互事件）
 const model = await scene.add('ModelLoader', {
   name: 'overview',
-  url: '/models/kache.glb',
+  url: '/models/ShaderBall.glb',
   scale: 1,
   position: [0, 0, 0],
   castShadow: true,
@@ -500,7 +481,7 @@ const loadModel = async () => {
 
         modelComponent = await scene.add('ModelLoader', {
             name: 'overview',
-            url: '/models/kache.glb',
+            url: '/models/ShaderBall.glb',
             scale: 1,
             position: [0, 0, 0],
             castShadow: true,
@@ -773,191 +754,32 @@ const cleanup = () => {
 };
 </script>
 
-<style scoped>
+<style scoped lang="less">
+@import '@/styles/gui.less';
 .scene-container {
     width: 100%;
     height: 100%;
 }
 
-.loading-overlay {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(0, 0, 0, 0.8);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 1000;
-}
-
-.loading-content {
-    text-align: center;
-    color: white;
-    max-width: 300px;
-}
-
-.loading-spinner {
-    width: 40px;
-    height: 40px;
-    border: 4px solid rgba(255, 255, 255, 0.3);
-    border-top: 4px solid #00ff88;
-    border-radius: 50%;
-    animation: spin 1s linear infinite;
-    margin: 0 auto 20px;
-}
-
-@keyframes spin {
-    0% {
-        transform: rotate(0deg);
-    }
-    100% {
-        transform: rotate(360deg);
-    }
-}
-
-.loading-text {
-    font-size: 16px;
-    margin-bottom: 15px;
-}
-
-.loading-progress {
-    width: 100%;
-    height: 4px;
-    background: rgba(255, 255, 255, 0.2);
-    border-radius: 2px;
-    overflow: hidden;
-}
-
-.progress-bar {
-    height: 100%;
-    background: linear-gradient(90deg, #00ff88, #00ccff);
-    transition: width 0.3s ease;
-}
-
-.control-panel {
-    position: absolute;
-    top: 60px;
-    right: 20px;
-    background: rgba(0, 0, 0, 0.9);
-    color: white;
-    padding: 20px;
-    border-radius: 12px;
-    font-size: 14px;
-    min-width: 280px;
-    max-width: 350px;
-    max-height: calc(100vh - 120px);
-    overflow-y: auto;
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.panel-title {
-    font-size: 18px;
-    margin-bottom: 16px;
-    border-bottom: 2px solid #00ff88;
-    padding-bottom: 8px;
-    font-weight: 600;
-    color: #00ff88;
-}
-
-.info-section,
-.control-section {
-    margin-bottom: 20px;
-}
-
-.info-section h4,
-.control-section h4 {
-    font-size: 14px;
-    margin-bottom: 10px;
-    color: #00ccff;
-    font-weight: 500;
-}
-
-.info-item {
-    display: flex;
-    justify-content: space-between;
-    margin: 8px 0;
-    align-items: center;
-}
-
-.info-item span:first-child {
-    opacity: 0.8;
-    font-size: 13px;
-}
-
-.info-item .value {
-    font-weight: bold;
-    color: #00ff88;
-    font-family: 'Consolas', monospace;
-}
-
-.mesh-select {
-    width: 100%;
-    padding: 8px 12px;
-    background: rgba(255, 255, 255, 0.1);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    border-radius: 6px;
-    color: white;
-    font-size: 13px;
-}
-
-.mesh-select:focus {
-    outline: none;
-    border-color: #00ff88;
-}
-
-.transform-group {
-    margin-bottom: 15px;
-}
-
-.transform-group label {
-    display: block;
-    margin-bottom: 6px;
-    font-size: 13px;
-    color: #00ccff;
-    font-weight: 500;
-}
-
-.input-group {
+.transform-grid {
     display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
-    gap: 6px;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin-bottom: 10px;
 }
 
-.input-group input {
-    padding: 6px 8px;
-    background: rgba(255, 255, 255, 0.1);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    border-radius: 4px;
-    color: white;
+.mesh-selection {
+    margin-bottom: 10px;
+}
+
+.warning-text {
+    color: #ff6b6b;
     font-size: 12px;
-    text-align: center;
-}
-
-.input-group input:focus {
-    outline: none;
-    border-color: #00ff88;
-}
-
-.reset-btn,
-.clear-btn {
-    width: 100%;
-    padding: 8px 12px;
-    background: linear-gradient(135deg, #ff6b6b, #ee5a24);
-    border: none;
+    padding: 8px;
+    background: rgba(255, 107, 107, 0.1);
+    border: 1px solid rgba(255, 107, 107, 0.3);
     border-radius: 6px;
-    color: white;
-    font-size: 13px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-}
-
-.reset-btn:hover,
-.clear-btn:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(255, 107, 107, 0.3);
+    margin-top: 10px;
 }
 
 .event-log {
@@ -967,6 +789,7 @@ const cleanup = () => {
     border-radius: 6px;
     padding: 10px;
     margin-bottom: 10px;
+    .scrollbar-style();
 }
 
 .event-item {

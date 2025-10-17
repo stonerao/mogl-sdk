@@ -4,12 +4,9 @@
         <div ref="sceneContainer" class="scene-container"></div>
 
         <!-- 控制面板 -->
-        <div class="control-panel">
-            <h3 class="panel-title">标签控制</h3>
-
+        <GuiPanel title="标签控制" width="wide">
             <!-- 标签列表 -->
-            <div class="section">
-                <h4>标签列表</h4>
+            <GuiSection title="标签列表">
                 <div class="label-list">
                     <div
                         v-for="label in labelList"
@@ -20,117 +17,95 @@
                     >
                         <span class="label-name">{{ label.label }}</span>
                         <div class="label-actions">
-                            <button @click.stop="toggleLabelVisibility(label.id)" class="btn-small">
-                                {{ label.visible ? '隐藏' : '显示' }}
-                            </button>
-                            <button
+                            <GuiButton
+                                :label="label.visible ? '隐藏' : '显示'"
+                                size="small"
+                                @click.stop="toggleLabelVisibility(label.id)"
+                            />
+                            <GuiButton
+                                label="删除"
+                                size="small"
+                                variant="secondary"
                                 @click.stop="removeLabel(label.id)"
-                                class="btn-small btn-danger"
-                            >
-                                删除
-                            </button>
+                            />
                         </div>
                     </div>
                 </div>
-            </div>
+            </GuiSection>
 
             <!-- 添加标签 -->
-            <div class="section">
-                <h4>添加标签</h4>
-                <div class="form-group">
-                    <label>标签文字:</label>
-                    <input v-model="newLabelText" type="text" placeholder="输入标签文字" />
-                </div>
-                <button @click="addNewLabel" class="btn-primary">添加标签</button>
-            </div>
+            <GuiSection title="添加标签">
+                <GuiTextInput label="标签文字" v-model="newLabelText" placeholder="输入标签文字" />
+                <GuiButton label="添加标签" @click="addNewLabel" />
+            </GuiSection>
 
             <!-- 全局样式配置 -->
-            <div class="section">
-                <h4>全局样式</h4>
+            <GuiSection title="全局样式">
+                <GuiSlider
+                    label="字体大小"
+                    v-model="globalConfig.fontSize"
+                    :min="16"
+                    :max="64"
+                    suffix="px"
+                    @update:modelValue="updateGlobalStyle"
+                />
 
-                <div class="form-group">
-                    <label>字体大小: {{ globalConfig.fontSize }}px</label>
-                    <input
-                        v-model.number="globalConfig.fontSize"
-                        type="range"
-                        min="16"
-                        max="64"
-                        @input="updateGlobalStyle"
-                    />
-                </div>
+                <GuiColorPicker
+                    label="文字颜色"
+                    v-model="globalConfig.textColor"
+                    @update:modelValue="updateGlobalStyle"
+                />
 
-                <div class="form-group">
-                    <label>文字颜色:</label>
-                    <input
-                        v-model="globalConfig.textColor"
-                        type="color"
-                        @input="updateGlobalStyle"
-                    />
-                </div>
+                <GuiColorPicker
+                    label="背景颜色"
+                    v-model="globalConfig.backgroundColor"
+                    @update:modelValue="updateGlobalStyle"
+                />
 
-                <div class="form-group">
-                    <label>背景颜色:</label>
-                    <input
-                        v-model="globalConfig.backgroundColor"
-                        type="color"
-                        @input="updateGlobalStyle"
-                    />
-                </div>
+                <GuiColorPicker
+                    label="边框颜色"
+                    v-model="globalConfig.borderColor"
+                    @update:modelValue="updateGlobalStyle"
+                />
 
-                <div class="form-group">
-                    <label>边框颜色:</label>
-                    <input
-                        v-model="globalConfig.borderColor"
-                        type="color"
-                        @input="updateGlobalStyle"
-                    />
-                </div>
+                <GuiSlider
+                    label="边框宽度"
+                    v-model="globalConfig.borderWidth"
+                    :min="0"
+                    :max="10"
+                    suffix="px"
+                    @update:modelValue="updateGlobalStyle"
+                />
 
-                <div class="form-group">
-                    <label>边框宽度: {{ globalConfig.borderWidth }}px</label>
-                    <input
-                        v-model.number="globalConfig.borderWidth"
-                        type="range"
-                        min="0"
-                        max="10"
-                        @input="updateGlobalStyle"
-                    />
-                </div>
+                <GuiSlider
+                    label="圆角半径"
+                    v-model="globalConfig.borderRadius"
+                    :min="0"
+                    :max="20"
+                    suffix="px"
+                    @update:modelValue="updateGlobalStyle"
+                />
 
-                <div class="form-group">
-                    <label>圆角半径: {{ globalConfig.borderRadius }}px</label>
-                    <input
-                        v-model.number="globalConfig.borderRadius"
-                        type="range"
-                        min="0"
-                        max="20"
-                        @input="updateGlobalStyle"
-                    />
-                </div>
-
-                <div class="form-group">
-                    <label>缩放: {{ globalConfig.scale.toFixed(1) }}</label>
-                    <input
-                        v-model.number="globalConfig.scale"
-                        type="range"
-                        min="0.5"
-                        max="3"
-                        step="0.1"
-                        @input="updateGlobalStyle"
-                    />
-                </div>
-            </div>
+                <GuiSlider
+                    label="缩放"
+                    v-model="globalConfig.scale"
+                    :min="0.5"
+                    :max="3"
+                    :step="0.1"
+                    :precision="1"
+                    @update:modelValue="updateGlobalStyle"
+                />
+            </GuiSection>
 
             <!-- 事件日志 -->
-            <div class="section">
-                <h4>事件日志</h4>
+            <GuiSection title="事件日志">
                 <div class="event-log">
                     <div v-for="(log, index) in eventLogs" :key="index" class="log-item">
                         {{ log }}
                     </div>
                 </div>
-            </div>
-        </div>
+            </GuiSection>
+        </GuiPanel>
     </SplitLayout>
 </template>
 
@@ -139,6 +114,14 @@ import { ref, reactive, onMounted, onUnmounted } from 'vue';
 import { Scene } from '@w3d/core';
 import { Label3D, GridHelper } from '@w3d/components';
 import * as THREE from 'three';
+import {
+    GuiPanel,
+    GuiSection,
+    GuiSlider,
+    GuiColorPicker,
+    GuiButton,
+    GuiTextInput
+} from '@/components/Gui';
 import SplitLayout from '../../components/SplitLayout.vue';
 
 const sceneContainer = ref(null);
@@ -564,54 +547,18 @@ onUnmounted(() => {
 });
 </script>
 
-<style scoped>
+<style scoped lang="less">
+@import '@/styles/gui.less';
 .scene-container {
     width: 100%;
     height: 100%;
     position: relative;
 }
 
-.control-panel {
-    position: absolute;
-    top: 20px;
-    right: 20px;
-    background: rgba(0, 0, 0, 0.8);
-    padding: 20px;
-    border-radius: 8px;
-    color: white;
-    max-width: 320px;
-    max-height: calc(100% - 40px);
-    overflow-y: auto;
-    font-size: 14px;
-}
-
-.panel-title {
-    margin: 0 0 15px 0;
-    font-size: 18px;
-    font-weight: bold;
-    border-bottom: 2px solid #4ecdc4;
-    padding-bottom: 10px;
-}
-
-.section {
-    margin-bottom: 20px;
-    padding-bottom: 15px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.section:last-child {
-    border-bottom: none;
-}
-
-.section h4 {
-    margin: 0 0 10px 0;
-    font-size: 14px;
-    color: #4ecdc4;
-}
-
 .label-list {
     max-height: 200px;
     overflow-y: auto;
+    .scrollbar-style();
 }
 
 .label-item {
@@ -645,85 +592,12 @@ onUnmounted(() => {
     gap: 5px;
 }
 
-.form-group {
-    margin-bottom: 12px;
-}
-
-.form-group label {
-    display: block;
-    margin-bottom: 5px;
-    font-size: 12px;
-    color: #aaa;
-}
-
-.form-group input[type='text'] {
-    width: 100%;
-    padding: 6px 10px;
-    background: rgba(255, 255, 255, 0.1);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    border-radius: 4px;
-    color: white;
-    font-size: 13px;
-}
-
-.form-group input[type='range'] {
-    width: 100%;
-}
-
-.form-group input[type='color'] {
-    width: 100%;
-    height: 30px;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-}
-
-.btn-primary {
-    width: 100%;
-    padding: 8px 16px;
-    background: #4ecdc4;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 13px;
-    font-weight: bold;
-    transition: background 0.2s;
-}
-
-.btn-primary:hover {
-    background: #45b7d1;
-}
-
-.btn-small {
-    padding: 4px 8px;
-    background: rgba(255, 255, 255, 0.1);
-    color: white;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    border-radius: 3px;
-    cursor: pointer;
-    font-size: 11px;
-    transition: all 0.2s;
-}
-
-.btn-small:hover {
-    background: rgba(255, 255, 255, 0.2);
-}
-
-.btn-danger {
-    background: rgba(255, 107, 107, 0.3);
-    border-color: #ff6b6b;
-}
-
-.btn-danger:hover {
-    background: rgba(255, 107, 107, 0.5);
-}
-
 .event-log {
     max-height: 150px;
     overflow-y: auto;
     font-size: 11px;
     font-family: monospace;
+    .scrollbar-style();
 }
 
 .log-item {
@@ -734,33 +608,6 @@ onUnmounted(() => {
 
 .log-item:last-child {
     border-bottom: none;
-}
-
-/* 滚动条样式 */
-.control-panel::-webkit-scrollbar,
-.label-list::-webkit-scrollbar,
-.event-log::-webkit-scrollbar {
-    width: 6px;
-}
-
-.control-panel::-webkit-scrollbar-track,
-.label-list::-webkit-scrollbar-track,
-.event-log::-webkit-scrollbar-track {
-    background: rgba(255, 255, 255, 0.05);
-    border-radius: 3px;
-}
-
-.control-panel::-webkit-scrollbar-thumb,
-.label-list::-webkit-scrollbar-thumb,
-.event-log::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.2);
-    border-radius: 3px;
-}
-
-.control-panel::-webkit-scrollbar-thumb:hover,
-.label-list::-webkit-scrollbar-thumb:hover,
-.event-log::-webkit-scrollbar-thumb:hover {
-    background: rgba(255, 255, 255, 0.3);
 }
 </style>
 

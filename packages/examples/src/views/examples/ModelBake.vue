@@ -8,119 +8,86 @@
         <div ref="sceneContainer" class="scene-container"></div>
 
         <!-- 加载状态 -->
-        <div v-if="isLoading" class="loading-overlay">
-            <div class="loading-content">
-                <div class="loading-spinner"></div>
-                <p class="loading-text">{{ loadingText || '加载中...' }}</p>
-                <div class="loading-progress">
-                    <div class="progress-bar" :style="{ width: `${loadingProgress || 0}%` }"></div>
-                </div>
-            </div>
-        </div>
+        <template v-if="isLoading">
+            <GuiLoading :progress="loadingProgress" :text="loadingText || '加载中...'" />
+        </template>
 
         <!-- 控制面板 -->
-        <div class="control-panel">
-            <h3 class="panel-title">模型烘焙光照控制</h3>
+        <template v-if="!isLoading">
+            <GuiPanel title="模型烘焙光照控制" width="wide">
+                <!-- 模型信息 -->
+                <GuiSection title="模型信息">
+                    <GuiInfoItem label="Mesh 数量" :value="meshCount || 0" />
+                </GuiSection>
 
-            <!-- 模型信息 -->
-            <div class="info-section">
-                <h4>模型信息</h4>
-                <div class="info-item">
-                    <span>模型名称:</span>
-                    <span class="value"></span>
-                </div>
-                <div class="info-item">
-                    <span>Mesh 数量:</span>
-                    <span class="value">{{ meshCount || 0 }}</span>
-                </div>
-            </div>
+                <!-- 烘焙光照控制 -->
+                <GuiSection title="烘焙光照设置">
+                    <GuiCheckbox
+                        label="启用烘焙光照"
+                        v-model="bakedLightingSettings.enabled"
+                        @update:modelValue="toggleBakedLighting"
+                    />
 
-            <!-- 烘焙光照控制 -->
-            <div class="control-section">
-                <h4>烘焙光照设置</h4>
-                <div class="baked-lighting-controls">
-                    <div class="setting-group">
-                        <label>
-                            <input
-                                type="checkbox"
-                                v-model="bakedLightingSettings.enabled"
-                                @change="toggleBakedLighting"
-                            />
-                            启用烘焙光照
-                        </label>
+                    <template v-if="bakedLightingSettings.enabled">
+                        <GuiSlider
+                            label="烘焙强度"
+                            v-model="bakedLightingSettings.intensity"
+                            :min="0"
+                            :max="2"
+                            :step="0.1"
+                            :precision="1"
+                            @update:modelValue="updateBakedIntensity"
+                        />
+
+                        <GuiSelect
+                            label="应用模式"
+                            v-model="bakedLightingSettings.mode"
+                            :options="[
+                                { value: 'map', label: '替换贴图 (map)' },
+                                { value: 'lightMap', label: '光照贴图 (lightMap)' }
+                            ]"
+                            @update:modelValue="updateBakedMode"
+                        />
+
+                        <GuiSelect
+                            label="UV 通道"
+                            v-model="bakedLightingSettings.channel"
+                            :options="[
+                                { value: '0', label: 'UV1 (channel 0)' },
+                                { value: '1', label: 'UV2 (channel 1) - 推荐' }
+                            ]"
+                            @update:modelValue="updateBakedChannel"
+                        />
+
+                        <GuiInfoItem
+                            label="已应用物体"
+                            :value="bakedLightingSettings.appliedCount || 0"
+                        />
+                        <GuiInfoItem
+                            label="加载状态"
+                            :value="bakedLightingSettings.statusText || '未开始'"
+                        />
+                    </template>
+                </GuiSection>
+
+                <!-- 调试工具 -->
+                <GuiSection title="调试工具">
+                    <div class="button-group">
+                        <GuiButton label="打印模型信息" @click="printModelInfo" />
+                        <GuiButton label="测试烘焙光照" @click="testBakedLighting" />
+                        <GuiButton label="测试材质克隆" @click="testMaterialCloning" />
                     </div>
+                </GuiSection>
 
-                    <div v-if="bakedLightingSettings.enabled" class="baked-options">
-                        <div class="setting-group">
-                            <label>烘焙强度</label>
-                            <input
-                                type="range"
-                                v-model.number="bakedLightingSettings.intensity"
-                                @input="updateBakedIntensity"
-                                min="0"
-                                max="2"
-                                step="0.1"
-                            />
-                            <span>{{ bakedLightingSettings.intensity.toFixed(1) }}</span>
-                        </div>
-
-                        <div class="setting-group">
-                            <label>应用模式</label>
-                            <select v-model="bakedLightingSettings.mode" @change="updateBakedMode">
-                                <option value="map">替换贴图 (map)</option>
-                                <option value="lightMap">光照贴图 (lightMap)</option>
-                            </select>
-                        </div>
-
-                        <div class="setting-group">
-                            <label>UV 通道</label>
-                            <select
-                                v-model="bakedLightingSettings.channel"
-                                @change="updateBakedChannel"
-                            >
-                                <option value="0">UV1 (channel 0)</option>
-                                <option value="1">UV2 (channel 1) - 推荐</option>
-                            </select>
-                            <small class="setting-hint">烘焙贴图通常使用 UV2</small>
-                        </div>
-
-                        <div class="baked-info">
-                            <div class="info-item">
-                                <span>已应用物体:</span>
-                                <span class="value">{{
-                                    bakedLightingSettings.appliedCount || 0
-                                }}</span>
-                            </div>
-                            <div class="info-item">
-                                <span>加载状态:</span>
-                                <span class="value" :class="bakedLightingSettings.status">
-                                    {{ bakedLightingSettings.statusText || '未开始' }}
-                                </span>
-                            </div>
-                        </div>
+                <!-- 相机控制 -->
+                <GuiSection title="相机控制">
+                    <div class="button-group">
+                        <GuiButton label="重置视角" @click="resetCamera" />
+                        <GuiButton label="聚焦模型" @click="focusModel" />
                     </div>
-                </div>
-            </div>
-
-            <!-- 调试工具 -->
-            <div class="control-section">
-                <h4>调试工具</h4>
-                <div class="debug-controls">
-                    <button @click="printModelInfo" class="control-btn">打印模型信息</button>
-                    <button @click="testBakedLighting" class="control-btn">测试烘焙光照</button>
-                    <button @click="testMaterialCloning" class="control-btn">测试材质克隆</button>
-                </div>
-            </div>
-
-            <!-- 相机控制 -->
-            <div class="control-section">
-                <h4>相机控制</h4>
-                <div class="camera-controls">
-                    <button @click="resetCamera" class="control-btn">重置视角</button>
-                    <button @click="focusModel" class="control-btn">聚焦模型</button>
-                </div>
-            </div>
-        </div>
+                </GuiSection>
+            </GuiPanel>
+        </template>
     </SplitLayout>
 </template>
 
@@ -128,6 +95,16 @@
 import { ref, reactive, computed, onMounted, onUnmounted } from 'vue';
 import { Scene } from '@w3d/core';
 import { ModelLoader, HDRLoader } from '@w3d/components';
+import {
+    GuiPanel,
+    GuiSection,
+    GuiLoading,
+    GuiInfoItem,
+    GuiCheckbox,
+    GuiSlider,
+    GuiSelect,
+    GuiButton
+} from '@/components/Gui';
 import SplitLayout from '../../components/SplitLayout.vue';
 
 const sceneContainer = ref(null);
@@ -762,7 +739,8 @@ const cleanup = () => {
 };
 </script>
 
-<style scoped>
+<style scoped lang="less">
+@import '@/styles/gui.less';
 .scene-container {
     width: 100%;
     height: 100%;
@@ -771,255 +749,10 @@ const cleanup = () => {
     overflow: hidden;
 }
 
-/* 加载状态样式 */
-.loading-overlay {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(0, 0, 0, 0.8);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 1000;
-}
-
-.loading-content {
-    text-align: center;
-    color: white;
-}
-
-.loading-spinner {
-    width: 50px;
-    height: 50px;
-    border: 3px solid rgba(255, 255, 255, 0.3);
-    border-top: 3px solid #00ccff;
-    border-radius: 50%;
-    animation: spin 1s linear infinite;
-    margin: 0 auto 20px;
-}
-
-@keyframes spin {
-    0% {
-        transform: rotate(0deg);
-    }
-    100% {
-        transform: rotate(360deg);
-    }
-}
-
-.loading-text {
-    font-size: 16px;
-    margin-bottom: 15px;
-    color: #ffffff;
-}
-
-.loading-progress {
-    width: 200px;
-    height: 4px;
-    background: rgba(255, 255, 255, 0.2);
-    border-radius: 2px;
-    overflow: hidden;
-    margin: 0 auto;
-}
-
-.progress-bar {
-    height: 100%;
-    background: linear-gradient(90deg, #00ccff, #0099cc);
-    transition: width 0.3s ease;
-}
-
-/* 控制面板样式 */
-.control-panel {
-    background: rgba(0, 0, 0, 0.9);
-    color: white;
-    padding: 20px;
-    border-radius: 8px;
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    max-height: 80vh;
-    overflow-y: auto;
-}
-
-.panel-title {
-    font-size: 18px;
-    font-weight: bold;
-    margin-bottom: 20px;
-    color: #00ccff;
-    text-align: center;
-}
-
-.info-section,
-.control-section {
-    margin-bottom: 20px;
-    padding-bottom: 15px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.info-section:last-child,
-.control-section:last-child {
-    border-bottom: none;
-    margin-bottom: 0;
-}
-
-.info-section h4,
-.control-section h4 {
-    font-size: 14px;
-    font-weight: 600;
-    margin-bottom: 12px;
-    color: rgba(255, 255, 255, 0.9);
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-}
-
-.info-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 8px;
-    font-size: 12px;
-}
-
-.info-item span:first-child {
-    color: rgba(255, 255, 255, 0.7);
-}
-
-.info-item .value {
-    color: #ffffff;
-    font-weight: 500;
-}
-
-/* 烘焙光照控件样式 */
-.baked-lighting-controls {
+.button-group {
     display: flex;
     flex-direction: column;
-    gap: 12px;
-}
-
-.setting-group {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-}
-
-.setting-group label {
-    font-size: 12px;
-    color: rgba(255, 255, 255, 0.8);
-    display: flex;
-    align-items: center;
     gap: 8px;
-}
-
-.setting-group input[type='checkbox'] {
-    accent-color: #00ccff;
-}
-
-.setting-group input[type='range'] {
-    width: 100%;
-    margin: 4px 0;
-}
-
-.setting-group select {
-    width: 100%;
-    padding: 6px 10px;
-    background: rgba(255, 255, 255, 0.1);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    border-radius: 4px;
-    color: #ffffff;
-    font-size: 12px;
-    outline: none;
-    cursor: pointer;
-}
-
-.setting-group select:focus {
-    border-color: #00ccff;
-    background: rgba(255, 255, 255, 0.15);
-}
-
-.setting-group select option {
-    background: #2a2a2a;
-    color: #ffffff;
-}
-
-.setting-hint {
-    font-size: 10px;
-    color: rgba(255, 255, 255, 0.6);
-    font-style: italic;
-    margin-top: 2px;
-}
-
-.baked-options {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    padding: 12px;
-    background: rgba(255, 255, 255, 0.05);
-    border-radius: 6px;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.baked-info {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-    padding: 8px;
-    background: rgba(0, 0, 0, 0.2);
-    border-radius: 4px;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.baked-info .info-item .value.loading {
-    color: #ffc107;
-}
-
-.baked-info .info-item .value.success {
-    color: #28a745;
-}
-
-.baked-info .info-item .value.error {
-    color: #dc3545;
-}
-
-.baked-info .info-item .value.idle {
-    color: rgba(255, 255, 255, 0.5);
-}
-
-/* 调试控制样式 */
-.debug-controls {
-    display: flex;
-    gap: 8px;
-    flex-wrap: wrap;
-    margin-bottom: 10px;
-}
-
-/* 相机控制样式 */
-.camera-controls {
-    display: flex;
-    gap: 8px;
-    flex-wrap: wrap;
-}
-
-.control-btn {
-    flex: 1;
-    min-width: 80px;
-    padding: 8px 12px;
-    background: rgba(0, 204, 255, 0.2);
-    border: 1px solid #00ccff;
-    border-radius: 4px;
-    color: #00ccff;
-    font-size: 11px;
-    cursor: pointer;
-    transition: all 0.2s ease;
-}
-
-.control-btn:hover {
-    background: rgba(0, 204, 255, 0.3);
-    transform: translateY(-1px);
-}
-
-.control-btn:active {
-    transform: translateY(0);
 }
 
 /* 响应式设计 */

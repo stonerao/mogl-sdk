@@ -4,125 +4,89 @@
         <div ref="sceneContainer" class="scene-container"></div>
 
         <!-- 控制面板 -->
-        <div class="control-panel">
-            <h3 class="panel-title">实例化模型控制</h3>
-
+        <GuiPanel title="实例化模型控制" width="wide">
             <!-- 加载状态 -->
-            <div v-if="isLoading" class="section">
-                <div class="loading-indicator">
-                    <div class="spinner"></div>
-                    <p>加载模型中... {{ loadProgress.toFixed(0) }}%</p>
-                </div>
-            </div>
+            <template v-if="isLoading">
+                <GuiLoading :progress="loadProgress" text="加载模型中..." />
+            </template>
 
             <!-- 实例配置 -->
-            <div v-if="!isLoading" class="section">
-                <h4>实例配置</h4>
-
-                <div class="form-group">
-                    <label>实例数量: {{ instanceConfig.instanceCount }}</label>
-                    <input
-                        v-model.number="instanceConfig.instanceCount"
-                        type="range"
-                        min="100"
-                        max="5000"
-                        step="100"
-                        @change="recreateInstances"
+            <template v-if="!isLoading">
+                <GuiSection title="实例配置">
+                    <GuiSlider
+                        label="实例数量"
+                        v-model="instanceConfig.instanceCount"
+                        :min="100"
+                        :max="5000"
+                        :step="100"
+                        @update:modelValue="recreateInstances"
                     />
-                </div>
 
-                <div class="form-group">
-                    <label>布局方式:</label>
-                    <select v-model="instanceConfig.layout" @change="recreateInstances">
-                        <option value="grid">网格布局</option>
-                        <option value="random">随机布局</option>
-                        <option value="custom">自定义数据</option>
-                    </select>
-                </div>
-
-                <div v-if="instanceConfig.layout === 'grid'" class="form-group">
-                    <label>网格间距 X: {{ instanceConfig.spacing.x }}</label>
-                    <input
-                        v-model.number="instanceConfig.spacing.x"
-                        type="range"
-                        min="5"
-                        max="20"
-                        step="1"
-                        @change="recreateInstances"
+                    <GuiSelect
+                        label="布局方式"
+                        v-model="instanceConfig.layout"
+                        :options="[
+                            { value: 'grid', label: '网格布局' },
+                            { value: 'random', label: '随机布局' },
+                            { value: 'custom', label: '自定义数据' }
+                        ]"
+                        @update:modelValue="recreateInstances"
                     />
-                </div>
 
-                <div v-if="instanceConfig.layout === 'grid'" class="form-group">
-                    <label>网格间距 Z: {{ instanceConfig.spacing.z }}</label>
-                    <input
-                        v-model.number="instanceConfig.spacing.z"
-                        type="range"
-                        min="5"
-                        max="20"
-                        step="1"
-                        @change="recreateInstances"
-                    />
-                </div>
-            </div>
+                    <template v-if="instanceConfig.layout === 'grid'">
+                        <GuiSlider
+                            label="网格间距 X"
+                            v-model="instanceConfig.spacing.x"
+                            :min="5"
+                            :max="20"
+                            :step="1"
+                            @update:modelValue="recreateInstances"
+                        />
 
-            <!-- 颜色配置 -->
-            <div v-if="!isLoading" class="section">
-                <h4>颜色配置</h4>
+                        <GuiSlider
+                            label="网格间距 Z"
+                            v-model="instanceConfig.spacing.z"
+                            :min="5"
+                            :max="20"
+                            :step="1"
+                            @update:modelValue="recreateInstances"
+                        />
+                    </template>
+                </GuiSection>
 
-                <div class="form-group">
-                    <label>默认颜色:</label>
-                    <input
+                <!-- 颜色配置 -->
+                <GuiSection title="颜色配置">
+                    <GuiColorPicker
+                        label="默认颜色"
                         v-model="instanceConfig.normalColor"
-                        type="color"
-                        @input="updateColors"
+                        @update:modelValue="updateColors"
                     />
-                </div>
 
-                <div class="form-group">
-                    <label>悬停颜色:</label>
-                    <input v-model="instanceConfig.hoverColor" type="color" />
-                </div>
+                    <GuiColorPicker label="悬停颜色" v-model="instanceConfig.hoverColor" />
 
-                <div class="form-group">
-                    <label>点击颜色:</label>
-                    <input v-model="instanceConfig.clickedColor" type="color" />
-                </div>
+                    <GuiColorPicker label="点击颜色" v-model="instanceConfig.clickedColor" />
 
-                <button @click="resetAllColors" class="btn-primary" style="width: 100%">
-                    重置所有颜色
-                </button>
-            </div>
+                    <GuiButton label="重置所有颜色" @click="resetAllColors" />
+                </GuiSection>
 
-            <!-- 性能统计 -->
-            <div v-if="!isLoading" class="section">
-                <h4>性能统计</h4>
-                <div class="stats">
-                    <div class="stat-item">
-                        <span class="stat-label">FPS:</span>
-                        <span class="stat-value">{{ fps }}</span>
+                <!-- 性能统计 -->
+                <GuiSection title="性能统计">
+                    <GuiInfoItem label="FPS" :value="fps" />
+                    <GuiInfoItem label="实例数量" :value="instanceConfig.instanceCount" />
+                    <GuiInfoItem label="已点击" :value="clickedCount" />
+                </GuiSection>
+
+                <!-- 事件日志 -->
+                <GuiSection title="事件日志">
+                    <div class="event-log">
+                        <div v-for="(log, index) in eventLogs" :key="index" class="log-item">
+                            <span class="log-time">{{ log.time }}</span>
+                            <span class="log-message">{{ log.message }}</span>
+                        </div>
                     </div>
-                    <div class="stat-item">
-                        <span class="stat-label">实例数量:</span>
-                        <span class="stat-value">{{ instanceConfig.instanceCount }}</span>
-                    </div>
-                    <div class="stat-item">
-                        <span class="stat-label">已点击:</span>
-                        <span class="stat-value">{{ clickedCount }}</span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- 事件日志 -->
-            <div v-if="!isLoading" class="section">
-                <h4>事件日志</h4>
-                <div class="event-log">
-                    <div v-for="(log, index) in eventLogs" :key="index" class="log-item">
-                        <span class="log-time">{{ log.time }}</span>
-                        <span class="log-message">{{ log.message }}</span>
-                    </div>
-                </div>
-            </div>
-        </div>
+                </GuiSection>
+            </template>
+        </GuiPanel>
     </SplitLayout>
 </template>
 
@@ -131,6 +95,16 @@ import { ref, reactive, onMounted, onUnmounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { Scene } from '@w3d/core';
 import { InstancedModel, GridHelper, HDRLoader } from '@w3d/components';
+import {
+    GuiPanel,
+    GuiSection,
+    GuiLoading,
+    GuiSlider,
+    GuiSelect,
+    GuiColorPicker,
+    GuiButton,
+    GuiInfoItem
+} from '@/components/Gui';
 import SplitLayout from '../../components/SplitLayout.vue';
 
 const { t } = useI18n();
@@ -249,7 +223,7 @@ const createInstancedModel = async () => {
     loadProgress.value = 0;
 
     const config = {
-        modelUrl: '/models/kache.glb',
+        modelUrl: '/models/ShaderBall.glb',
         instanceCount: instanceConfig.instanceCount,
         layout: instanceConfig.layout,
         gridSize: instanceConfig.gridSize,
@@ -413,7 +387,7 @@ await scene.add('GridHelper', {
 
 const instancedModel = await scene.add('InstancedModel', {
   // 模型文件路径
-  modelUrl: 'models/kache.glb',
+  modelUrl: 'models/ShaderBall.glb',
 
   // 实例数量
   instanceCount: 1000,
@@ -463,7 +437,7 @@ for (let i = 0; i < 50; i++) {
 
 // 使用自定义数据创建实例
 const customInstancedModel = await scene.add('InstancedModel', {
-  modelUrl: 'models/kache.glb',
+  modelUrl: 'models/ShaderBall.glb',
   instancesData: customInstancesData,  // 传入自定义实例数据
   normalColor: 0x00ff00,
   hoverColor: 0xffff00,
@@ -566,179 +540,12 @@ onUnmounted(() => {
 });
 </script>
 
-<style scoped>
+<style scoped lang="less">
+@import '@/styles/gui.less';
 .scene-container {
     width: 100%;
     height: 100%;
     position: relative;
-}
-
-.control-panel {
-    position: absolute;
-    top: 20px;
-    right: 20px;
-    width: 320px;
-    max-height: calc(100vh - 40px);
-    background: rgba(0, 0, 0, 0.85);
-    padding: 20px;
-    border-radius: 8px;
-    color: white;
-    overflow-y: auto;
-    font-size: 14px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
-}
-
-.panel-title {
-    margin: 0 0 15px 0;
-    font-size: 18px;
-    font-weight: bold;
-    border-bottom: 2px solid #00ff00;
-    padding-bottom: 10px;
-}
-
-.section {
-    margin-bottom: 20px;
-    padding-bottom: 15px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.section:last-child {
-    border-bottom: none;
-}
-
-.section h4 {
-    margin: 0 0 12px 0;
-    font-size: 15px;
-    color: #00ff00;
-}
-
-.form-group {
-    margin-bottom: 12px;
-}
-
-.form-group label {
-    display: block;
-    margin-bottom: 5px;
-    font-size: 13px;
-    color: #ccc;
-}
-
-.form-group input[type='range'] {
-    width: 100%;
-    height: 4px;
-    background: rgba(255, 255, 255, 0.2);
-    border-radius: 2px;
-    outline: none;
-}
-
-.form-group input[type='range']::-webkit-slider-thumb {
-    width: 14px;
-    height: 14px;
-    background: #00ff00;
-    border-radius: 50%;
-    cursor: pointer;
-}
-
-.form-group input[type='color'] {
-    width: 100%;
-    height: 32px;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-}
-
-.form-group select {
-    width: 100%;
-    padding: 6px;
-    background: rgba(255, 255, 255, 0.1);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    border-radius: 4px;
-    color: white;
-    font-size: 13px;
-}
-
-.form-group select option {
-    background: #222;
-}
-
-.btn-primary {
-    padding: 8px 16px;
-    background: #00ff00;
-    color: #000;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 13px;
-    font-weight: bold;
-    transition: background 0.2s;
-}
-
-.btn-primary:hover {
-    background: #00cc00;
-}
-
-.btn-danger {
-    padding: 8px 16px;
-    background: #ff0000;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 13px;
-    font-weight: bold;
-    transition: background 0.2s;
-}
-
-.btn-danger:hover {
-    background: #cc0000;
-}
-
-/* 加载指示器 */
-.loading-indicator {
-    text-align: center;
-    padding: 20px;
-}
-
-.spinner {
-    width: 40px;
-    height: 40px;
-    margin: 0 auto 10px;
-    border: 4px solid rgba(255, 255, 255, 0.2);
-    border-top-color: #00ff00;
-    border-radius: 50%;
-    animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-    to {
-        transform: rotate(360deg);
-    }
-}
-
-/* 性能统计 */
-.stats {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-}
-
-.stat-item {
-    display: flex;
-    justify-content: space-between;
-    padding: 6px 10px;
-    background: rgba(255, 255, 255, 0.05);
-    border-radius: 4px;
-}
-
-.stat-label {
-    color: #999;
-    font-size: 12px;
-}
-
-.stat-value {
-    color: #00ff00;
-    font-weight: bold;
-    font-size: 13px;
 }
 
 /* 事件日志 */
@@ -748,6 +555,7 @@ onUnmounted(() => {
     background: rgba(0, 0, 0, 0.3);
     border-radius: 4px;
     padding: 8px;
+    .scrollbar-style();
 }
 
 .log-item {
@@ -770,28 +578,5 @@ onUnmounted(() => {
 .log-message {
     color: #ccc;
     flex: 1;
-}
-
-/* 滚动条样式 */
-.control-panel::-webkit-scrollbar,
-.event-log::-webkit-scrollbar {
-    width: 6px;
-}
-
-.control-panel::-webkit-scrollbar-track,
-.event-log::-webkit-scrollbar-track {
-    background: rgba(255, 255, 255, 0.05);
-    border-radius: 3px;
-}
-
-.control-panel::-webkit-scrollbar-thumb,
-.event-log::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.2);
-    border-radius: 3px;
-}
-
-.control-panel::-webkit-scrollbar-thumb:hover,
-.event-log::-webkit-scrollbar-thumb:hover {
-    background: rgba(255, 255, 255, 0.3);
 }
 </style>

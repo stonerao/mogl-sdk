@@ -4,176 +4,151 @@
         <div ref="containerRef" class="scene-container"></div>
 
         <!-- 控制面板 -->
-        <div class="control-panel">
-            <h3>{{ t('bvhQuery.title') }}</h3>
-
+        <GuiPanel :title="t('bvhQuery.title')" width="wide">
             <!-- 模式选择 -->
-            <div class="form-group">
-                <label>{{ t('bvhQuery.mode') }}</label>
-                <select v-model="currentMode" @change="onModeChange">
-                    <option value="raycast">{{ t('bvhQuery.modes.raycast') }}</option>
-                    <option value="nearest">{{ t('bvhQuery.modes.nearest') }}</option>
-                    <option value="collision">{{ t('bvhQuery.modes.collision') }}</option>
-                    <option value="voxel">{{ t('bvhQuery.modes.voxel') }}</option>
-                </select>
-            </div>
+            <GuiSelect
+                :label="t('bvhQuery.mode')"
+                v-model="currentMode"
+                :options="[
+                    { value: 'raycast', label: t('bvhQuery.modes.raycast') },
+                    { value: 'nearest', label: t('bvhQuery.modes.nearest') },
+                    { value: 'collision', label: t('bvhQuery.modes.collision') },
+                    { value: 'voxel', label: t('bvhQuery.modes.voxel') }
+                ]"
+                @update:modelValue="onModeChange"
+            />
 
             <!-- BVH 配置 -->
-            <div class="section">
-                <h4>{{ t('bvhQuery.bvhConfig') }}</h4>
+            <GuiSection :title="t('bvhQuery.bvhConfig')">
+                <GuiSelect
+                    :label="t('bvhQuery.strategy')"
+                    v-model="bvhConfig.strategy"
+                    :options="[
+                        { value: 'CENTER', label: 'CENTER' },
+                        { value: 'AVERAGE', label: 'AVERAGE' },
+                        { value: 'SAH', label: 'SAH' }
+                    ]"
+                    @update:modelValue="rebuildBVH"
+                />
 
-                <div class="form-group">
-                    <label>{{ t('bvhQuery.strategy') }}</label>
-                    <select v-model="bvhConfig.strategy" @change="rebuildBVH">
-                        <option value="CENTER">CENTER</option>
-                        <option value="AVERAGE">AVERAGE</option>
-                        <option value="SAH">SAH</option>
-                    </select>
-                </div>
+                <GuiSlider
+                    :label="`${t('bvhQuery.maxDepth')}`"
+                    v-model="bvhConfig.maxDepth"
+                    :min="10"
+                    :max="50"
+                    :step="1"
+                    @update:modelValue="rebuildBVH"
+                />
 
-                <div class="form-group">
-                    <label>{{ t('bvhQuery.maxDepth') }}: {{ bvhConfig.maxDepth }}</label>
-                    <input
-                        type="range"
-                        v-model.number="bvhConfig.maxDepth"
-                        min="10"
-                        max="50"
-                        @change="rebuildBVH"
-                    />
-                </div>
+                <GuiSlider
+                    :label="`${t('bvhQuery.maxLeafTris')}`"
+                    v-model="bvhConfig.maxLeafTris"
+                    :min="5"
+                    :max="20"
+                    :step="1"
+                    @update:modelValue="rebuildBVH"
+                />
 
-                <div class="form-group">
-                    <label>{{ t('bvhQuery.maxLeafTris') }}: {{ bvhConfig.maxLeafTris }}</label>
-                    <input
-                        type="range"
-                        v-model.number="bvhConfig.maxLeafTris"
-                        min="5"
-                        max="20"
-                        @change="rebuildBVH"
-                    />
-                </div>
+                <GuiCheckbox
+                    :label="t('bvhQuery.showHelper')"
+                    v-model="showHelper"
+                    @update:modelValue="toggleBVHHelper"
+                />
 
-                <div class="form-group">
-                    <label>
-                        <input type="checkbox" v-model="showHelper" @change="toggleBVHHelper" />
-                        {{ t('bvhQuery.showHelper') }}
-                    </label>
-                </div>
-
-                <div v-if="showHelper" class="form-group">
-                    <label>{{ t('bvhQuery.helperDepth') }}: {{ helperDepth }}</label>
-                    <input
-                        type="range"
-                        v-model.number="helperDepth"
-                        min="1"
-                        max="20"
-                        @change="updateHelperDepth"
-                    />
-                </div>
-            </div>
+                <GuiSlider
+                    v-if="showHelper"
+                    :label="`${t('bvhQuery.helperDepth')}`"
+                    v-model="helperDepth"
+                    :min="1"
+                    :max="20"
+                    :step="1"
+                    @update:modelValue="updateHelperDepth"
+                />
+            </GuiSection>
 
             <!-- 射线投射模式配置 -->
-            <div v-if="currentMode === 'raycast'" class="section">
-                <h4>{{ t('bvhQuery.raycastConfig') }}</h4>
-
-                <div class="form-group">
-                    <label>
-                        <input type="checkbox" v-model="raycastConfig.firstHitOnly" />
-                        {{ t('bvhQuery.firstHitOnly') }}
-                    </label>
-                </div>
-
-                <div class="form-group">
-                    <label>
-                        <input type="checkbox" v-model="raycastConfig.showNormal" />
-                        {{ t('bvhQuery.showNormal') }}
-                    </label>
-                </div>
-            </div>
+            <template v-if="currentMode === 'raycast'">
+                <GuiSection :title="t('bvhQuery.raycastConfig')">
+                    <GuiCheckbox
+                        :label="t('bvhQuery.firstHitOnly')"
+                        v-model="raycastConfig.firstHitOnly"
+                    />
+                    <GuiCheckbox
+                        :label="t('bvhQuery.showNormal')"
+                        v-model="raycastConfig.showNormal"
+                    />
+                </GuiSection>
+            </template>
 
             <!-- 最近点模式配置 -->
-            <div v-if="currentMode === 'nearest'" class="section">
-                <h4>{{ t('bvhQuery.nearestConfig') }}</h4>
-
-                <div class="form-group">
-                    <label>
-                        <input type="checkbox" v-model="nearestConfig.showLine" />
-                        {{ t('bvhQuery.showLine') }}
-                    </label>
-                </div>
-
-                <div class="form-group">
-                    <label>
-                        <input type="checkbox" v-model="nearestConfig.showPoint" />
-                        {{ t('bvhQuery.showPoint') }}
-                    </label>
-                </div>
-            </div>
+            <template v-if="currentMode === 'nearest'">
+                <GuiSection :title="t('bvhQuery.nearestConfig')">
+                    <GuiCheckbox :label="t('bvhQuery.showLine')" v-model="nearestConfig.showLine" />
+                    <GuiCheckbox
+                        :label="t('bvhQuery.showPoint')"
+                        v-model="nearestConfig.showPoint"
+                    />
+                </GuiSection>
+            </template>
 
             <!-- 碰撞检测模式配置 -->
-            <div v-if="currentMode === 'collision'" class="section">
-                <h4>{{ t('bvhQuery.collisionConfig') }}</h4>
-
-                <div class="form-group">
-                    <label>{{ t('bvhQuery.collisionType') }}</label>
-                    <select v-model="collisionConfig.type">
-                        <option value="sphere">{{ t('bvhQuery.sphere') }}</option>
-                        <option value="box">{{ t('bvhQuery.box') }}</option>
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label>{{ t('bvhQuery.size') }}: {{ collisionConfig.size }}</label>
-                    <input
-                        type="range"
-                        v-model.number="collisionConfig.size"
-                        min="0.5"
-                        max="5"
-                        step="0.1"
+            <template v-if="currentMode === 'collision'">
+                <GuiSection :title="t('bvhQuery.collisionConfig')">
+                    <GuiSelect
+                        :label="t('bvhQuery.collisionType')"
+                        v-model="collisionConfig.type"
+                        :options="[
+                            { value: 'sphere', label: t('bvhQuery.sphere') },
+                            { value: 'box', label: t('bvhQuery.box') }
+                        ]"
                     />
-                </div>
-            </div>
+                    <GuiSlider
+                        :label="`${t('bvhQuery.size')}`"
+                        v-model="collisionConfig.size"
+                        :min="0.5"
+                        :max="5"
+                        :step="0.1"
+                    />
+                </GuiSection>
+            </template>
 
             <!-- 统计信息 -->
-            <div class="section stats">
-                <h4>{{ t('stats.title') }}</h4>
-                <div class="stat-item">
-                    <span>{{ t('stats.fps') }}:</span>
-                    <span>{{ fps }}</span>
-                </div>
-                <div v-if="bvhStats" class="stat-item">
-                    <span>{{ t('bvhQuery.nodeCount') }}:</span>
-                    <span>{{ bvhStats.nodeCount }}</span>
-                </div>
-                <div v-if="bvhStats" class="stat-item">
-                    <span>{{ t('bvhQuery.leafNodeCount') }}:</span>
-                    <span>{{ bvhStats.leafNodeCount }}</span>
-                </div>
-                <div v-if="bvhStats" class="stat-item">
-                    <span>{{ t('bvhQuery.triangleCount') }}:</span>
-                    <span>{{ Math.floor(bvhStats.triangleCount) }}</span>
-                </div>
-                <div v-if="bvhStats" class="stat-item">
-                    <span>{{ t('bvhQuery.lastQueryTime') }}:</span>
-                    <span>{{ bvhStats.lastQueryTime.toFixed(3) }}ms</span>
-                </div>
-                <div v-if="bvhStats" class="stat-item">
-                    <span>{{ t('bvhQuery.totalQueries') }}:</span>
-                    <span>{{ bvhStats.totalQueries }}</span>
-                </div>
-            </div>
+            <GuiSection :title="t('stats.title')">
+                <GuiInfoItem :label="`${t('stats.fps')}`" :value="fps" />
+                <template v-if="bvhStats">
+                    <GuiInfoItem
+                        :label="`${t('bvhQuery.nodeCount')}`"
+                        :value="bvhStats.nodeCount"
+                    />
+                    <GuiInfoItem
+                        :label="`${t('bvhQuery.leafNodeCount')}`"
+                        :value="bvhStats.leafNodeCount"
+                    />
+                    <GuiInfoItem
+                        :label="`${t('bvhQuery.triangleCount')}`"
+                        :value="Math.floor(bvhStats.triangleCount)"
+                    />
+                    <GuiInfoItem
+                        :label="`${t('bvhQuery.lastQueryTime')}`"
+                        :value="`${bvhStats.lastQueryTime.toFixed(3)}ms`"
+                    />
+                    <GuiInfoItem
+                        :label="`${t('bvhQuery.totalQueries')}`"
+                        :value="bvhStats.totalQueries"
+                    />
+                </template>
+            </GuiSection>
 
             <!-- 事件日志 -->
-            <div class="section event-log">
-                <h4>{{ t('bvhQuery.eventLog') }}</h4>
+            <GuiSection :title="t('bvhQuery.eventLog')">
                 <div class="log-container">
                     <div v-for="(log, index) in eventLogs" :key="index" class="log-item">
                         <span class="log-time">{{ log.time }}</span>
                         <span class="log-message">{{ log.message }}</span>
                     </div>
                 </div>
-            </div>
-        </div>
+            </GuiSection>
+        </GuiPanel>
 
         <!-- 提示信息 -->
         <div class="info-panel">
@@ -198,6 +173,14 @@ import { ref, reactive, onMounted, onUnmounted } from 'vue';
 import { useLanguage } from '@/composables/useLanguage';
 import { Scene } from '@w3d/core';
 import { ModelLoader, BVHQuery } from '@w3d/components';
+import {
+    GuiPanel,
+    GuiSection,
+    GuiSlider,
+    GuiCheckbox,
+    GuiSelect,
+    GuiInfoItem
+} from '@/components/Gui';
 import * as THREE from 'three';
 
 const { t } = useLanguage();
@@ -313,7 +296,7 @@ const loadModel = async () => {
         addLog('Loading model...');
 
         const modelLoader = await scene.add('ModelLoader', {
-            url: '/models/kache.glb',
+            url: '/models/ShaderBall.glb',
             scale: 1,
             position: [0, 0, 0],
             castShadow: false,
@@ -667,13 +650,11 @@ onMounted(() => {
 
 onUnmounted(() => {
     removeEventListeners();
-    if (scene) {
-        scene.destroy();
-    }
 });
 </script>
 
-<style scoped>
+<style scoped lang="less">
+@import '@/styles/gui.less';
 .bvh-query-demo {
     position: relative;
     width: 100%;
@@ -686,113 +667,10 @@ onUnmounted(() => {
     height: 100%;
 }
 
-.control-panel {
-    position: absolute;
-    top: 20px;
-    right: 20px;
-    width: 320px;
-    max-height: calc(100vh - 40px);
-    background: rgba(0, 0, 0, 0.85);
-    color: #fff;
-    padding: 20px;
-    border-radius: 8px;
-    overflow-y: auto;
-    font-size: 14px;
-    backdrop-filter: blur(10px);
-}
-
-.control-panel h3 {
-    margin: 0 0 20px 0;
-    font-size: 18px;
-    color: #00ff88;
-    border-bottom: 2px solid #00ff88;
-    padding-bottom: 10px;
-}
-
-.control-panel h4 {
-    margin: 15px 0 10px 0;
-    font-size: 15px;
-    color: #00ccff;
-}
-
-.section {
-    margin-bottom: 20px;
-    padding-bottom: 15px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.section:last-child {
-    border-bottom: none;
-}
-
-.form-group {
-    margin-bottom: 15px;
-}
-
-.form-group label {
-    display: block;
-    margin-bottom: 5px;
-    color: #ccc;
-    font-size: 13px;
-}
-
-.form-group input[type='range'] {
-    width: 100%;
-    margin-top: 5px;
-}
-
-.form-group input[type='checkbox'] {
-    margin-right: 8px;
-}
-
-.form-group select {
-    width: 100%;
-    padding: 6px 10px;
-    background: rgba(255, 255, 255, 0.1);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    border-radius: 4px;
-    color: #fff;
-    font-size: 13px;
-}
-
-.form-group select:focus {
-    outline: none;
-    border-color: #00ff88;
-}
-
-.stats {
-    background: rgba(0, 255, 136, 0.05);
-    padding: 15px;
-    border-radius: 6px;
-}
-
-.stat-item {
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 8px;
-    font-size: 13px;
-}
-
-.stat-item span:first-child {
-    color: #aaa;
-}
-
-.stat-item span:last-child {
-    color: #00ff88;
-    font-weight: bold;
-}
-
-.event-log {
-    background: rgba(0, 0, 0, 0.3);
-    padding: 15px;
-    border-radius: 6px;
-}
-
 .log-container {
     max-height: 200px;
     overflow-y: auto;
-    font-size: 12px;
-    font-family: 'Courier New', monospace;
+    .scrollbar-style();
 }
 
 .log-item {

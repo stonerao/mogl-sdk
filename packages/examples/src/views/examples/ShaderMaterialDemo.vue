@@ -8,183 +8,140 @@
         <div ref="sceneContainer" class="scene-container"></div>
 
         <!-- 控制面板 -->
-        <div class="control-panel">
-            <h3 class="panel-title">{{ t('shaderMaterial.title') }}</h3>
+        <template v-if="isLoading">
+            <GuiLoading :progress="loadProgress" :text="t('shaderMaterial.loading')" />
+        </template>
 
-            <!-- 加载状态 -->
-            <div v-if="isLoading" class="section">
-                <div class="loading-indicator">
-                    <div class="spinner"></div>
-                    <p>{{ t('shaderMaterial.loading') }} {{ loadProgress.toFixed(0) }}%</p>
-                </div>
-            </div>
-
-            <!-- 材质选择 -->
-            <div v-if="!isLoading" class="section">
-                <h4>{{ t('shaderMaterial.materialSelection') }}</h4>
-
-                <div class="form-group">
-                    <label>{{ t('shaderMaterial.currentMaterial') }}</label>
-                    <select v-model="currentMaterialName" @change="switchMaterial">
-                        <option value="basicColor">
-                            {{ t('shaderMaterial.materials.basicColor') }}
-                        </option>
-                        <option value="gradient">
-                            {{ t('shaderMaterial.materials.gradient') }}
-                        </option>
-                        <option value="animated">
-                            {{ t('shaderMaterial.materials.animated') }}
-                        </option>
-                        <option value="diffusion">
-                            {{ t('shaderMaterial.materials.diffusion') }}
-                        </option>
-                    </select>
-                </div>
-
-                <div class="info-item">
-                    <span>{{ t('shaderMaterial.activeMaterial') }}</span>
-                    <span class="value">{{ currentMaterialName }}</span>
-                </div>
-            </div>
-
-            <!-- 材质参数 -->
-            <div v-if="!isLoading && currentMaterialName === 'basicColor'" class="section">
-                <h4>{{ t('shaderMaterial.materialParams') }}</h4>
-
-                <div class="form-group">
-                    <label>{{ t('params.color') }}</label>
-                    <input
-                        v-model="basicColorParams.color"
-                        type="color"
-                        @input="updateBasicColor"
+        <template v-if="!isLoading">
+            <GuiPanel :title="t('shaderMaterial.title')" width="wide">
+                <!-- 材质选择 -->
+                <GuiSection :title="t('shaderMaterial.materialSelection')">
+                    <GuiSelect
+                        :label="t('shaderMaterial.currentMaterial')"
+                        v-model="currentMaterialName"
+                        :options="[
+                            {
+                                value: 'basicColor',
+                                label: t('shaderMaterial.materials.basicColor')
+                            },
+                            { value: 'gradient', label: t('shaderMaterial.materials.gradient') },
+                            { value: 'animated', label: t('shaderMaterial.materials.animated') },
+                            { value: 'diffusion', label: t('shaderMaterial.materials.diffusion') }
+                        ]"
+                        @update:modelValue="switchMaterial"
                     />
-                </div>
-            </div>
-
-            <div v-if="!isLoading && currentMaterialName === 'gradient'" class="section">
-                <h4>{{ t('shaderMaterial.materialParams') }}</h4>
-
-                <div class="form-group">
-                    <label>{{ t('shaderMaterial.color1') }}</label>
-                    <input
-                        v-model="gradientParams.color1"
-                        type="color"
-                        @input="updateGradientColors"
+                    <GuiInfoItem
+                        :label="t('shaderMaterial.activeMaterial')"
+                        :value="currentMaterialName"
                     />
-                </div>
+                </GuiSection>
 
-                <div class="form-group">
-                    <label>{{ t('shaderMaterial.color2') }}</label>
-                    <input
-                        v-model="gradientParams.color2"
-                        type="color"
-                        @input="updateGradientColors"
-                    />
-                </div>
-            </div>
+                <!-- 基础颜色材质参数 -->
+                <template v-if="currentMaterialName === 'basicColor'">
+                    <GuiSection :title="t('shaderMaterial.materialParams')">
+                        <GuiColorPicker
+                            :label="t('params.color')"
+                            v-model="basicColorParams.color"
+                            @update:modelValue="updateBasicColor"
+                        />
+                    </GuiSection>
+                </template>
 
-            <div v-if="!isLoading && currentMaterialName === 'animated'" class="section">
-                <h4>{{ t('shaderMaterial.materialParams') }}</h4>
+                <!-- 渐变材质参数 -->
+                <template v-if="currentMaterialName === 'gradient'">
+                    <GuiSection :title="t('shaderMaterial.materialParams')">
+                        <GuiColorPicker
+                            :label="t('shaderMaterial.color1')"
+                            v-model="gradientParams.color1"
+                            @update:modelValue="updateGradientColors"
+                        />
+                        <GuiColorPicker
+                            :label="t('shaderMaterial.color2')"
+                            v-model="gradientParams.color2"
+                            @update:modelValue="updateGradientColors"
+                        />
+                    </GuiSection>
+                </template>
 
-                <div class="form-group">
-                    <label>{{ t('params.color') }}</label>
-                    <input
-                        v-model="animatedParams.color"
-                        type="color"
-                        @input="updateAnimatedColor"
-                    />
-                </div>
+                <!-- 动画材质参数 -->
+                <template v-if="currentMaterialName === 'animated'">
+                    <GuiSection :title="t('shaderMaterial.materialParams')">
+                        <GuiColorPicker
+                            :label="t('params.color')"
+                            v-model="animatedParams.color"
+                            @update:modelValue="updateAnimatedColor"
+                        />
+                        <GuiSlider
+                            :label="t('params.speed')"
+                            v-model="animatedParams.speed"
+                            :min="0.1"
+                            :max="5.0"
+                            :step="0.1"
+                            :precision="1"
+                            @update:modelValue="updateAnimatedSpeed"
+                        />
+                    </GuiSection>
+                </template>
 
-                <div class="form-group">
-                    <label>{{ t('params.speed') }} {{ animatedParams.speed.toFixed(1) }}</label>
-                    <input
-                        v-model.number="animatedParams.speed"
-                        type="range"
-                        min="0.1"
-                        max="5.0"
-                        step="0.1"
-                        @input="updateAnimatedSpeed"
-                    />
-                </div>
-            </div>
+                <!-- 扩散材质参数 -->
+                <template v-if="currentMaterialName === 'diffusion'">
+                    <GuiSection :title="t('shaderMaterial.materialParams')">
+                        <GuiColorPicker
+                            :label="t('shaderMaterial.baseColor')"
+                            v-model="diffusionParams.baseColor"
+                            @update:modelValue="updateDiffusionParams"
+                        />
+                        <GuiSlider
+                            :label="t('params.speed')"
+                            v-model="diffusionParams.speed"
+                            :min="0.1"
+                            :max="5.0"
+                            :step="0.1"
+                            :precision="1"
+                            @update:modelValue="updateDiffusionParams"
+                        />
+                        <GuiSlider
+                            :label="t('shaderMaterial.intensity')"
+                            v-model="diffusionParams.intensity"
+                            :min="0.1"
+                            :max="3.0"
+                            :step="0.1"
+                            :precision="1"
+                            @update:modelValue="updateDiffusionParams"
+                        />
+                    </GuiSection>
+                </template>
 
-            <div v-if="!isLoading && currentMaterialName === 'diffusion'" class="section">
-                <h4>{{ t('shaderMaterial.materialParams') }}</h4>
-
-                <div class="form-group">
-                    <label>{{ t('shaderMaterial.baseColor') }}</label>
-                    <input
-                        v-model="diffusionParams.baseColor"
-                        type="color"
-                        @input="updateDiffusionParams"
-                    />
-                </div>
-
-                <div class="form-group">
-                    <label>{{ t('params.speed') }} {{ diffusionParams.speed.toFixed(1) }}</label>
-                    <input
-                        v-model.number="diffusionParams.speed"
-                        type="range"
-                        min="0.1"
-                        max="5.0"
-                        step="0.1"
-                        @input="updateDiffusionParams"
-                    />
-                </div>
-
-                <div class="form-group">
-                    <label
-                        >{{ t('shaderMaterial.intensity') }}
-                        {{ diffusionParams.intensity.toFixed(1) }}</label
-                    >
-                    <input
-                        v-model.number="diffusionParams.intensity"
-                        type="range"
-                        min="0.1"
-                        max="3.0"
-                        step="0.1"
-                        @input="updateDiffusionParams"
-                    />
-                </div>
-            </div>
-
-            <!-- 材质列表 -->
-            <div v-if="!isLoading" class="section">
-                <h4>{{ t('shaderMaterial.materialList') }}</h4>
-                <div class="material-list">
-                    <div v-for="mat in materialList" :key="mat.name" class="material-item">
-                        <span class="material-name">{{ mat.name }}</span>
-                        <span class="material-badge">{{ t('shaderMaterial.shader') }}</span>
+                <!-- 材质列表 -->
+                <GuiSection :title="t('shaderMaterial.materialList')">
+                    <div class="material-list">
+                        <div v-for="mat in materialList" :key="mat.name" class="material-item">
+                            <span class="material-name">{{ mat.name }}</span>
+                            <span class="material-badge">{{ t('shaderMaterial.shader') }}</span>
+                        </div>
                     </div>
-                </div>
-            </div>
+                </GuiSection>
 
-            <!-- 性能统计 -->
-            <div v-if="!isLoading" class="section">
-                <h4>{{ t('stats.title') }}</h4>
-                <div class="stats">
-                    <div class="stat-item">
-                        <span class="stat-label">{{ t('stats.fps') }}:</span>
-                        <span class="stat-value">{{ fps }}</span>
-                    </div>
-                    <div class="stat-item">
-                        <span class="stat-label">{{ t('shaderMaterial.materialCount') }}:</span>
-                        <span class="stat-value">{{ materialList.length }}</span>
-                    </div>
-                </div>
-            </div>
+                <!-- 性能统计 -->
+                <GuiSection :title="t('stats.title')">
+                    <GuiInfoItem :label="t('stats.fps')" :value="fps" />
+                    <GuiInfoItem
+                        :label="t('shaderMaterial.materialCount')"
+                        :value="materialList.length"
+                    />
+                </GuiSection>
 
-            <!-- 事件日志 -->
-            <div v-if="!isLoading" class="section">
-                <h4>{{ t('controls.eventLog') }}</h4>
-                <div class="event-log">
-                    <div v-for="(log, index) in eventLogs" :key="index" class="log-item">
-                        <span class="log-time">{{ log.time }}</span>
-                        <span class="log-message">{{ log.message }}</span>
+                <!-- 事件日志 -->
+                <GuiSection :title="t('controls.eventLog')">
+                    <div class="event-log">
+                        <div v-for="(log, index) in eventLogs" :key="index" class="log-item">
+                            <span class="log-time">{{ log.time }}</span>
+                            <span class="log-message">{{ log.message }}</span>
+                        </div>
                     </div>
-                </div>
-            </div>
-        </div>
+                </GuiSection>
+            </GuiPanel>
+        </template>
     </SplitLayout>
 </template>
 
@@ -194,6 +151,15 @@ import { useI18n } from 'vue-i18n';
 import { Scene } from '@w3d/core';
 import { ShaderMaterial, ModelLoader, HDRLoader } from '@w3d/components';
 import * as THREE from 'three';
+import {
+    GuiPanel,
+    GuiSection,
+    GuiSlider,
+    GuiColorPicker,
+    GuiSelect,
+    GuiInfoItem,
+    GuiLoading
+} from '@/components/Gui';
 import SplitLayout from '../../components/SplitLayout.vue';
 
 const { t } = useI18n();
@@ -735,119 +701,15 @@ scene.start();
  */`;
 </script>
 
-<style scoped>
+<style scoped lang="less">
+@import '@/styles/gui.less';
+
 .scene-container {
     width: 100%;
     height: 100%;
 }
 
-.control-panel {
-    position: absolute;
-    top: 20px;
-    right: 20px;
-    width: 320px;
-    max-height: calc(100vh - 100px);
-    overflow-y: auto;
-    background: rgba(0, 0, 0, 0.8);
-    border-radius: 8px;
-    padding: 20px;
-    color: #fff;
-    font-family: 'Arial', sans-serif;
-    backdrop-filter: blur(10px);
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
-}
-
-.panel-title {
-    margin: 0 0 20px 0;
-    font-size: 18px;
-    font-weight: bold;
-    color: #00ff88;
-    border-bottom: 2px solid #00ff88;
-    padding-bottom: 10px;
-}
-
-.section {
-    margin-bottom: 20px;
-    padding-bottom: 15px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.section:last-child {
-    border-bottom: none;
-}
-
-.section h4 {
-    margin: 0 0 15px 0;
-    font-size: 14px;
-    color: #00ff88;
-    font-weight: 600;
-}
-
-.form-group {
-    margin-bottom: 15px;
-}
-
-.form-group label {
-    display: block;
-    margin-bottom: 8px;
-    font-size: 13px;
-    color: #ccc;
-}
-
-.form-group input[type='range'] {
-    width: 100%;
-    height: 4px;
-    border-radius: 2px;
-    background: rgba(255, 255, 255, 0.2);
-    outline: none;
-}
-
-.form-group input[type='range']::-webkit-slider-thumb {
-    appearance: none;
-    width: 16px;
-    height: 16px;
-    border-radius: 50%;
-    background: #00ff88;
-    cursor: pointer;
-}
-
-.form-group input[type='color'] {
-    width: 100%;
-    height: 40px;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-}
-
-.form-group select {
-    width: 100%;
-    padding: 8px;
-    background: rgba(255, 255, 255, 0.1);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    border-radius: 4px;
-    color: #fff;
-    font-size: 13px;
-    cursor: pointer;
-}
-
-.form-group select option {
-    background: #1a1a1a;
-    color: #fff;
-}
-
-.info-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 8px 0;
-    font-size: 13px;
-}
-
-.info-item .value {
-    color: #00ff88;
-    font-weight: 600;
-}
-
+/* 材质列表 */
 .material-list {
     display: flex;
     flex-direction: column;
@@ -878,38 +740,14 @@ scene.start();
     font-weight: 600;
 }
 
-.stats {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-}
-
-.stat-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 8px 12px;
-    background: rgba(255, 255, 255, 0.05);
-    border-radius: 4px;
-}
-
-.stat-label {
-    font-size: 13px;
-    color: #ccc;
-}
-
-.stat-value {
-    font-size: 14px;
-    font-weight: 600;
-    color: #00ff88;
-}
-
+/* 事件日志 */
 .event-log {
     max-height: 200px;
     overflow-y: auto;
     background: rgba(0, 0, 0, 0.3);
     border-radius: 4px;
     padding: 10px;
+    .scrollbar-style();
 }
 
 .log-item {
@@ -933,55 +771,5 @@ scene.start();
 .log-message {
     color: #ccc;
     flex: 1;
-}
-
-.loading-indicator {
-    text-align: center;
-    padding: 20px;
-}
-
-.spinner {
-    width: 40px;
-    height: 40px;
-    margin: 0 auto 15px;
-    border: 4px solid rgba(255, 255, 255, 0.1);
-    border-top-color: #00ff88;
-    border-radius: 50%;
-    animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-    to {
-        transform: rotate(360deg);
-    }
-}
-
-.loading-indicator p {
-    color: #00ff88;
-    font-size: 14px;
-    margin: 0;
-}
-
-/* 滚动条样式 */
-.control-panel::-webkit-scrollbar,
-.event-log::-webkit-scrollbar {
-    width: 6px;
-}
-
-.control-panel::-webkit-scrollbar-track,
-.event-log::-webkit-scrollbar-track {
-    background: rgba(255, 255, 255, 0.05);
-    border-radius: 3px;
-}
-
-.control-panel::-webkit-scrollbar-thumb,
-.event-log::-webkit-scrollbar-thumb {
-    background: rgba(0, 255, 136, 0.5);
-    border-radius: 3px;
-}
-
-.control-panel::-webkit-scrollbar-thumb:hover,
-.event-log::-webkit-scrollbar-thumb:hover {
-    background: rgba(0, 255, 136, 0.7);
 }
 </style>

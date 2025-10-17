@@ -4,231 +4,161 @@
         <div ref="sceneContainer" class="scene-container"></div>
 
         <!-- 控制面板 -->
-        <div class="control-panel">
-            <h3 class="panel-title">迁移线控制</h3>
-
+        <GuiPanel title="迁移线控制" width="wide">
             <!-- 全局配置 -->
-            <div class="section">
-                <h4>全局配置</h4>
+            <GuiSection title="全局配置">
+                <GuiColorPicker
+                    label="颜色"
+                    v-model="globalConfig.color"
+                    @update:modelValue="updateGlobalConfig"
+                />
 
-                <div class="form-group">
-                    <label>颜色:</label>
-                    <input v-model="globalConfig.color" type="color" @input="updateGlobalConfig" />
-                </div>
+                <GuiSlider
+                    label="持续时间"
+                    v-model="globalConfig.duration"
+                    :min="1000"
+                    :max="10000"
+                    :step="100"
+                    suffix="ms"
+                    @update:modelValue="updateGlobalConfig"
+                />
 
-                <div class="form-group">
-                    <label>持续时间: {{ globalConfig.duration }}ms</label>
-                    <input
-                        v-model.number="globalConfig.duration"
-                        type="range"
-                        min="1000"
-                        max="10000"
-                        step="100"
-                        @input="updateGlobalConfig"
-                    />
-                </div>
+                <GuiSlider
+                    label="速度"
+                    v-model="globalConfig.speed"
+                    :min="0.1"
+                    :max="3"
+                    :step="0.1"
+                    :precision="1"
+                    @update:modelValue="updateGlobalConfig"
+                />
 
-                <div class="form-group">
-                    <label>速度: {{ globalConfig.speed.toFixed(1) }}</label>
-                    <input
-                        v-model.number="globalConfig.speed"
-                        type="range"
-                        min="0.1"
-                        max="3"
-                        step="0.1"
-                        @input="updateGlobalConfig"
-                    />
-                </div>
+                <GuiCheckbox
+                    label="循环播放"
+                    v-model="globalConfig.loop"
+                    @update:modelValue="updateGlobalConfig"
+                />
 
-                <div class="form-group">
-                    <label>
-                        <input
-                            v-model="globalConfig.loop"
-                            type="checkbox"
-                            @change="updateGlobalConfig"
-                        />
-                        循环播放
-                    </label>
-                </div>
+                <GuiSlider
+                    label="发光强度"
+                    v-model="globalConfig.glowIntensity"
+                    :min="0"
+                    :max="3"
+                    :step="0.1"
+                    :precision="1"
+                    @update:modelValue="updateGlobalConfig"
+                />
 
-                <!-- Shader 特定配置 -->
-                <div class="form-group">
-                    <label>发光强度: {{ globalConfig.glowIntensity.toFixed(1) }}</label>
-                    <input
-                        v-model.number="globalConfig.glowIntensity"
-                        type="range"
-                        min="0"
-                        max="3"
-                        step="0.1"
-                        @input="updateGlobalConfig"
-                    />
-                </div>
-
-                <div class="form-group">
-                    <label>流动速度: {{ globalConfig.flowSpeed.toFixed(1) }}</label>
-                    <input
-                        v-model.number="globalConfig.flowSpeed"
-                        type="range"
-                        min="0.1"
-                        max="3"
-                        step="0.1"
-                        @input="updateGlobalConfig"
-                    />
-                </div>
-            </div>
+                <GuiSlider
+                    label="流动速度"
+                    v-model="globalConfig.flowSpeed"
+                    :min="0.1"
+                    :max="3"
+                    :step="0.1"
+                    :precision="1"
+                    @update:modelValue="updateGlobalConfig"
+                />
+            </GuiSection>
 
             <!-- 区域块配置 -->
-            <div class="section">
-                <h4>区域块配置</h4>
+            <GuiSection title="区域块配置">
+                <GuiColorPicker label="区域颜色" v-model="areaConfig.color" />
 
-                <div class="form-group">
-                    <label>区域颜色:</label>
-                    <input v-model="areaConfig.color" type="color" />
+                <GuiSlider
+                    label="墙壁高度"
+                    v-model="areaConfig.wallHeight"
+                    :min="1"
+                    :max="20"
+                    :step="1"
+                />
+
+                <GuiSlider
+                    label="边框宽度"
+                    v-model="areaConfig.borderWidth"
+                    :min="1"
+                    :max="10"
+                    :step="1"
+                />
+
+                <GuiSlider
+                    label="动画速度"
+                    v-model="areaConfig.animationSpeed"
+                    :min="0.1"
+                    :max="3"
+                    :step="0.1"
+                    :precision="1"
+                />
+
+                <GuiCheckbox label="显示墙壁" v-model="areaConfig.showWall" />
+
+                <GuiSelect
+                    label="形状类型"
+                    v-model="areaShapeType"
+                    :options="[
+                        { value: 'square', label: '正方形' },
+                        { value: 'triangle', label: '三角形' },
+                        { value: 'hexagon', label: '六边形' },
+                        { value: 'random', label: '随机多边形' }
+                    ]"
+                />
+
+                <div class="button-group">
+                    <GuiButton label="添加区域块" @click="addRandomArea" />
+                    <GuiButton label="清除所有区域块" variant="secondary" @click="clearAllAreas" />
                 </div>
-
-                <div class="form-group">
-                    <label>墙壁高度: {{ areaConfig.wallHeight }}</label>
-                    <input
-                        v-model.number="areaConfig.wallHeight"
-                        type="range"
-                        min="1"
-                        max="20"
-                        step="1"
-                    />
-                </div>
-
-                <div class="form-group">
-                    <label>墙壁透明度: {{ areaConfig.wallOpacity.toFixed(2) }}</label>
-                    <input
-                        v-model.number="areaConfig.wallOpacity"
-                        type="range"
-                        min="0.1"
-                        max="1"
-                        step="0.05"
-                    />
-                </div>
-
-                <div class="form-group">
-                    <label>边框宽度: {{ areaConfig.borderWidth }}</label>
-                    <input
-                        v-model.number="areaConfig.borderWidth"
-                        type="range"
-                        min="1"
-                        max="10"
-                        step="1"
-                    />
-                </div>
-
-                <div class="form-group">
-                    <label>动画速度: {{ areaConfig.animationSpeed.toFixed(1) }}</label>
-                    <input
-                        v-model.number="areaConfig.animationSpeed"
-                        type="range"
-                        min="0.1"
-                        max="3"
-                        step="0.1"
-                    />
-                </div>
-
-                <div class="form-group">
-                    <label>
-                        <input v-model="areaConfig.showWall" type="checkbox" />
-                        显示墙壁
-                    </label>
-                </div>
-
-                <div class="form-group">
-                    <label>形状类型:</label>
-                    <select v-model="areaShapeType">
-                        <option value="square">正方形</option>
-                        <option value="triangle">三角形</option>
-                        <option value="hexagon">六边形</option>
-                        <option value="random">随机多边形</option>
-                    </select>
-                </div>
-
-                <button
-                    @click="addRandomArea"
-                    class="btn-primary"
-                    style="width: 100%; margin-bottom: 10px"
-                >
-                    添加区域块
-                </button>
-
-                <button @click="clearAllAreas" class="btn-danger" style="width: 100%">
-                    清除所有区域块
-                </button>
 
                 <!-- 区域块列表 -->
-                <div v-if="areaList.length > 0" style="margin-top: 15px">
-                    <h5 style="font-size: 12px; color: #00ff00; margin-bottom: 8px">
-                        区域块列表 ({{ areaList.length }})
-                    </h5>
-                    <div v-for="area in areaList" :key="area.id" class="area-item">
-                        <span class="area-name">{{ area.userData?.name || area.id }}</span>
-                        <button @click="removeArea(area.id)" class="btn-remove">删除</button>
+                <template v-if="areaList.length > 0">
+                    <div class="area-list">
+                        <div v-for="area in areaList" :key="area.id" class="area-item">
+                            <span class="area-name">{{ area.userData?.name || area.id }}</span>
+                            <GuiButton label="删除" size="small" @click="removeArea(area.id)" />
+                        </div>
                     </div>
-                </div>
-            </div>
+                </template>
+            </GuiSection>
 
-            <!-- 控制按钮 -->
-            <div class="section">
-                <h4>动画控制</h4>
-                <div class="control-buttons">
-                    <button @click="startAll" class="btn-primary">全部播放</button>
-                    <button @click="pauseAll" class="btn-secondary">全部暂停</button>
-                    <button @click="stopAll" class="btn-secondary">全部停止</button>
-                    <button @click="clearAll" class="btn-danger">清除全部</button>
+            <!-- 动画控制 -->
+            <GuiSection title="动画控制">
+                <div class="button-group">
+                    <GuiButton label="全部播放" @click="startAll" />
+                    <GuiButton label="全部暂停" variant="secondary" @click="pauseAll" />
+                    <GuiButton label="全部停止" variant="secondary" @click="stopAll" />
+                    <GuiButton label="清除全部" variant="secondary" @click="clearAll" />
                 </div>
-            </div>
+            </GuiSection>
 
             <!-- 添加迁移线 -->
-            <div class="section">
-                <h4>添加迁移线</h4>
-                <div class="form-group">
-                    <label>路径类型:</label>
-                    <select v-model="newLinePathType">
-                        <option value="simple">简单路径 (A→B)</option>
-                        <option value="multi">多段路径 (A→B→C)</option>
-                        <option value="curve">曲线路径</option>
-                    </select>
-                </div>
-                <button @click="addRandomLine" class="btn-primary">添加随机迁移线</button>
-            </div>
+            <GuiSection title="添加迁移线">
+                <GuiSelect
+                    label="路径类型"
+                    v-model="newLinePathType"
+                    :options="[
+                        { value: 'simple', label: '简单路径 (A→B)' },
+                        { value: 'multi', label: '多段路径 (A→B→C)' },
+                        { value: 'curve', label: '曲线路径' }
+                    ]"
+                />
+                <GuiButton label="添加随机迁移线" @click="addRandomLine" />
+            </GuiSection>
 
             <!-- 性能统计 -->
-            <div class="section">
-                <h4>性能统计</h4>
-                <div class="stats">
-                    <div class="stat-item">
-                        <span>FPS:</span>
-                        <span class="value">{{ fps }}</span>
-                    </div>
-                    <div class="stat-item">
-                        <span>迁移线数量:</span>
-                        <span class="value">{{ lineCount }}</span>
-                    </div>
-                    <div class="stat-item">
-                        <span>区域块数量:</span>
-                        <span class="value">{{ areaCount }}</span>
-                    </div>
-                    <div class="stat-item">
-                        <span>播放中:</span>
-                        <span class="value">{{ playingCount }}</span>
-                    </div>
-                </div>
-            </div>
+            <GuiSection title="性能统计">
+                <GuiInfoItem label="FPS" :value="fps" />
+                <GuiInfoItem label="迁移线数量" :value="lineCount" />
+                <GuiInfoItem label="区域块数量" :value="areaCount" />
+                <GuiInfoItem label="播放中" :value="playingCount" />
+            </GuiSection>
 
             <!-- 事件日志 -->
-            <div class="section">
-                <h4>事件日志</h4>
+            <GuiSection title="事件日志">
                 <div class="event-log">
                     <div v-for="(log, index) in eventLogs" :key="index" class="log-item">
                         {{ log }}
                     </div>
                 </div>
-            </div>
-        </div>
+            </GuiSection>
+        </GuiPanel>
     </SplitLayout>
 </template>
 
@@ -236,6 +166,16 @@
 import { ref, reactive, onMounted, onUnmounted } from 'vue';
 import { Scene } from '@w3d/core';
 import { MigrationLine, GridHelper } from '@w3d/components';
+import {
+    GuiPanel,
+    GuiSection,
+    GuiColorPicker,
+    GuiSlider,
+    GuiCheckbox,
+    GuiSelect,
+    GuiButton,
+    GuiInfoItem
+} from '@/components/Gui';
 import * as THREE from 'three';
 import SplitLayout from '../../components/SplitLayout.vue';
 
@@ -854,235 +794,60 @@ onUnmounted(() => {
 });
 </script>
 
-<style scoped>
+<style scoped lang="less">
+@import '@/styles/gui.less';
 .scene-container {
     width: 100%;
     height: 100%;
     position: relative;
 }
 
-.control-panel {
-    position: absolute;
-    top: 20px;
-    right: 20px;
-    background: rgba(0, 0, 0, 0.85);
-    padding: 20px;
-    border-radius: 8px;
-    color: white;
-    max-width: 340px;
-    max-height: calc(100% - 40px);
-    overflow-y: auto;
-    font-size: 14px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
-}
-
-.panel-title {
-    margin: 0 0 15px 0;
-    font-size: 18px;
-    font-weight: bold;
-    border-bottom: 2px solid #00ff00;
-    padding-bottom: 10px;
-}
-
-.section {
-    margin-bottom: 20px;
-    padding-bottom: 15px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.section:last-child {
-    border-bottom: none;
-}
-
-.section h4 {
-    margin: 0 0 10px 0;
-    font-size: 14px;
-    color: #00ff00;
-}
-
-.form-group {
-    margin-bottom: 12px;
-}
-
-.form-group label {
-    display: block;
-    margin-bottom: 5px;
-    font-size: 12px;
-    color: #aaa;
-}
-
-.form-group input[type='color'] {
-    width: 100%;
-    height: 30px;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-}
-
-.form-group input[type='range'] {
-    width: 100%;
-}
-
-.form-group input[type='checkbox'] {
-    margin-right: 8px;
-}
-
-.form-group select {
-    width: 100%;
-    padding: 6px 10px;
-    background: rgba(255, 255, 255, 0.1);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    border-radius: 4px;
-    color: white;
-    font-size: 12px;
-}
-
-.control-buttons {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 8px;
-}
-
-.btn-primary {
-    padding: 8px 16px;
-    background: #00ff00;
-    color: black;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 12px;
-    font-weight: bold;
-    transition: background 0.2s;
-}
-
-.btn-primary:hover {
-    background: #00cc00;
-}
-
-.btn-secondary {
-    padding: 8px 16px;
-    background: rgba(255, 255, 255, 0.1);
-    color: white;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 12px;
-    transition: all 0.2s;
-}
-
-.btn-secondary:hover {
-    background: rgba(255, 255, 255, 0.2);
-}
-
-.btn-danger {
-    padding: 8px 16px;
-    background: rgba(255, 107, 107, 0.3);
-    color: white;
-    border: 1px solid #ff6b6b;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 12px;
-    transition: all 0.2s;
-    grid-column: 1 / -1;
-}
-
-.btn-danger:hover {
-    background: rgba(255, 107, 107, 0.5);
-}
-
-.stats {
+.button-group {
     display: flex;
     flex-direction: column;
     gap: 8px;
 }
 
-.stat-item {
+.area-list {
+    max-height: 200px;
+    overflow-y: auto;
+    .scrollbar-style();
+}
+
+.area-item {
     display: flex;
     justify-content: space-between;
-    padding: 6px 10px;
+    align-items: center;
+    padding: 8px;
     background: rgba(255, 255, 255, 0.05);
     border-radius: 4px;
+    margin-bottom: 4px;
     font-size: 12px;
 }
 
-.stat-item .value {
-    color: #00ff00;
-    font-weight: bold;
+.area-name {
+    flex: 1;
+    color: #00ff88;
 }
 
 .event-log {
     max-height: 150px;
     overflow-y: auto;
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 4px;
+    padding: 8px;
     font-size: 11px;
     font-family: monospace;
+    .scrollbar-style();
 }
 
 .log-item {
-    padding: 4px 0;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    padding: 2px 0;
     color: #aaa;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 .log-item:last-child {
     border-bottom: none;
-}
-
-/* 区域块列表样式 */
-.area-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 6px 10px;
-    background: rgba(255, 255, 255, 0.05);
-    border-radius: 4px;
-    font-size: 12px;
-    margin-bottom: 6px;
-}
-
-.area-name {
-    color: #00ff00;
-    flex: 1;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
-
-.btn-remove {
-    padding: 2px 8px;
-    font-size: 11px;
-    background: rgba(255, 0, 0, 0.3);
-    color: white;
-    border: 1px solid rgba(255, 0, 0, 0.5);
-    border-radius: 3px;
-    cursor: pointer;
-    transition: all 0.2s;
-}
-
-.btn-remove:hover {
-    background: rgba(255, 0, 0, 0.5);
-    border-color: rgba(255, 0, 0, 0.8);
-}
-
-/* 滚动条样式 */
-.control-panel::-webkit-scrollbar,
-.event-log::-webkit-scrollbar {
-    width: 6px;
-}
-
-.control-panel::-webkit-scrollbar-track,
-.event-log::-webkit-scrollbar-track {
-    background: rgba(255, 255, 255, 0.05);
-    border-radius: 3px;
-}
-
-.control-panel::-webkit-scrollbar-thumb,
-.event-log::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.2);
-    border-radius: 3px;
-}
-
-.control-panel::-webkit-scrollbar-thumb:hover,
-.event-log::-webkit-scrollbar-thumb:hover {
-    background: rgba(255, 255, 255, 0.3);
 }
 </style>

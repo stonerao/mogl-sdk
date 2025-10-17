@@ -2,243 +2,182 @@
     <SplitLayout :code="sourceCode" language="javascript" title="04 - Model Loader">
         <div class="scene-container" ref="sceneContainer">
             <!-- 加载状态 -->
-            <div v-if="isLoading" class="loading-overlay">
-                <div class="loading-content">
-                    <div class="loading-spinner"></div>
-                    <div class="loading-text">{{ loadingText }}</div>
-                    <div class="loading-progress">
-                        <div class="progress-bar">
-                            <div
-                                class="progress-fill"
-                                :style="{ width: loadingProgress + '%' }"
-                            ></div>
-                        </div>
-                        <span class="progress-text">{{ loadingProgress }}%</span>
-                    </div>
-                </div>
-            </div>
+            <template v-if="isLoading">
+                <GuiLoading :progress="loadingProgress" :text="loadingText" />
+            </template>
 
             <!-- 控制面板 -->
-            <div class="control-panel">
-                <!-- 模型加载 -->
-                <div class="control-section">
-                    <h4>模型加载</h4>
-                    <div class="model-controls">
-                        <div class="input-group">
-                            <label>模型 URL</label>
-                            <input
-                                type="text"
-                                v-model="modelConfig.url"
-                                placeholder="输入模型文件 URL"
-                                @keyup.enter="loadModel"
+            <template v-if="!isLoading">
+                <GuiPanel title="模型加载器" width="wide">
+                    <!-- 模型加载 -->
+                    <GuiSection title="模型加载">
+                        <GuiTextInput
+                            label="模型 URL"
+                            v-model="modelConfig.url"
+                            placeholder="输入模型文件 URL"
+                            @keyup.enter="loadModel"
+                        />
+                        <div class="button-group">
+                            <GuiButton
+                                label="加载模型"
+                                :disabled="!modelConfig.url"
+                                @click="loadModel"
+                            />
+                            <GuiButton
+                                label="清除模型"
+                                variant="secondary"
+                                :disabled="!currentModel"
+                                @click="clearModel"
                             />
                         </div>
-                        <div class="button-group">
-                            <button
-                                @click="loadModel"
-                                class="load-btn"
-                                :disabled="!modelConfig.url"
-                            >
-                                加载模型
-                            </button>
-                            <button @click="clearModel" class="clear-btn" :disabled="!currentModel">
-                                清除模型
-                            </button>
-                        </div>
-                    </div>
-                </div>
+                    </GuiSection>
 
-                <!-- 模型变换 -->
-                <div class="control-section" v-if="currentModel">
-                    <h4>模型变换</h4>
-                    <div class="transform-controls">
-                        <!-- 位置控制 -->
-                        <div class="transform-group">
-                            <label>位置</label>
-                            <div class="position-controls">
-                                <div class="input-group">
-                                    <label>X</label>
-                                    <input
-                                        type="number"
-                                        v-model.number="modelTransform.position.x"
-                                        @input="updateModelTransform"
-                                        step="0.1"
-                                    />
-                                </div>
-                                <div class="input-group">
-                                    <label>Y</label>
-                                    <input
-                                        type="number"
-                                        v-model.number="modelTransform.position.y"
-                                        @input="updateModelTransform"
-                                        step="0.1"
-                                    />
-                                </div>
-                                <div class="input-group">
-                                    <label>Z</label>
-                                    <input
-                                        type="number"
-                                        v-model.number="modelTransform.position.z"
-                                        @input="updateModelTransform"
-                                        step="0.1"
-                                    />
-                                </div>
+                    <!-- 模型变换 -->
+                    <template v-if="currentModel">
+                        <GuiSection title="模型变换">
+                            <!-- 位置控制 -->
+                            <div class="position-grid">
+                                <GuiNumberInput
+                                    label="X"
+                                    v-model="modelTransform.position.x"
+                                    :step="0.1"
+                                    @update:modelValue="updateModelTransform"
+                                />
+                                <GuiNumberInput
+                                    label="Y"
+                                    v-model="modelTransform.position.y"
+                                    :step="0.1"
+                                    @update:modelValue="updateModelTransform"
+                                />
+                                <GuiNumberInput
+                                    label="Z"
+                                    v-model="modelTransform.position.z"
+                                    :step="0.1"
+                                    @update:modelValue="updateModelTransform"
+                                />
                             </div>
-                        </div>
 
-                        <!-- 旋转控制 -->
-                        <div class="transform-group">
-                            <label>旋转 (度)</label>
-                            <div class="rotation-controls">
-                                <div class="param-group">
-                                    <label>X 轴</label>
-                                    <input
-                                        type="range"
-                                        v-model.number="modelTransform.rotation.x"
-                                        @input="updateModelTransform"
-                                        min="0"
-                                        max="360"
-                                        step="1"
-                                    />
-                                    <span>{{ modelTransform.rotation.x }}°</span>
-                                </div>
-                                <div class="param-group">
-                                    <label>Y 轴</label>
-                                    <input
-                                        type="range"
-                                        v-model.number="modelTransform.rotation.y"
-                                        @input="updateModelTransform"
-                                        min="0"
-                                        max="360"
-                                        step="1"
-                                    />
-                                    <span>{{ modelTransform.rotation.y }}°</span>
-                                </div>
-                                <div class="param-group">
-                                    <label>Z 轴</label>
-                                    <input
-                                        type="range"
-                                        v-model.number="modelTransform.rotation.z"
-                                        @input="updateModelTransform"
-                                        min="0"
-                                        max="360"
-                                        step="1"
-                                    />
-                                    <span>{{ modelTransform.rotation.z }}°</span>
-                                </div>
-                            </div>
-                        </div>
+                            <!-- 旋转控制 -->
+                            <GuiSlider
+                                label="旋转 X 轴"
+                                v-model="modelTransform.rotation.x"
+                                :min="0"
+                                :max="360"
+                                :step="1"
+                                suffix="°"
+                                @update:modelValue="updateModelTransform"
+                            />
+                            <GuiSlider
+                                label="旋转 Y 轴"
+                                v-model="modelTransform.rotation.y"
+                                :min="0"
+                                :max="360"
+                                :step="1"
+                                suffix="°"
+                                @update:modelValue="updateModelTransform"
+                            />
+                            <GuiSlider
+                                label="旋转 Z 轴"
+                                v-model="modelTransform.rotation.z"
+                                :min="0"
+                                :max="360"
+                                :step="1"
+                                suffix="°"
+                                @update:modelValue="updateModelTransform"
+                            />
 
-                        <!-- 缩放控制 -->
-                        <div class="transform-group">
-                            <label>缩放</label>
-                            <div class="scale-controls">
-                                <div class="param-group">
-                                    <label>统一缩放</label>
-                                    <input
-                                        type="range"
-                                        v-model.number="modelTransform.scale.uniform"
-                                        @input="updateUniformScale"
-                                        min="0.1"
-                                        max="3"
-                                        step="0.1"
-                                    />
-                                    <span>{{ modelTransform.scale.uniform }}x</span>
-                                </div>
-                                <div class="setting-group">
-                                    <label>
-                                        <input
-                                            type="checkbox"
-                                            v-model="modelTransform.scale.lockAspect"
-                                            @change="updateModelTransform"
-                                        />
-                                        锁定比例
-                                    </label>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                            <!-- 缩放控制 -->
+                            <GuiSlider
+                                label="统一缩放"
+                                v-model="modelTransform.scale.uniform"
+                                :min="0.1"
+                                :max="3"
+                                :step="0.1"
+                                :precision="1"
+                                suffix="x"
+                                @update:modelValue="updateUniformScale"
+                            />
+                            <GuiCheckbox
+                                label="锁定比例"
+                                v-model="modelTransform.scale.lockAspect"
+                                @update:modelValue="updateModelTransform"
+                            />
+                        </GuiSection>
+                    </template>
 
-                <!-- 交互事件配置 -->
-                <div class="control-section" v-if="currentModel">
-                    <h4>交互事件配置</h4>
-                    <div class="interaction-controls">
-                        <div class="setting-group">
-                            <label>交互模式</label>
-                            <select
+                    <!-- 交互事件配置 -->
+                    <template v-if="currentModel">
+                        <GuiSection title="交互事件配置">
+                            <GuiSelect
+                                label="交互模式"
                                 v-model="interactionConfig.mode"
-                                @change="updateInteractionMode"
-                            >
-                                <option value="disabled">禁用</option>
-                                <option value="all">全部启用</option>
-                                <option value="selected">选择性启用</option>
-                            </select>
-                        </div>
+                                :options="[
+                                    { value: 'disabled', label: '禁用' },
+                                    { value: 'all', label: '全部启用' },
+                                    { value: 'selected', label: '选择性启用' }
+                                ]"
+                                @update:modelValue="updateInteractionMode"
+                            />
 
-                        <div v-if="interactionConfig.mode === 'selected'" class="mesh-selection">
-                            <label>可交互 Mesh</label>
-                            <div class="mesh-list">
-                                <div
-                                    v-for="mesh in availableMeshes"
-                                    :key="mesh.name"
-                                    class="mesh-item"
-                                >
-                                    <label>
-                                        <input
-                                            type="checkbox"
-                                            :value="mesh.name"
-                                            v-model="interactionConfig.selectedMeshes"
-                                            @change="updateInteractionMode"
+                            <template v-if="interactionConfig.mode === 'selected'">
+                                <div class="mesh-list">
+                                    <div
+                                        v-for="mesh in availableMeshes"
+                                        :key="mesh.name"
+                                        class="mesh-item"
+                                    >
+                                        <GuiCheckbox
+                                            :label="mesh.name"
+                                            :modelValue="
+                                                interactionConfig.selectedMeshes.includes(mesh.name)
+                                            "
+                                            @update:modelValue="
+                                                (val) => {
+                                                    if (val) {
+                                                        interactionConfig.selectedMeshes.push(
+                                                            mesh.name
+                                                        );
+                                                    } else {
+                                                        interactionConfig.selectedMeshes =
+                                                            interactionConfig.selectedMeshes.filter(
+                                                                (m) => m !== mesh.name
+                                                            );
+                                                    }
+                                                    updateInteractionMode();
+                                                }
+                                            "
                                         />
-                                        {{ mesh.name }}
-                                    </label>
+                                    </div>
                                 </div>
-                            </div>
-                        </div>
+                            </template>
 
-                        <div class="interaction-info">
-                            <div class="info-item">
-                                <span>当前可交互对象：</span>
-                                <span class="info-value">{{ currentInteractiveCount }}</span>
-                            </div>
-                            <div v-if="performanceWarning" class="warning">
-                                ⚠️ {{ performanceWarning }}
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                            <GuiInfoItem label="当前可交互对象" :value="currentInteractiveCount" />
+                            <template v-if="performanceWarning">
+                                <div class="warning">⚠️ {{ performanceWarning }}</div>
+                            </template>
+                        </GuiSection>
+                    </template>
 
-                <!-- 模型信息 -->
-                <div class="control-section" v-if="currentModel">
-                    <h4>模型信息</h4>
-                    <div class="model-info">
-                        <div class="info-item">
-                            <span>Mesh 数量：</span>
-                            <span class="info-value">{{ modelInfo.meshCount }}</span>
-                        </div>
-                        <div class="info-item">
-                            <span>材质数量：</span>
-                            <span class="info-value">{{ modelInfo.materialCount }}</span>
-                        </div>
-                        <div class="info-item">
-                            <span>顶点数量：</span>
-                            <span class="info-value">{{ modelInfo.vertexCount }}</span>
-                        </div>
-                        <div class="info-item">
-                            <span>文件大小：</span>
-                            <span class="info-value">{{ modelInfo.fileSize }}</span>
-                        </div>
-                    </div>
-                </div>
+                    <!-- 模型信息 -->
+                    <template v-if="currentModel">
+                        <GuiSection title="模型信息">
+                            <GuiInfoItem label="Mesh 数量" :value="modelInfo.meshCount" />
+                            <GuiInfoItem label="材质数量" :value="modelInfo.materialCount" />
+                            <GuiInfoItem label="顶点数量" :value="modelInfo.vertexCount" />
+                            <GuiInfoItem label="文件大小" :value="modelInfo.fileSize" />
+                        </GuiSection>
+                    </template>
 
-                <!-- 重置按钮 -->
-                <div class="control-section">
-                    <button @click="resetTransform" class="reset-btn" :disabled="!currentModel">
-                        重置变换
-                    </button>
-                </div>
-            </div>
+                    <!-- 重置按钮 -->
+                    <GuiSection title="操作">
+                        <GuiButton
+                            label="重置变换"
+                            :disabled="!currentModel"
+                            @click="resetTransform"
+                        />
+                    </GuiSection>
+                </GuiPanel>
+            </template>
         </div>
     </SplitLayout>
 </template>
@@ -247,6 +186,19 @@
 import { ref, reactive, onMounted, onUnmounted } from 'vue';
 import { Scene } from '@w3d/core';
 import { ModelLoader, GridHelper } from '@w3d/components';
+import {
+    GuiPanel,
+    GuiSection,
+    GuiSlider,
+    GuiColorPicker,
+    GuiSelect,
+    GuiCheckbox,
+    GuiButton,
+    GuiInfoItem,
+    GuiLoading,
+    GuiNumberInput,
+    GuiTextInput
+} from '@/components/Gui';
 import SplitLayout from '../../components/SplitLayout.vue';
 import * as THREE from 'three';
 
@@ -257,7 +209,7 @@ const loadingProgress = ref(0);
 
 // 模型配置
 const modelConfig = reactive({
-    url: '/models/kache.glb'
+    url: '/models/ShaderBall.glb'
 });
 
 // 模型变换状态
@@ -331,7 +283,7 @@ scene.add('GridHelper', {
 // 1. 基础模型加载
 const model = await scene.add('ModelLoader', {
   name: 'building',
-  url: './models/kache.glb',
+  url: './models/ShaderBall.glb',
 
   // 交互事件配置 (interactiveMeshes)
   // false (默认) - 禁用所有事件，最佳性能
@@ -348,7 +300,7 @@ const model = await scene.add('ModelLoader', {
 // 2. 选择性启用事件（推荐）
 const interactiveModel = await scene.add('ModelLoader', {
   name: 'interactive-building',
-  url: '/models/kache.glb',
+  url: '/models/ShaderBall.glb',
   interactiveMeshes: ['行政大楼', '办公楼A', '停车场']
 });
 
@@ -702,7 +654,9 @@ const cleanup = () => {
 };
 </script>
 
-<style scoped>
+<style scoped lang="less">
+@import '@/styles/gui.less';
+
 /* 场景容器 */
 .scene-container {
     position: relative;
@@ -712,271 +666,37 @@ const cleanup = () => {
     overflow: hidden;
 }
 
-/* 加载状态 */
-.loading-overlay {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(0, 0, 0, 0.8);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 1000;
-}
-
-.loading-content {
-    text-align: center;
-    color: white;
-}
-
-.loading-spinner {
-    width: 40px;
-    height: 40px;
-    border: 4px solid rgba(255, 255, 255, 0.3);
-    border-top: 4px solid #00ff88;
-    border-radius: 50%;
-    animation: spin 1s linear infinite;
-    margin: 0 auto 20px;
-}
-
-.loading-text {
-    font-size: 16px;
-    margin-bottom: 15px;
-    color: #ffffff;
-}
-
-.loading-progress {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    justify-content: center;
-}
-
-.progress-bar {
-    width: 200px;
-    height: 4px;
-    background: rgba(255, 255, 255, 0.2);
-    border-radius: 2px;
-    overflow: hidden;
-}
-
-.progress-fill {
-    height: 100%;
-    background: linear-gradient(90deg, #00ff88, #00cc6a);
-    border-radius: 2px;
-    transition: width 0.3s ease;
-}
-
-.progress-text {
-    font-size: 14px;
-    color: #00ff88;
-    min-width: 40px;
-}
-
-/* 控制面板 */
-.control-panel {
-    position: absolute;
-    top: 20px;
-    right: 20px;
-    width: 320px;
-    max-height: calc(100vh - 40px);
-    background: rgba(30, 30, 30, 0.95);
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 12px;
-    padding: 20px;
-    overflow-y: auto;
-    z-index: 100;
-}
-
-.control-section {
-    margin-bottom: 25px;
-}
-
-.control-section:last-child {
-    margin-bottom: 0;
-}
-
-.control-section h4 {
-    margin: 0 0 15px 0;
-    color: #00ff88;
-    font-size: 16px;
-    font-weight: 600;
-    border-bottom: 1px solid rgba(0, 255, 136, 0.3);
-    padding-bottom: 8px;
-}
-
-/* 模型控制 */
-.model-controls {
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-}
-
-.input-group {
-    display: flex;
-    flex-direction: column;
-    gap: 5px;
-}
-
-.input-group label {
-    color: #ffffff;
-    font-size: 14px;
-    font-weight: 500;
-}
-
-.input-group input[type='text'],
-.input-group input[type='number'] {
-    padding: 8px 12px;
-    background: rgba(255, 255, 255, 0.1);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    border-radius: 6px;
-    color: #ffffff;
-    font-size: 14px;
-    transition: all 0.3s ease;
-}
-
-.input-group input[type='text']:focus,
-.input-group input[type='number']:focus {
-    outline: none;
-    border-color: #00ff88;
-    background: rgba(0, 255, 136, 0.1);
-}
-
-.button-group {
-    display: flex;
-    gap: 10px;
-}
-
-.load-btn,
-.clear-btn,
-.reset-btn {
-    flex: 1;
-    padding: 10px 16px;
-    border: none;
-    border-radius: 6px;
-    font-size: 14px;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all 0.3s ease;
-}
-
-.load-btn {
-    background: linear-gradient(135deg, #00ff88, #00cc6a);
-    color: #000000;
-}
-
-.load-btn:hover:not(:disabled) {
-    background: linear-gradient(135deg, #00cc6a, #00aa55);
-    transform: translateY(-1px);
-}
-
-.clear-btn,
-.reset-btn {
-    background: rgba(255, 255, 255, 0.1);
-    color: #ffffff;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-}
-
-.clear-btn:hover:not(:disabled),
-.reset-btn:hover:not(:disabled) {
-    background: rgba(255, 255, 255, 0.2);
-    transform: translateY(-1px);
-}
-
-.load-btn:disabled,
-.clear-btn:disabled,
-.reset-btn:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-    transform: none;
-}
-
-/* 变换控制 */
-.transform-controls {
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-}
-
-.transform-group {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-}
-
-.transform-group > label {
-    color: #ffffff;
-    font-size: 14px;
-    font-weight: 500;
-}
-
-.position-controls {
+/* 位置网格布局 */
+.position-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     gap: 10px;
+    margin-bottom: 15px;
 }
 
-.position-controls .input-group {
-    gap: 3px;
-}
-
-.position-controls .input-group label {
-    font-size: 12px;
-    text-align: center;
-}
-
-.rotation-controls,
-.scale-controls {
+/* Mesh 列表 */
+.mesh-list {
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 8px;
+    margin-bottom: 15px;
 }
 
-.param-group {
-    display: flex;
-    align-items: center;
-    gap: 10px;
+.mesh-item {
+    padding: 8px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 6px;
 }
 
-.param-group label {
-    color: #ffffff;
+/* 警告信息 */
+.warning {
+    padding: 10px;
+    background: rgba(255, 165, 0, 0.1);
+    border-left: 3px solid #ffa500;
+    border-radius: 4px;
+    color: #ffa500;
     font-size: 12px;
-    min-width: 60px;
-}
-
-.param-group input[type='range'] {
-    flex: 1;
-    height: 4px;
-    background: rgba(255, 255, 255, 0.2);
-    border-radius: 2px;
-    outline: none;
-    cursor: pointer;
-}
-
-.param-group input[type='range']::-webkit-slider-thumb {
-    appearance: none;
-    width: 16px;
-    height: 16px;
-    background: #00ff88;
-    border-radius: 50%;
-    cursor: pointer;
-}
-
-.param-group input[type='range']::-moz-range-thumb {
-    width: 16px;
-    height: 16px;
-    background: #00ff88;
-    border-radius: 50%;
-    border: none;
-    cursor: pointer;
-}
-
-.param-group span {
-    color: #00ff88;
-    font-size: 12px;
+    margin-top: 10px;
     min-width: 40px;
     text-align: right;
 }
