@@ -1,19 +1,25 @@
 import { Component } from '@w3d/core';
 import * as THREE from 'three';
+import {
+    createPresetMaterial,
+    hasPreset,
+    getPresetDefaults,
+    getAvailablePresets
+} from './presets/index.js';
 
 /**
  * ShaderMaterial 着色器材质管理组件
- * 
+ *
  * @class ShaderMaterial
  * @extends Component
  * @description 管理多个自定义着色器材质，支持创建、获取、删除等操作
- * 
+ *
  * @example
  * // 创建 ShaderMaterial 组件
  * const shaderMaterial = await scene.add('ShaderMaterial', {
  *     name: 'shaderManager'
  * });
- * 
+ *
  * // 创建一个着色器材质
  * const material = shaderMaterial.createMaterial('basicShader', {
  *     vertexShader: vertexShaderCode,
@@ -23,10 +29,10 @@ import * as THREE from 'three';
  *         color: { value: new THREE.Color(0x00ff00) }
  *     }
  * });
- * 
+ *
  * // 获取材质
  * const mat = shaderMaterial.getMaterial('basicShader');
- * 
+ *
  * // 删除材质
  * shaderMaterial.removeMaterial('basicShader');
  */
@@ -72,9 +78,14 @@ export class ShaderMaterial extends Component {
 
     /**
      * 创建着色器材质
-     * 
+     *
+     * 支持两种调用方式：
+     * 1. 自定义材质：传入完整的 shader 配置
+     * 2. 预设材质：使用 preset 参数指定预设材质类型
+     *
      * @param {string} name - 材质的唯一标识名称
      * @param {Object} config - 材质配置
+     * @param {string} config.preset - 预设材质类型（可选）：'basicColor', 'gradient', 'animated'
      * @param {string} config.vertexShader - 顶点着色器代码（GLSL）
      * @param {string} config.fragmentShader - 片段着色器代码（GLSL）
      * @param {Object} config.uniforms - 着色器 uniform 变量
@@ -84,55 +95,62 @@ export class ShaderMaterial extends Component {
      * @param {number} config.depthTest - 是否深度测试，默认 true
      * @param {number} config.depthWrite - 是否写入深度，默认 true
      * @returns {THREE.ShaderMaterial} 创建的着色器材质
-     * 
+     *
      * @example
-     * const material = shaderMaterial.createMaterial('gradientShader', {
-     *     vertexShader: `
-     *         varying vec2 vUv;
-     *         void main() {
-     *             vUv = uv;
-     *             gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
-     *         }
-     *     `,
-     *     fragmentShader: `
-     *         uniform vec3 color1;
-     *         uniform vec3 color2;
-     *         varying vec2 vUv;
-     *         void main() {
-     *             gl_FragColor = vec4(mix(color1, color2, vUv.y), 1.0);
-     *         }
-     *     `,
-     *     uniforms: {
-     *         color1: { value: new THREE.Color(0xff0000) },
-     *         color2: { value: new THREE.Color(0x0000ff) }
-     *     },
-     *     transparent: false,
-     *     side: THREE.DoubleSide
+     * // 方式 1：使用预设材质
+     * const material1 = shaderMaterial.createMaterial('myGradient', {
+     *     preset: 'gradient',
+     *     color1: '#ff0000',
+     *     color2: '#0000ff'
+     * });
+     *
+     * // 方式 2：自定义材质
+     * const material2 = shaderMaterial.createMaterial('customShader', {
+     *     vertexShader: `...`,
+     *     fragmentShader: `...`,
+     *     uniforms: { ... }
      * });
      */
     createMaterial(name, config = {}) {
         if (!name) {
+            // eslint-disable-next-line no-console
             console.error('ShaderMaterial: 材质名称不能为空');
             return null;
         }
 
         if (this.materials.has(name)) {
+            // eslint-disable-next-line no-console
             console.warn(`ShaderMaterial: 材质 "${name}" 已存在，将被覆盖`);
             // 销毁旧材质
             const oldMaterial = this.materials.get(name);
             oldMaterial.dispose();
         }
 
+        // 如果指定了预设材质，使用预设配置
+        let finalConfig = config;
+        if (config.preset) {
+            const presetConfig = createPresetMaterial(config.preset, config);
+            if (!presetConfig) {
+                // eslint-disable-next-line no-console
+                console.error(
+                    `ShaderMaterial: 预设材质 "${config.preset}" 不存在。可用预设: ${getAvailablePresets().join(', ')}`
+                );
+                return null;
+            }
+            // 合并预设配置和用户配置
+            finalConfig = { ...presetConfig, ...config };
+        }
+
         // 创建着色器材质
         const material = new THREE.ShaderMaterial({
-            vertexShader: config.vertexShader || this.getDefaultVertexShader(),
-            fragmentShader: config.fragmentShader || this.getDefaultFragmentShader(),
-            uniforms: config.uniforms || {},
-            transparent: config.transparent !== undefined ? config.transparent : false,
-            side: config.side !== undefined ? config.side : THREE.FrontSide,
-            wireframe: config.wireframe !== undefined ? config.wireframe : false,
-            depthTest: config.depthTest !== undefined ? config.depthTest : true,
-            depthWrite: config.depthWrite !== undefined ? config.depthWrite : true
+            vertexShader: finalConfig.vertexShader || this.getDefaultVertexShader(),
+            fragmentShader: finalConfig.fragmentShader || this.getDefaultFragmentShader(),
+            uniforms: finalConfig.uniforms || {},
+            transparent: finalConfig.transparent !== undefined ? finalConfig.transparent : false,
+            side: finalConfig.side !== undefined ? finalConfig.side : THREE.FrontSide,
+            wireframe: finalConfig.wireframe !== undefined ? finalConfig.wireframe : false,
+            depthTest: finalConfig.depthTest !== undefined ? finalConfig.depthTest : true,
+            depthWrite: finalConfig.depthWrite !== undefined ? finalConfig.depthWrite : true
         });
 
         // 存储材质
@@ -149,36 +167,91 @@ export class ShaderMaterial extends Component {
 
     /**
      * 获取材质
-     * 
-     * @param {string} name - 材质名称
+     *
+     * 支持两种调用方式：
+     * 1. 仅传入名称：获取已创建的材质
+     * 2. 传入名称和参数：如果材质不存在且名称是预设材质，则自动创建
+     *
+     * @param {string} name - 材质名称或预设材质类型
+     * @param {Object} params - 材质参数（可选）
      * @returns {THREE.ShaderMaterial|null} 材质实例，如果不存在返回 null
-     * 
+     *
      * @example
-     * const material = shaderMaterial.getMaterial('basicShader');
-     * if (material) {
-     *     mesh.material = material;
-     * }
+     * // 方式 1：获取已创建的材质
+     * const material1 = shaderMaterial.getMaterial('myMaterial');
+     *
+     * // 方式 2：获取预设材质（如果不存在则自动创建）
+     * const material2 = shaderMaterial.getMaterial('gradient', {
+     *     color1: '#ff0000',
+     *     color2: '#0000ff'
+     * });
+     *
+     * // 方式 3：更新已存在材质的参数
+     * const material3 = shaderMaterial.getMaterial('gradient', {
+     *     color1: '#00ff00'  // 只更新 color1
+     * });
      */
-    getMaterial(name) {
-        if (!this.materials.has(name)) {
-            console.warn(`ShaderMaterial: 材质 "${name}" 不存在`);
-            return null;
+    getMaterial(name, params) {
+        // 如果材质已存在
+        if (this.materials.has(name)) {
+            const material = this.materials.get(name);
+
+            // 如果提供了参数，更新 uniforms
+            if (params) {
+                Object.keys(params).forEach((key) => {
+                    if (material.uniforms && material.uniforms[key]) {
+                        const value = params[key];
+                        // 如果是颜色值，转换为 THREE.Color
+                        if (
+                            typeof value === 'string' &&
+                            (value.startsWith('#') || value.startsWith('rgb'))
+                        ) {
+                            material.uniforms[key].value = new THREE.Color(value);
+                        } else {
+                            material.uniforms[key].value = value;
+                        }
+                    }
+                });
+            }
+
+            return material;
         }
 
-        return this.materials.get(name);
+        // 如果材质不存在，检查是否是预设材质
+        if (params !== undefined && hasPreset(name)) {
+            // 自动创建预设材质
+            return this.createMaterial(name, {
+                preset: name,
+                ...params
+            });
+        }
+
+        // 材质不存在且不是预设材质
+        if (params === undefined) {
+            // eslint-disable-next-line no-console
+            console.warn(`ShaderMaterial: 材质 "${name}" 不存在`);
+        } else {
+            // eslint-disable-next-line no-console
+            console.warn(
+                `ShaderMaterial: 材质 "${name}" 不存在，且不是有效的预设材质。可用预设: ${getAvailablePresets().join(', ')}`
+            );
+        }
+
+        return null;
     }
 
     /**
      * 删除材质
-     * 
+     *
      * @param {string} name - 材质名称
      * @returns {boolean} 是否删除成功
-     * 
+     *
      * @example
      * shaderMaterial.removeMaterial('basicShader');
      */
     removeMaterial(name) {
         if (!this.materials.has(name)) {
+            // eslint-disable-next-line no-console
             console.warn(`ShaderMaterial: 材质 "${name}" 不存在`);
             return false;
         }
@@ -197,9 +270,9 @@ export class ShaderMaterial extends Component {
 
     /**
      * 获取所有材质列表
-     * 
+     *
      * @returns {Array<{name: string, material: THREE.ShaderMaterial}>} 材质列表
-     * 
+     *
      * @example
      * const materials = shaderMaterial.getAllMaterials();
      * materials.forEach(({ name, material }) => {
@@ -216,12 +289,12 @@ export class ShaderMaterial extends Component {
 
     /**
      * 更新材质的 uniform 变量
-     * 
+     *
      * @param {string} name - 材质名称
      * @param {string} uniformName - uniform 变量名
      * @param {*} value - 新值
      * @returns {boolean} 是否更新成功
-     * 
+     *
      * @example
      * shaderMaterial.updateUniform('basicShader', 'color', new THREE.Color(0xff0000));
      */
@@ -232,6 +305,7 @@ export class ShaderMaterial extends Component {
         }
 
         if (!material.uniforms[uniformName]) {
+            // eslint-disable-next-line no-console
             console.warn(`ShaderMaterial: 材质 "${name}" 中不存在 uniform "${uniformName}"`);
             return false;
         }
@@ -246,6 +320,33 @@ export class ShaderMaterial extends Component {
         });
 
         return true;
+    }
+
+    /**
+     * 获取所有可用的预设材质列表
+     *
+     * @returns {string[]} 预设材质名称数组
+     *
+     * @example
+     * const presets = shaderMaterial.getAvailablePresets();
+     * console.log('可用预设:', presets); // ['basicColor', 'gradient', 'animated']
+     */
+    getAvailablePresets() {
+        return getAvailablePresets();
+    }
+
+    /**
+     * 获取预设材质的默认参数
+     *
+     * @param {string} presetName - 预设材质名称
+     * @returns {Object|null} 默认参数对象，如果预设不存在则返回 null
+     *
+     * @example
+     * const defaults = shaderMaterial.getPresetDefaults('gradient');
+     * console.log(defaults); // { color1: '#ff0000', color2: '#0000ff' }
+     */
+    getPresetDefaults(presetName) {
+        return getPresetDefaults(presetName);
     }
 
     /**
@@ -288,4 +389,3 @@ export class ShaderMaterial extends Component {
         this.emit('disposed');
     }
 }
-

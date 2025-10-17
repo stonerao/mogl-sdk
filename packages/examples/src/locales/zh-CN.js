@@ -309,13 +309,16 @@ export default {
         materialParams: '材质参数',
         color1: '颜色 1:',
         color2: '颜色 2:',
+        baseColor: '基础颜色:',
+        intensity: '强度:',
         materialList: '材质列表',
         shader: 'Shader',
         materialCount: '材质数量',
         materials: {
             basicColor: '基础颜色',
             gradient: '渐变材质',
-            animated: '动画材质'
+            animated: '动画材质',
+            diffusion: '扩散材质'
         }
     }
 };

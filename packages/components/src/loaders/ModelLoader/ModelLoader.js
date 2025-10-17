@@ -90,6 +90,7 @@ export class ModelLoader extends Component {
      */
     async loadModel() {
         if (!this.config.url) {
+            // eslint-disable-next-line no-console
             console.warn('ModelLoader: url is required');
             return;
         }
@@ -100,7 +101,9 @@ export class ModelLoader extends Component {
 
             // 使用 Core 加载器加载模型（自动检测格式）
             const modelData = await this.coreLoader.load(this.config.url, (progress) => {
+                // 触发加载进度事件（同时触发两个事件名以保持向后兼容）
                 this.emit('loadProgress', { progress });
+                this.emit('progress', { progress }); // 向后兼容
             });
 
             // 保存模型数据（统一格式）
@@ -131,15 +134,21 @@ export class ModelLoader extends Component {
                 this.setupAnimations(this.animations);
             }
 
-            // 触发加载完成事件（包含模型类型信息）
-            this.emit('loadComplete', {
+            // 触发加载完成事件（同时触发两个事件名以保持向后兼容）
+            const loadCompleteData = {
                 modelData,
                 type: modelData.type, // 'gltf' 或 'fbx'
-                gltf: this.gltf // 向后兼容
-            });
+                gltf: this.gltf, // 向后兼容
+                model: this.model // 添加 model 属性以便直接访问
+            };
+            this.emit('loadComplete', loadCompleteData);
+            this.emit('loaded', loadCompleteData); // 向后兼容
         } catch (error) {
+            // eslint-disable-next-line no-console
             console.error('ModelLoader: Failed to load model', error);
+            // 触发加载错误事件（同时触发两个事件名以保持向后兼容）
             this.emit('loadError', { error });
+            this.emit('error', { error }); // 向后兼容
         }
     }
 
@@ -237,6 +246,7 @@ export class ModelLoader extends Component {
      */
     getMeshByName(name) {
         if (!this.model) {
+            // eslint-disable-next-line no-console
             console.warn('ModelLoader: Model not loaded yet');
             return null;
         }
@@ -262,6 +272,7 @@ export class ModelLoader extends Component {
      */
     findMesh(criteria) {
         if (!this.model) {
+            // eslint-disable-next-line no-console
             console.warn('ModelLoader: Model not loaded yet');
             return null;
         }
@@ -302,6 +313,7 @@ export class ModelLoader extends Component {
      */
     getAllMeshes() {
         if (!this.model) {
+            // eslint-disable-next-line no-console
             console.warn('ModelLoader: Model not loaded yet');
             return [];
         }
@@ -332,6 +344,7 @@ export class ModelLoader extends Component {
      */
     setupInteractiveObjects() {
         if (!this.model) {
+            // eslint-disable-next-line no-console
             console.warn('ModelLoader: Model not loaded, cannot setup interactive objects');
             return;
         }
@@ -368,6 +381,7 @@ export class ModelLoader extends Component {
 
             // 性能警告
             if (allMeshes.length > 50) {
+                // eslint-disable-next-line no-console
                 console.warn(
                     `[W3D Performance Warning] ModelLoader: Enabling events for all meshes (count: ${allMeshes.length}) may impact performance. ` +
                         "Consider specifying only interactive meshes using interactiveMeshes: ['mesh1', 'mesh2']."
@@ -399,6 +413,7 @@ export class ModelLoader extends Component {
 
             // 警告未找到的 Mesh
             if (notFoundMeshes.length > 0) {
+                // eslint-disable-next-line no-console
                 console.warn(
                     `ModelLoader: The following mesh names were not found in the model: ${notFoundMeshes.join(', ')}. ` +
                         `Available meshes: ${this.getMeshNames().join(', ')}`
@@ -408,6 +423,7 @@ export class ModelLoader extends Component {
             return;
         }
 
+        // eslint-disable-next-line no-console
         console.warn(
             `ModelLoader: Invalid interactiveMeshes configuration: ${interactiveMeshes}. ` +
                 "Expected: false, '*', or array of mesh names."
@@ -454,6 +470,7 @@ export class ModelLoader extends Component {
      */
     async applyBakedLighting(textureMapping = {}, options = {}) {
         if (!this.model) {
+            // eslint-disable-next-line no-console
             console.warn('ModelLoader: 模型未加载，无法应用烘焙光照');
             return;
         }
@@ -533,6 +550,7 @@ export class ModelLoader extends Component {
                 if (result.status === 'fulfilled') {
                     appliedCount++;
                 } else {
+                    // eslint-disable-next-line no-console
                     console.error('纹理加载失败:', result.reason);
                 }
             });
@@ -540,6 +558,7 @@ export class ModelLoader extends Component {
             // 触发烘焙光照应用事件
             this.emit('bakedLightingApplied', { appliedCount, mode, intensity });
         } catch (error) {
+            // eslint-disable-next-line no-console
             console.error('应用烘焙光照失败:', error);
             this.emit('bakedLightingError', { error: error.message });
         }
@@ -592,6 +611,7 @@ export class ModelLoader extends Component {
                 undefined,
                 // 加载失败
                 (error) => {
+                    // eslint-disable-next-line no-console
                     console.error(`纹理加载失败: ${texturePath}`, error);
                     reject(new Error(`纹理加载失败: ${texturePath} - ${error.message}`));
                 }

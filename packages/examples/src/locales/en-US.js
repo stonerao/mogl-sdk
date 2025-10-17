@@ -306,5 +306,26 @@ export default {
         stats: 'Statistics',
         vertices: 'Vertices',
         faces: 'Faces'
+    },
+    shaderMaterial: {
+        title: 'Shader Material Controls',
+        loading: 'Loading model...',
+        materialSelection: 'Material Selection',
+        currentMaterial: 'Current Material:',
+        activeMaterial: 'Active Material:',
+        materialParams: 'Material Parameters',
+        color1: 'Color 1:',
+        color2: 'Color 2:',
+        baseColor: 'Base Color:',
+        intensity: 'Intensity:',
+        materialList: 'Material List',
+        shader: 'Shader',
+        materialCount: 'Material Count',
+        materials: {
+            basicColor: 'Basic Color',
+            gradient: 'Gradient',
+            animated: 'Animated',
+            diffusion: 'Diffusion'
+        }
     }
 };

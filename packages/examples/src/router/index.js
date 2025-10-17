@@ -25,6 +25,7 @@ const PipelineDemo = () => import('../views/examples/PipelineDemo.vue');
 const BVHQueryDemo = () => import('../views/examples/BVHQueryDemo.vue');
 const ExtrudedPolygonDemo = () => import('../views/examples/ExtrudedPolygonDemo.vue');
 const InstancedModelDemo = () => import('../views/examples/InstancedModelDemo.vue');
+const ShaderMaterialDemo = () => import('../views/examples/ShaderMaterialDemo.vue');
 
 const routes = [
     {
@@ -176,6 +177,15 @@ const routes = [
         component: InstancedModelDemo,
         meta: {
             title: '16 - Instanced Model',
+            category: 'advanced'
+        }
+    },
+    {
+        path: '/examples/17-shader-material',
+        name: 'ShaderMaterialDemo',
+        component: ShaderMaterialDemo,
+        meta: {
+            title: '17 - Shader Material',
             category: 'advanced'
         }
     },

@@ -35,6 +35,9 @@
                         <option value="animated">
                             {{ t('shaderMaterial.materials.animated') }}
                         </option>
+                        <option value="diffusion">
+                            {{ t('shaderMaterial.materials.diffusion') }}
+                        </option>
                     </select>
                 </div>
 
@@ -105,6 +108,46 @@
                 </div>
             </div>
 
+            <div v-if="!isLoading && currentMaterialName === 'diffusion'" class="section">
+                <h4>{{ t('shaderMaterial.materialParams') }}</h4>
+
+                <div class="form-group">
+                    <label>{{ t('shaderMaterial.baseColor') }}</label>
+                    <input
+                        v-model="diffusionParams.baseColor"
+                        type="color"
+                        @input="updateDiffusionParams"
+                    />
+                </div>
+
+                <div class="form-group">
+                    <label>{{ t('params.speed') }} {{ diffusionParams.speed.toFixed(1) }}</label>
+                    <input
+                        v-model.number="diffusionParams.speed"
+                        type="range"
+                        min="0.1"
+                        max="5.0"
+                        step="0.1"
+                        @input="updateDiffusionParams"
+                    />
+                </div>
+
+                <div class="form-group">
+                    <label
+                        >{{ t('shaderMaterial.intensity') }}
+                        {{ diffusionParams.intensity.toFixed(1) }}</label
+                    >
+                    <input
+                        v-model.number="diffusionParams.intensity"
+                        type="range"
+                        min="0.1"
+                        max="3.0"
+                        step="0.1"
+                        @input="updateDiffusionParams"
+                    />
+                </div>
+            </div>
+
             <!-- 材质列表 -->
             <div v-if="!isLoading" class="section">
                 <h4>{{ t('shaderMaterial.materialList') }}</h4>
@@ -149,7 +192,7 @@
 import { ref, reactive, onMounted, onUnmounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { Scene } from '@w3d/core';
-import { ShaderMaterial, ModelLoader, GridHelper, HDRLoader } from '@w3d/components';
+import { ShaderMaterial, ModelLoader, HDRLoader } from '@w3d/components';
 import * as THREE from 'three';
 import SplitLayout from '../../components/SplitLayout.vue';
 
@@ -197,6 +240,13 @@ const animatedParams = reactive({
     speed: 1.0
 });
 
+// 扩散材质参数
+const diffusionParams = reactive({
+    baseColor: '#3319cc',
+    speed: 1.0,
+    intensity: 1.0
+});
+
 // 性能统计
 const fps = ref(60);
 
@@ -211,81 +261,87 @@ const addLog = (message) => {
         eventLogs.value.pop();
     }
 };
-
+const loadHDREnvironment = async () => {
+    try {
+        await scene.add('HDRLoader', {
+            name: 'environment',
+            url: '/textures/blouberg_sunrise_2_1k.hdr',
+            asEnvironment: true,
+            asBackground: true
+        });
+    } catch (error) {
+        console.error('HDR loading failed:', error);
+        addLog(`HDR 加载失败: ${error.message}`, 'error');
+    }
+};
 // 初始化场景
 const initScene = async () => {
-    scene = new Scene(sceneContainer.value, {
-        renderer: {
-            antialias: true,
-            outputColorSpace: 'srgb'
-        },
-        camera: {
-            fov: 45,
-            position: [0, 2, 5],
-            lookAt: [0, 0, 0]
-        }
-    });
+    try {
+        // eslint-disable-next-line no-console
+        console.log('开始初始化场景');
 
-    scene.init();
+        scene = new Scene(sceneContainer.value, {
+            renderer: {
+                antialias: true,
+                outputColorSpace: 'srgb'
+            },
+            camera: {
+                fov: 45,
+                position: [0, 2, 5],
+                lookAt: [0, 0, 0]
+            }
+        });
 
-    // 添加灯光
-    scene.light.addAmbient({
-        color: '#ffffff',
-        intensity: 0.6
-    });
+        scene.init();
 
-    scene.light.addDirectional({
-        color: '#ffffff',
-        intensity: 0.8,
-        position: [5, 5, 5],
-        castShadow: true
-    });
+        // 添加灯光
+        scene.light.addAmbient({
+            color: '#ffffff',
+            intensity: 0.6
+        });
 
-    // 启用阴影
-    scene.renderer.enableShadow(true);
+        scene.light.addDirectional({
+            color: '#ffffff',
+            intensity: 0.8,
+            position: [5, 5, 5],
+            castShadow: true
+        });
 
-    // 启用自动调整大小
-    scene.renderer.enableResize();
+        // 启用阴影
+        scene.renderer.enableShadow(true);
 
-    // 注册组件
-    scene.registerComponent('ShaderMaterial', ShaderMaterial);
-    scene.registerComponent('ModelLoader', ModelLoader);
-    scene.registerComponent('GridHelper', GridHelper);
-    scene.registerComponent('HDRLoader', HDRLoader);
+        // 启用自动调整大小
+        scene.renderer.enableResize();
 
-    // 添加网格辅助
-    await scene.add('GridHelper', {
-        name: 'grid',
-        size: 20,
-        divisions: 20
-    });
+        // 注册组件
+        scene.registerComponent('ShaderMaterial', ShaderMaterial);
+        scene.registerComponent('ModelLoader', ModelLoader);
+        scene.registerComponent('HDRLoader', HDRLoader);
 
-    // 加载 HDR 环境贴图
-    const hdrLoader = await scene.add('HDRLoader', {
-        name: 'hdrLoader'
-    });
+        // eslint-disable-next-line no-console
+        console.log('开始加载 HDR 环境');
+        await loadHDREnvironment();
 
-    hdrLoader.on('loaded', ({ texture }) => {
-        scene.scene.environment = texture;
-        scene.scene.background = texture;
-        scene.scene.backgroundBlurriness = 0.5;
-    });
+        // eslint-disable-next-line no-console
+        console.log('开始创建着色器材质');
+        // 创建 ShaderMaterial 组件
+        await createShaderMaterials();
 
-    await hdrLoader.load('/hdr/venice_sunset_1k.hdr');
+        // eslint-disable-next-line no-console
+        console.log('开始加载模型');
+        // 加载模型
+        await loadModel();
 
-    // 创建 ShaderMaterial 组件
-    await createShaderMaterials();
-
-    // 加载模型
-    await loadModel();
-
-    // 启动渲染循环
-    scene.start();
-
-    // 更新 FPS
-    setInterval(() => {
-        fps.value = Math.round(scene.renderer.getFPS());
-    }, 1000);
+        // 启动渲染循环
+        scene.start();
+        // eslint-disable-next-line no-console
+        console.log('场景初始化完成');
+    } catch (error) {
+        // eslint-disable-next-line no-console
+        console.error('场景初始化失败:', error);
+        addLog(`场景初始化失败: ${error.message}`);
+        isLoading.value = false;
+    }
 };
 
 // 创建着色器材质
@@ -309,94 +365,21 @@ const createShaderMaterials = async () => {
         addLog(`材质 "${materialName}" 的 ${uniformName} 已更新`);
     });
 
-    // 创建基础颜色材质
-    shaderMaterialComponent.createMaterial('basicColor', {
-        vertexShader: `
-            varying vec2 vUv;
-            varying vec3 vNormal;
-            void main() {
-                vUv = uv;
-                vNormal = normalize(normalMatrix * normal);
-                gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
-            }
-        `,
-        fragmentShader: `
-            uniform vec3 color;
-            varying vec2 vUv;
-            varying vec3 vNormal;
-            void main() {
-                vec3 light = normalize(vec3(1.0, 1.0, 1.0));
-                float dProd = max(0.0, dot(vNormal, light));
-                gl_FragColor = vec4(color * (0.3 + 0.7 * dProd), 1.0);
-            }
-        `,
-        uniforms: {
-            color: { value: new THREE.Color(basicColorParams.color) }
-        },
-        side: THREE.DoubleSide
+    // 使用预设材质 - 基础颜色材质
+    shaderMaterialComponent.getMaterial('basicColor', {
+        color: basicColorParams.color
     });
 
-    // 创建渐变材质
-    shaderMaterialComponent.createMaterial('gradient', {
-        vertexShader: `
-            varying vec2 vUv;
-            varying vec3 vNormal;
-            void main() {
-                vUv = uv;
-                vNormal = normalize(normalMatrix * normal);
-                gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
-            }
-        `,
-        fragmentShader: `
-            uniform vec3 color1;
-            uniform vec3 color2;
-            varying vec2 vUv;
-            varying vec3 vNormal;
-            void main() {
-                vec3 color = mix(color1, color2, vUv.y);
-                vec3 light = normalize(vec3(1.0, 1.0, 1.0));
-                float dProd = max(0.0, dot(vNormal, light));
-                gl_FragColor = vec4(color * (0.3 + 0.7 * dProd), 1.0);
-            }
-        `,
-        uniforms: {
-            color1: { value: new THREE.Color(gradientParams.color1) },
-            color2: { value: new THREE.Color(gradientParams.color2) }
-        },
-        side: THREE.DoubleSide
+    // 使用预设材质 - 渐变材质
+    shaderMaterialComponent.getMaterial('gradient', {
+        color1: gradientParams.color1,
+        color2: gradientParams.color2
     });
 
-    // 创建动画材质
-    shaderMaterialComponent.createMaterial('animated', {
-        vertexShader: `
-            varying vec2 vUv;
-            varying vec3 vNormal;
-            void main() {
-                vUv = uv;
-                vNormal = normalize(normalMatrix * normal);
-                gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
-            }
-        `,
-        fragmentShader: `
-            uniform float time;
-            uniform vec3 color;
-            uniform float speed;
-            varying vec2 vUv;
-            varying vec3 vNormal;
-            void main() {
-                float wave = sin(vUv.x * 10.0 + time * speed) * 0.5 + 0.5;
-                vec3 finalColor = color * wave;
-                vec3 light = normalize(vec3(1.0, 1.0, 1.0));
-                float dProd = max(0.0, dot(vNormal, light));
-                gl_FragColor = vec4(finalColor * (0.3 + 0.7 * dProd), 1.0);
-            }
-        `,
-        uniforms: {
-            time: { value: 0.0 },
-            color: { value: new THREE.Color(animatedParams.color) },
-            speed: { value: animatedParams.speed }
-        },
-        side: THREE.DoubleSide
+    // 使用预设材质 - 动画材质
+    shaderMaterialComponent.getMaterial('animated', {
+        color: animatedParams.color,
+        speed: animatedParams.speed
     });
 
     updateMaterialList();
@@ -404,41 +387,92 @@ const createShaderMaterials = async () => {
 
 // 加载模型
 const loadModel = async () => {
-    modelLoader = await scene.add('ModelLoader', {
-        name: 'planeModel',
-        url: '/models/plane.glb'
-    });
+    try {
+        modelLoader = await scene.add('ModelLoader', {
+            name: 'planeModel',
+            url: '/models/plane.glb'
+        });
 
-    modelLoader.on('progress', ({ progress }) => {
-        loadProgress.value = progress * 100;
-    });
+        // 监听加载进度事件
+        modelLoader.on('progress', ({ progress }) => {
+            loadProgress.value = progress * 100;
+            // eslint-disable-next-line no-console
+            console.log('加载进度:', loadProgress.value.toFixed(0) + '%');
+        });
 
-    modelLoader.on('loaded', ({ model }) => {
-        loadedModel = model;
-        model.position.set(0, 0, 0);
-        model.scale.set(2, 2, 2);
+        // 监听加载完成事件
+        modelLoader.on('loaded', ({ model }) => {
+            // eslint-disable-next-line no-console
+            console.log('模型加载完成事件触发');
+            loadedModel = model;
+            model.position.set(0, 0, 0);
+            model.scale.set(2, 2, 2);
 
-        // 应用默认材质
-        applyMaterialToModel(currentMaterialName.value);
+            // 应用默认材质
+            applyMaterialToModel(currentMaterialName.value);
 
+            // 设置加载完成状态
+            isLoading.value = false;
+            // eslint-disable-next-line no-console
+            console.log('isLoading 设置为 false');
+            addLog('模型加载完成');
+        });
+
+        // 监听加载错误事件
+        modelLoader.on('error', ({ error }) => {
+            // eslint-disable-next-line no-console
+            console.error('模型加载失败:', error);
+            addLog(`模型加载失败: ${error.message}`);
+            isLoading.value = false;
+        });
+    } catch (error) {
+        // eslint-disable-next-line no-console
+        console.error('创建 ModelLoader 失败:', error);
+        addLog(`创建 ModelLoader 失败: ${error.message}`);
         isLoading.value = false;
-        addLog('模型加载完成');
-    });
-
-    modelLoader.on('error', ({ error }) => {
-        console.error('模型加载失败:', error);
-        addLog(`模型加载失败: ${error.message}`);
-        isLoading.value = false;
-    });
+    }
 };
 
 // 应用材质到模型
 const applyMaterialToModel = (materialName) => {
-    if (!loadedModel || !shaderMaterialComponent) return;
+    if (!loadedModel || !shaderMaterialComponent) {
+        console.warn('模型或材质组件未初始化');
+        return;
+    }
 
-    const material = shaderMaterialComponent.getMaterial(materialName);
+    // 获取材质，如果不存在则使用预设创建
+    let material = shaderMaterialComponent.getMaterial(materialName);
+
+    // 如果材质不存在，尝试使用预设材质创建
     if (!material) {
-        console.error(`材质 "${materialName}" 不存在`);
+        console.warn(`材质 "${materialName}" 不存在，尝试使用预设创建`);
+
+        // 根据材质名称使用对应的参数创建
+        if (materialName === 'basicColor') {
+            material = shaderMaterialComponent.getMaterial('basicColor', {
+                color: basicColorParams.color
+            });
+        } else if (materialName === 'gradient') {
+            material = shaderMaterialComponent.getMaterial('gradient', {
+                color1: gradientParams.color1,
+                color2: gradientParams.color2
+            });
+        } else if (materialName === 'animated') {
+            material = shaderMaterialComponent.getMaterial('animated', {
+                color: animatedParams.color,
+                speed: animatedParams.speed
+            });
+        } else if (materialName === 'diffusion') {
+            material = shaderMaterialComponent.getMaterial('diffusion', {
+                baseColor: diffusionParams.baseColor,
+                speed: diffusionParams.speed,
+                intensity: diffusionParams.intensity
+            });
+        }
+    }
+
+    if (!material) {
+        console.error(`无法创建或获取材质 "${materialName}"`);
         return;
     }
 
@@ -503,6 +537,18 @@ const updateAnimatedSpeed = () => {
     shaderMaterialComponent.updateUniform('animated', 'speed', animatedParams.speed);
 };
 
+// 更新扩散材质参数
+const updateDiffusionParams = () => {
+    if (!shaderMaterialComponent) return;
+    shaderMaterialComponent.updateUniform(
+        'diffusion',
+        'uBaseColor',
+        new THREE.Color(diffusionParams.baseColor)
+    );
+    shaderMaterialComponent.updateUniform('diffusion', 'uSpeed', diffusionParams.speed);
+    shaderMaterialComponent.updateUniform('diffusion', 'uIntensity', diffusionParams.intensity);
+};
+
 // 组件挂载
 onMounted(() => {
     initScene();
@@ -517,7 +563,7 @@ onUnmounted(() => {
 
 // 源代码展示
 const sourceCode = `import { Scene } from '@w3d/core';
-import { ShaderMaterial, ModelLoader, GridHelper, HDRLoader } from '@w3d/components';
+import { ShaderMaterial, ModelLoader,  HDRLoader } from '@w3d/components';
 import * as THREE from 'three';
 
 // 创建场景
@@ -551,15 +597,8 @@ scene.light.addDirectional({
 // 注册组件
 scene.registerComponent('ShaderMaterial', ShaderMaterial);
 scene.registerComponent('ModelLoader', ModelLoader);
-scene.registerComponent('GridHelper', GridHelper);
 scene.registerComponent('HDRLoader', HDRLoader);
 
-// 添加网格
-await scene.add('GridHelper', {
-  name: 'grid',
-  size: 20,
-  divisions: 20
-});
 
 // 加载 HDR 环境贴图
 const hdrLoader = await scene.add('HDRLoader', {
@@ -584,94 +623,43 @@ shaderMaterial.on('materialCreated', ({ name, material }) => {
   console.log(\`材质 "\${name}" 已创建\`, material);
 });
 
-// 创建基础颜色材质
-shaderMaterial.createMaterial('basicColor', {
+// 方式 1：使用预设材质（推荐）
+// 基础颜色材质
+const basicColorMaterial = shaderMaterial.getMaterial('basicColor', {
+  color: '#00ff00'
+});
+
+// 渐变材质
+const gradientMaterial = shaderMaterial.getMaterial('gradient', {
+  color1: '#ff0000',
+  color2: '#0000ff'
+});
+
+// 动画材质
+const animatedMaterial = shaderMaterial.getMaterial('animated', {
+  color: '#00ff00',
+  speed: 1.0
+});
+
+// 方式 2：自定义材质（完全控制）
+shaderMaterial.createMaterial('customShader', {
   vertexShader: \\\`
     varying vec2 vUv;
-    varying vec3 vNormal;
     void main() {
       vUv = uv;
-      vNormal = normalize(normalMatrix * normal);
       gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
     }
   \\\`,
   fragmentShader: \\\`
     uniform vec3 color;
     varying vec2 vUv;
-    varying vec3 vNormal;
     void main() {
-      vec3 light = normalize(vec3(1.0, 1.0, 1.0));
-      float dProd = max(0.0, dot(vNormal, light));
-      gl_FragColor = vec4(color * (0.3 + 0.7 * dProd), 1.0);
+      gl_FragColor = vec4(color, 1.0);
     }
   \\\`,
   uniforms: {
-    color: { value: new THREE.Color(0x00ff00) }
-  },
-  side: THREE.DoubleSide
-});
-
-// 创建渐变材质
-shaderMaterial.createMaterial('gradient', {
-  vertexShader: \\\`
-    varying vec2 vUv;
-    varying vec3 vNormal;
-    void main() {
-      vUv = uv;
-      vNormal = normalize(normalMatrix * normal);
-      gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
-    }
-  \\\`,
-  fragmentShader: \\\`
-    uniform vec3 color1;
-    uniform vec3 color2;
-    varying vec2 vUv;
-    varying vec3 vNormal;
-    void main() {
-      vec3 color = mix(color1, color2, vUv.y);
-      vec3 light = normalize(vec3(1.0, 1.0, 1.0));
-      float dProd = max(0.0, dot(vNormal, light));
-      gl_FragColor = vec4(color * (0.3 + 0.7 * dProd), 1.0);
-    }
-  \\\`,
-  uniforms: {
-    color1: { value: new THREE.Color(0xff0000) },
-    color2: { value: new THREE.Color(0x0000ff) }
-  },
-  side: THREE.DoubleSide
-});
-
-// 创建动画材质
-shaderMaterial.createMaterial('animated', {
-  vertexShader: \\\`
-    varying vec2 vUv;
-    varying vec3 vNormal;
-    void main() {
-      vUv = uv;
-      vNormal = normalize(normalMatrix * normal);
-      gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
-    }
-  \\\`,
-  fragmentShader: \\\`
-    uniform float time;
-    uniform vec3 color;
-    uniform float speed;
-    varying vec2 vUv;
-    varying vec3 vNormal;
-    void main() {
-      float wave = sin(vUv.x * 10.0 + time * speed) * 0.5 + 0.5;
-      vec3 finalColor = color * wave;
-      vec3 light = normalize(vec3(1.0, 1.0, 1.0));
-      float dProd = max(0.0, dot(vNormal, light));
-      gl_FragColor = vec4(finalColor * (0.3 + 0.7 * dProd), 1.0);
-    }
-  \\\`,
-  uniforms: {
-    time: { value: 0.0 },  // 自动更新
-    color: { value: new THREE.Color(0x00ff00) },
-    speed: { value: 1.0 }
-  },
-  side: THREE.DoubleSide
+    color: { value: new THREE.Color(0xff00ff) }
+  }
 });
 
 // 加载模型
@@ -718,30 +706,32 @@ scene.start();
 /**
  * 技术要点：
  *
- * 1. ShaderMaterial 组件管理
+ * 1. 预设材质系统（新功能）
+ *    - 使用 getMaterial() 快速创建预设材质
+ *    - 支持三种预设：basicColor、gradient、animated
+ *    - 自动创建和参数更新
+ *    - 简化材质创建流程
+ *
+ * 2. ShaderMaterial 组件管理
  *    - 创建多个着色器材质
  *    - 通过名称管理材质
  *    - 动态切换材质
+ *    - 支持自定义和预设两种方式
  *
- * 2. 着色器编程
+ * 3. 着色器编程
  *    - 顶点着色器（Vertex Shader）
  *    - 片段着色器（Fragment Shader）
  *    - Uniform 变量传递
  *
- * 3. 材质类型
- *    - 基础颜色材质：简单的颜色着色
- *    - 渐变材质：颜色渐变效果
- *    - 动画材质：使用 time uniform 创建动画
- *
- * 4. 光照计算
- *    - 简单的漫反射光照
- *    - 法线变换
- *    - 光照强度计算
+ * 4. 材质类型
+ *    - 基础颜色材质：简单的颜色着色 + 光照
+ *    - 渐变材质：双色渐变效果 + 光照
+ *    - 动画材质：波浪动画 + 光照
  *
  * 5. 材质应用
  *    - 遍历模型节点
  *    - 替换材质
- *    - 实时切换
+ *    - 实时切换和参数更新
  */`;
 </script>
 

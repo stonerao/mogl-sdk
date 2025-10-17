@@ -181,6 +181,12 @@ const examples = ref([
         key: '16-instanced-model',
         category: 'advanced',
         route: '/examples/16-instanced-model'
+    },
+    {
+        id: 17,
+        key: '17-shader-material',
+        category: 'advanced',
+        route: '/examples/17-shader-material'
     }
 ]);
 

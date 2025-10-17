@@ -72,10 +72,48 @@ model.playAnimation(0);
 
 ## 事件
 
-- `loadStart` - 加载开始
-- `loadProgress` - 加载进度
-- `loadComplete` - 加载完成
-- `loadError` - 加载错误
+ModelLoader 组件支持以下事件，每个事件都有两个名称（为了向后兼容）：
+
+### 加载事件
+
+| 事件名称（推荐） | 事件名称（兼容） | 说明     | 事件数据                                                     |
+| ---------------- | ---------------- | -------- | ------------------------------------------------------------ |
+| `loadStart`      | -                | 加载开始 | `{ url }`                                                    |
+| `loadProgress`   | `progress`       | 加载进度 | `{ progress }` - progress 为 0-1 之间的数值                  |
+| `loadComplete`   | `loaded`         | 加载完成 | `{ modelData, type, gltf, model }` - type 为 'gltf' 或 'fbx' |
+| `loadError`      | `error`          | 加载失败 | `{ error }`                                                  |
+
+**使用示例：**
+
+```javascript
+// 推荐使用的事件名称
+model.on('loadProgress', (data) => {
+    console.log('加载进度:', data.progress * 100 + '%');
+});
+
+model.on('loadComplete', (data) => {
+    console.log('模型加载完成');
+    console.log('模型类型:', data.type); // 'gltf' 或 'fbx'
+    console.log('模型对象:', data.model);
+});
+
+model.on('loadError', (data) => {
+    console.error('加载失败:', data.error);
+});
+
+// 向后兼容的事件名称（仍然支持）
+model.on('progress', (data) => {
+    console.log('加载进度:', data.progress * 100 + '%');
+});
+
+model.on('loaded', (data) => {
+    console.log('模型加载完成:', data.model);
+});
+
+model.on('error', (data) => {
+    console.error('加载失败:', data.error);
+});
+```
 
 ## 方法
 
