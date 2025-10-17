@@ -102,6 +102,10 @@ export default {
             '17-shader-material': {
                 title: '17 - Shader Material',
                 description: '着色器材质组件 - 自定义着色器材质管理和应用'
+            },
+            '18-path-tracer': {
+                title: '18 - Path Tracer',
+                description: 'GPU 路径追踪渲染 - 照片级真实感渲染效果'
             }
         }
     },

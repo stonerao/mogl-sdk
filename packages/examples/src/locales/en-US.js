@@ -109,6 +109,10 @@ export default {
                 title: '17 - Shader Material',
                 description:
                     'Shader material component - Custom shader material management and application'
+            },
+            '18-path-tracer': {
+                title: '18 - Path Tracer',
+                description: 'GPU path tracing renderer - Photorealistic rendering effects'
             }
         }
     },

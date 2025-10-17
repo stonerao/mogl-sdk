@@ -179,6 +179,12 @@ const examples = ref([
         key: '17-shader-material',
         category: 'advanced',
         route: '/examples/17-shader-material'
+    },
+    {
+        id: 18,
+        key: '18-path-tracer',
+        category: 'expert',
+        route: '/examples/18-path-tracer'
     }
 ]);
 
