@@ -24,6 +24,7 @@ const ImageMarkerDemo = () => import('../views/examples/ImageMarkerDemo.vue');
 const PipelineDemo = () => import('../views/examples/PipelineDemo.vue');
 const BVHQueryDemo = () => import('../views/examples/BVHQueryDemo.vue');
 const ExtrudedPolygonDemo = () => import('../views/examples/ExtrudedPolygonDemo.vue');
+const InstancedModelDemo = () => import('../views/examples/InstancedModelDemo.vue');
 
 const routes = [
     {
@@ -167,6 +168,15 @@ const routes = [
         meta: {
             title: '15 - Extruded Polygon',
             category: 'geometry'
+        }
+    },
+    {
+        path: '/examples/16-instanced-model',
+        name: 'InstancedModelDemo',
+        component: InstancedModelDemo,
+        meta: {
+            title: '16 - Instanced Model',
+            category: 'advanced'
         }
     },
     {

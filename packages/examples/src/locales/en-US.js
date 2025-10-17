@@ -82,6 +82,16 @@ export default {
                 title: '15 - Extruded Polygon',
                 description:
                     'Extruded polygon component - Point-based polygon, vertical extrusion, gradient colors, texture mapping'
+            },
+            '16-instanced-model': {
+                title: '16 - Instanced Model',
+                description:
+                    'Instanced model component - Large-scale model instantiation and management'
+            },
+            '17-shader-material': {
+                title: '17 - Shader Material',
+                description:
+                    'Shader material component - Custom shader material management and application'
             }
         }
     },

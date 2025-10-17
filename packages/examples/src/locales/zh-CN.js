@@ -77,6 +77,14 @@ export default {
             '15-extruded-polygon': {
                 title: '15 - Extruded Polygon',
                 description: '拉伸多边形组件 - 点位生成多边形、垂直拉伸、颜色渐变、纹理贴图'
+            },
+            '16-instanced-model': {
+                title: '16 - Instanced Model',
+                description: '实例化模型组件 - 大规模模型实例化和管理'
+            },
+            '17-shader-material': {
+                title: '17 - Shader Material',
+                description: '着色器材质组件 - 自定义着色器材质管理和应用'
             }
         }
     },
@@ -291,5 +299,23 @@ export default {
         stats: '统计信息',
         vertices: '顶点数',
         faces: '面数'
+    },
+    shaderMaterial: {
+        title: '着色器材质控制',
+        loading: '加载模型中...',
+        materialSelection: '材质选择',
+        currentMaterial: '当前材质:',
+        activeMaterial: '激活材质:',
+        materialParams: '材质参数',
+        color1: '颜色 1:',
+        color2: '颜色 2:',
+        materialList: '材质列表',
+        shader: 'Shader',
+        materialCount: '材质数量',
+        materials: {
+            basicColor: '基础颜色',
+            gradient: '渐变材质',
+            animated: '动画材质'
+        }
     }
 };

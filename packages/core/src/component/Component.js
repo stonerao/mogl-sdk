@@ -54,7 +54,11 @@ export class Component extends THREE.Group {
 
         // 事件发射器
         this.eventEmitter = new EventEmitter();
+        this.componentScene = new THREE.Group();
 
+        // 组件内部物体需要添加到this.componentScene中
+        this.componentScene.name = `${this.name}_scene`;
+        scene.scene.add(this.componentScene);
         // 生命周期状态
         this.isMounted = false;
         this.isDisposed = false;

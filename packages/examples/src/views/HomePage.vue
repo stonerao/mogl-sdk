@@ -175,6 +175,12 @@ const examples = ref([
         key: '15-extruded-polygon',
         category: 'geometry',
         route: '/examples/15-extruded-polygon'
+    },
+    {
+        id: 16,
+        key: '16-instanced-model',
+        category: 'advanced',
+        route: '/examples/16-instanced-model'
     }
 ]);
 
