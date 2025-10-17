@@ -16,7 +16,7 @@
         "dev:components": "pnpm --filter @w3d/components dev",
         "dev:utils": "pnpm --filter @w3d/utils dev",
         "dev:examples": "pnpm --filter @w3d/examples dev",
-        "build": "pnpm -r --filter 'packages/*' build",
+        "build": "pnpm --filter @w3d/examples build",
         "build:core": "pnpm --filter @w3d/core build",
         "build:components": "pnpm --filter @w3d/components build",
         "build:utils": "pnpm --filter @w3d/utils build",

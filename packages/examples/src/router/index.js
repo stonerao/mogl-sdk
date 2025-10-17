@@ -5,7 +5,8 @@
 import { createRouter, createWebHistory } from 'vue-router';
 
 // 页面组件
-import HomePage from '../views/HomePage.vue';
+import IntroPage from '../views/IntroPage.vue';
+import ExamplesPage from '../views/ExamplesPage.vue';
 import NotFound from '../views/NotFound.vue';
 
 // 示例组件（懒加载）
@@ -30,10 +31,18 @@ const ShaderMaterialDemo = () => import('../views/examples/ShaderMaterialDemo.vu
 const routes = [
     {
         path: '/',
-        name: 'Home',
-        component: HomePage,
+        name: 'Intro',
+        component: IntroPage,
         meta: {
-            title: 'Mogl SDK Examples'
+            title: 'Mogl SDK - 快速开发 Three.js 应用'
+        }
+    },
+    {
+        path: '/examples',
+        name: 'Examples',
+        component: ExamplesPage,
+        meta: {
+            title: 'Mogl SDK 示例集合'
         }
     },
     {

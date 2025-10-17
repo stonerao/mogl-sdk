@@ -2,15 +2,32 @@ export default {
     common: {
         home: 'Home',
         back: 'Back',
+        backToHome: 'Back to Home',
         language: 'Language',
         chinese: '中文',
         english: 'English'
     },
+    intro: {
+        title: 'mogl.js',
+        subtitle:
+            'mogl.js is designed for rapid Three.js development, dedicated to faster development of Three.js (WebGL) effects',
+        githubLabel: 'GitHub Repository',
+        viewExamples: 'View Examples',
+        features: {
+            title: 'Core Features',
+            fast: 'Fast Development',
+            fastDesc: 'Simplify Three.js development with ready-to-use components',
+            powerful: 'Powerful',
+            powerfulDesc: 'Rich component library for various 3D scene requirements',
+            flexible: 'Flexible Extension',
+            flexibleDesc: 'Based on Three.js, freely extensible and customizable'
+        }
+    },
     home: {
-        title: 'W3D SDK Examples',
-        subtitle: 'Explore the Power of W3D SDK',
+        title: 'W3D Mogl.js Examples',
+        subtitle: 'Explore the Power of W3D Mogl.js',
         description:
-            'Learn how to build amazing 3D applications with W3D SDK through these interactive examples',
+            'Learn how to build amazing 3D applications with W3D Mogl.js through these interactive examples',
         categories: {
             all: 'All',
             basic: 'Basic',

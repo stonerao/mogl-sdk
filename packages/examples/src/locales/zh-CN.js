@@ -2,14 +2,31 @@ export default {
     common: {
         home: '首页',
         back: '返回',
+        backToHome: '返回首页',
         language: '语言',
         chinese: '中文',
         english: 'English'
     },
+    intro: {
+        title: 'mogl.js',
+        subtitle:
+            'mogl.js 是为了快速开发 threejs 二次开发的，致力于更快速的开发 threejs (webgl) 效果',
+        githubLabel: 'GitHub 仓库',
+        viewExamples: '查看案例',
+        features: {
+            title: '核心特性',
+            fast: '快速开发',
+            fastDesc: '简化 Three.js 开发流程，提供开箱即用的组件',
+            powerful: '功能强大',
+            powerfulDesc: '丰富的组件库，满足各种 3D 场景需求',
+            flexible: '灵活扩展',
+            flexibleDesc: '基于 Three.js，可自由扩展和定制'
+        }
+    },
     home: {
-        title: 'W3D SDK 示例集合',
-        subtitle: '探索 W3D SDK 的强大功能',
-        description: '通过这些交互式示例学习如何使用 W3D SDK 构建令人惊叹的 3D 应用',
+        title: 'W3D Mogl.js 示例集合',
+        subtitle: '探索 W3D Mogl.js 的强大功能',
+        description: '通过这些交互式示例学习如何使用 W3D Mogl.js 构建令人惊叹的 3D 应用',
         categories: {
             all: '全部',
             basic: '基础',

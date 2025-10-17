@@ -1,22 +1,20 @@
 <template>
     <div class="home-page">
+        <!-- 返回首页按钮 -->
+        <div class="back-button-container">
+            <button class="back-button" @click="navigateToHome">
+                <span class="back-arrow">←</span>
+                {{ t('common.backToHome') }}
+            </button>
+        </div>
+
         <div class="home-container">
-            <!-- 标题和语言切换 -->
+            <!-- 标题 -->
             <div class="home-header">
                 <div class="header-content">
                     <h1 class="title">{{ t('home.title') }}</h1>
                     <p class="subtitle">{{ t('home.subtitle') }}</p>
                     <p class="version">Vue 3 + Vite + Three.js</p>
-                </div>
-                <div class="language-switcher">
-                    <button
-                        v-for="lang in languages"
-                        :key="lang.value"
-                        :class="['lang-btn', { active: locale === lang.value }]"
-                        @click="switchLanguage(lang.value)"
-                    >
-                        {{ lang.label }}
-                    </button>
                 </div>
             </div>
 
@@ -72,13 +70,7 @@ import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 
 const router = useRouter();
-const { t, locale } = useI18n();
-
-// 语言选项
-const languages = [
-    { label: '中文', value: 'zh-CN' },
-    { label: 'English', value: 'en-US' }
-];
+const { t } = useI18n();
 
 // 分类选项
 const categories = ['all', 'basic', 'advanced', 'effects', 'geometry'];
@@ -208,15 +200,14 @@ const getExampleDescription = (key) => {
     return t(`home.examples.${key}.description`);
 };
 
-// 切换语言
-const switchLanguage = (lang) => {
-    locale.value = lang;
-    localStorage.setItem('w3d-locale', lang);
-};
-
 // 导航到示例
 const navigateToExample = (example) => {
     router.push(example.route);
+};
+
+// 返回首页
+const navigateToHome = () => {
+    router.push('/');
 };
 </script>
 
@@ -225,26 +216,68 @@ const navigateToExample = (example) => {
     min-height: 100vh;
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     display: flex;
+    flex-direction: column;
+    position: relative;
+}
+
+/* 返回按钮容器 */
+.back-button-container {
+    padding: 20px 40px;
+    display: flex;
+    justify-content: flex-start;
+}
+
+.back-button {
+    display: inline-flex;
     align-items: center;
-    justify-content: center;
-    padding: 20px 15px;
+    gap: 8px;
+    padding: 10px 24px;
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: white;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 15px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+.back-button:hover {
+    background: rgba(255, 255, 255, 0.25);
+    border-color: rgba(255, 255, 255, 0.5);
+    transform: translateX(-3px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.back-arrow {
+    font-size: 18px;
+    transition: transform 0.3s ease;
+}
+
+.back-button:hover .back-arrow {
+    transform: translateX(-3px);
 }
 
 .home-container {
+    flex: 1;
     width: 100%;
     max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 15px 20px;
 }
 
 .home-header {
     display: flex;
-    justify-content: space-between;
+    justify-content: center;
     align-items: center;
     margin-bottom: 30px;
     color: white;
 }
 
 .header-content {
-    flex: 1;
+    text-align: center;
 }
 
 .title {
@@ -263,34 +296,6 @@ const navigateToExample = (example) => {
 .version {
     font-size: 14px;
     opacity: 0.8;
-}
-
-/* 语言切换器 */
-.language-switcher {
-    display: flex;
-    gap: 8px;
-}
-
-.lang-btn {
-    padding: 8px 16px;
-    background: rgba(255, 255, 255, 0.1);
-    border: 1px solid rgba(255, 255, 255, 0.3);
-    color: white;
-    border-radius: 6px;
-    cursor: pointer;
-    font-size: 14px;
-    transition: all 0.3s;
-}
-
-.lang-btn:hover {
-    background: rgba(255, 255, 255, 0.2);
-    border-color: rgba(255, 255, 255, 0.5);
-}
-
-.lang-btn.active {
-    background: rgba(255, 255, 255, 0.3);
-    border-color: rgba(255, 255, 255, 0.6);
-    font-weight: bold;
 }
 
 /* 分类过滤 */
@@ -467,13 +472,21 @@ const navigateToExample = (example) => {
 }
 
 @media (max-width: 768px) {
-    .home-page {
-        padding: 15px 10px;
+    .back-button-container {
+        padding: 15px 20px;
+        justify-content: center;
+    }
+
+    .back-button {
+        padding: 8px 20px;
+        font-size: 14px;
+    }
+
+    .home-container {
+        padding: 0 10px 15px;
     }
 
     .home-header {
-        flex-direction: column;
-        align-items: flex-start;
         margin-bottom: 20px;
     }
 
@@ -487,10 +500,6 @@ const navigateToExample = (example) => {
 
     .version {
         font-size: 13px;
-    }
-
-    .language-switcher {
-        margin-top: 12px;
     }
 
     .category-filter {
