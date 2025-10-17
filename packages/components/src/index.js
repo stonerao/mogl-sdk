@@ -34,6 +34,7 @@ export { ParticleSystem } from './effects/ParticleSystem/index.js';
 export { WaterEffect } from './effects/WaterEffect/index.js';
 export { FireEffect } from './effects/FireEffect/index.js';
 export { Pipeline } from './effects/Pipeline/index.js';
+export { PathTracer } from './effects/PathTracer/index.js';
 
 // 控制组件
 export { FirstPersonControls } from './controls/FirstPersonControls/index.js';

@@ -36,7 +36,12 @@ export class Scene {
             throw new Error('Container not found');
         }
         // 配置选项
-        this.options = options;
+        this.options = Object.assign(
+            {
+                isRendering: true
+            },
+            options
+        );
 
         // Three.js 场景
         this.scene = new THREE.Scene();
@@ -46,7 +51,7 @@ export class Scene {
         this.camera = null;
         this.controls = null;
         this.light = null;
-
+        console.log(options);
         // 管理器
         this.componentManager = new ComponentManager(this);
         this.eventSystem = new EventSystem(this);
@@ -147,7 +152,7 @@ export class Scene {
         }
 
         // 渲染场景
-        if (this.renderer && this.camera) {
+        if (this.renderer && this.camera && this.options.isRendering) {
             this.renderer.render(this.scene, this.camera.instance);
         }
     }

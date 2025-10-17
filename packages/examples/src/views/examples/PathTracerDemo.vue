@@ -276,9 +276,9 @@ const materialSettings = reactive({
 
 // 源代码展示
 const sourceCode = `import { Scene } from '@w3d/core';
-import { PathTracer, ModelLoader, GridHelper } from '@w3d/components';
+import { PathTracer, ModelLoader } from '@w3d/components';
 
-// 创建场景
+// 创建场景 (启用相机控制器)
 const scene = new Scene(container, {
   renderer: {
     antialias: true,
@@ -289,34 +289,18 @@ const scene = new Scene(container, {
     fov: 45,
     position: [5, 5, 10],
     lookAt: [0, 0, 0]
+  },
+  controls: {
+    enabled: true,        // 启用相机控制
+    enableDamping: true   // 启用阻尼效果
   }
 });
 
 scene.init();
 
-// 添加灯光
-scene.light.addAmbient({
-  color: '#ffffff',
-  intensity: 0.6
-});
-
-scene.light.addDirectional({
-  color: '#ffffff',
-  intensity: 0.8,
-  position: [5, 5, 5]
-});
-
 // 注册组件
 scene.registerComponent('PathTracer', PathTracer);
 scene.registerComponent('ModelLoader', ModelLoader);
-scene.registerComponent('GridHelper', GridHelper);
-
-// 添加网格
-await scene.add('GridHelper', {
-  name: 'grid',
-  size: 20,
-  divisions: 20
-});
 
 // 加载模型
 const model = await scene.add('ModelLoader', {
@@ -326,60 +310,62 @@ const model = await scene.add('ModelLoader', {
   position: [0, 0, 0]
 });
 
-// 创建路径追踪器
-const pathTracer = await scene.add('PathTracer', {
-  name: 'pathtracer',
-  model: model,
-  samples: 100,
-  tiles: 3,
-  resolutionScale: 1.0,
-  adjustMaterials: true,
-  materialConfig: {
-    roughnessScale: 0.25,
-    enableTransmission: true,
-    transmissionIOR: 1.4
-  },
-  floor: {
-    enabled: true,
-    roughness: 0.15,
-    metalness: 0.9
-  },
-  toneMapping: true,
-  autoStart: true
+// 等待模型加载完成
+model.on('loadComplete', async () => {
+  // 从场景中移除模型 (PathTracer 会重新添加)
+  scene.scene.remove(model.model);
+
+  // 创建路径追踪器 (使用 model.model 获取实际的 THREE.Group)
+  const pathTracer = await scene.add('PathTracer', {
+    name: 'pathtracer',
+    model: model.model,  // ⚠️ 重要: 使用 model.model 而不是 model
+    samples: 100,
+    tiles: 3,
+    resolutionScale: 1.0,
+    adjustMaterials: true,
+    materialConfig: {
+      roughnessScale: 0.25,
+      enableTransmission: true,
+      transmissionIOR: 1.4
+    },
+    floor: {
+      enabled: true,
+      roughness: 0.15,
+      metalness: 0.9
+    },
+    toneMapping: true,
+    autoStart: true
+  });
+
+  // 监听相机变化 (自动支持)
+  pathTracer.on('cameraChanged', () => {
+    console.log('相机位置改变,重新渲染中...');
+  });
+
+  // 监听渲染进度
+  pathTracer.on('progress', (data) => {
+    const percent = (data.progress * 100).toFixed(1);
+    console.log(\`渲染进度: \${percent}%\`);
+    console.log(\`采样数: \${data.samples}/\${data.targetSamples}\`);
+  });
+
+  // 监听渲染完成
+  pathTracer.on('complete', (data) => {
+    console.log('渲染完成!', data.samples);
+    // 可以下载渲染结果
+    pathTracer.download('pathtraced-render.png');
+  });
+
+  // 控制方法
+  // pathTracer.start();   // 开始渲染
+  // pathTracer.pause();   // 暂停渲染
+  // pathTracer.resume();  // 恢复渲染
+  // pathTracer.reset();   // 重置渲染
 });
 
-// 监听渲染进度
-pathTracer.on('progress', (data) => {
-  console.log(\`渲染进度: \${(data.progress * 100).toFixed(1)}%\`);
-  console.log(\`采样数: \${data.samples}/\${data.targetSamples}\`);
-});
+// 用户可以自由旋转、缩放、平移相机
+// PathTracer 会自动更新并重新渲染
 
-// 监听渲染完成
-pathTracer.on('complete', (data) => {
-  console.log('渲染完成!', data.samples);
-});
-
-
-
-// 控制方法
-// 开始渲染
-pathTracer.start();
-
-// 暂停渲染
-pathTracer.pause();
-
-// 恢复渲染
-pathTracer.resume();
-
-// 重置渲染
-pathTracer.reset();
-
-// 下载渲染结果
-pathTracer.download('pathtraced-render.png');
-
-// 更新设置
-pathTracer.setResolutionScale(0.8);
-pathTracer.setTiles(4);
 `;
 
 // 初始化场景

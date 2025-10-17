@@ -56,6 +56,9 @@ importers:
       '@w3d/utils':
         specifier: workspace:*
         version: link:../utils
+      three-gpu-pathtracer:
+        specifier: ^0.0.22
+        version: 0.0.22(three-mesh-bvh@0.9.1(three@0.180.0))(three@0.180.0)(xatlas-web@0.1.0)
       three-mesh-bvh:
         specifier: ^0.9.1
         version: 0.9.1(three@0.180.0)
@@ -3095,6 +3098,13 @@ packages:
   text-table@0.2.0:
     resolution: {integrity: sha512-N+8UisAXDGk8PFXP4HAzVR9nbfmVJ3zYLAWiTIoqC5v5isinhr+r5uaO8+7r3BMfuNIufIsA7RdpVgacC2cSpw==, tarball: https://registry.npmmirror.com/text-table/-/text-table-0.2.0.tgz}
 
+  three-gpu-pathtracer@0.0.22:
+    resolution: {integrity: sha512-blKolyzKGmhcIYPVv+I6IRndXLBri7i6U0/ZRIApwFoyPWaRVHuEIECH0UPYOO5CYGdnKL49EUScScUOQ/XagQ==, tarball: https://registry.npmmirror.com/three-gpu-pathtracer/-/three-gpu-pathtracer-0.0.22.tgz}
+    peerDependencies:
+      three: '>=0.151.0'
+      three-mesh-bvh: '>=0.7.4'
+      xatlas-web: ^0.1.0
+
   three-mesh-bvh@0.9.1:
     resolution: {integrity: sha512-WNT+m9jGQgtp4YdtwEnl4oFylNVifRf7iphlwWdJ4bJu7oNkY0xHIyntep9OzHuR1hpe/pyAP840gB/EsYDJfg==, tarball: https://registry.npmmirror.com/three-mesh-bvh/-/three-mesh-bvh-0.9.1.tgz}
     peerDependencies:
@@ -3439,6 +3449,9 @@ packages:
         optional: true
       utf-8-validate:
         optional: true
+
+  xatlas-web@0.1.0:
+    resolution: {integrity: sha512-PprVfuXbaIskxLTLBUQRaWfgSy9xUQqAMIRooOw0P6NYqwgh6T0voeer6+Z5M7AFt5SGXUybuww/uDGs1yw8vQ==, tarball: https://registry.npmmirror.com/xatlas-web/-/xatlas-web-0.1.0.tgz}
 
   xml-name-validator@5.0.0:
     resolution: {integrity: sha512-EvGK8EJ3DhaHfbRlETOWAS5pO9MZITeauHKJyb8wyajUfQUenkIg2MvLDTZ4T/TgIcm3HU0TFBgWWboAZ30UHg==, tarball: https://registry.npmmirror.com/xml-name-validator/-/xml-name-validator-5.0.0.tgz}
@@ -6832,6 +6845,12 @@ snapshots:
 
   text-table@0.2.0: {}
 
+  three-gpu-pathtracer@0.0.22(three-mesh-bvh@0.9.1(three@0.180.0))(three@0.180.0)(xatlas-web@0.1.0):
+    dependencies:
+      three: 0.180.0
+      three-mesh-bvh: 0.9.1(three@0.180.0)
+      xatlas-web: 0.1.0
+
   three-mesh-bvh@0.9.1(three@0.180.0):
     dependencies:
       three: 0.180.0
@@ -7144,6 +7163,8 @@ snapshots:
       write-json-file: 3.2.0
 
   ws@8.18.3: {}
+
+  xatlas-web@0.1.0: {}
 
   xml-name-validator@5.0.0: {}
 
