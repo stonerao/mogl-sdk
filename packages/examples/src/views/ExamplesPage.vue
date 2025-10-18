@@ -1,63 +1,104 @@
 <template>
-    <div class="home-page">
-        <!-- 返回首页按钮 -->
-        <div class="back-button-container">
+    <div class="examples-page">
+        <!-- 顶部导航栏 -->
+        <div class="top-navbar">
             <button class="back-button" @click="navigateToHome">
                 <span class="back-arrow">←</span>
                 {{ t('common.backToHome') }}
             </button>
+            <h1 class="page-title">{{ t('home.title') }}</h1>
+            <div class="navbar-spacer"></div>
         </div>
 
-        <div class="home-container">
-            <!-- 标题 -->
-            <div class="home-header">
-                <div class="header-content">
-                    <h1 class="title">{{ t('home.title') }}</h1>
-                    <p class="subtitle">{{ t('home.subtitle') }}</p>
-                    <p class="version">Vue 3 + Vite + Three.js</p>
+        <!-- 左右分栏布局 -->
+        <div class="split-container">
+            <!-- 左侧：案例列表 -->
+            <div class="sidebar">
+                <div class="sidebar-header">
+                    <h2 class="sidebar-title">{{ t('home.subtitle') }}</h2>
+                    <p class="sidebar-version">Vue 3 + Vite + Three.js</p>
                 </div>
-            </div>
 
-            <!-- 分类过滤 -->
-            <div class="category-filter">
-                <button
-                    v-for="cat in categories"
-                    :key="cat"
-                    :class="['category-btn', { active: selectedCategory === cat }]"
-                    @click="selectedCategory = cat"
-                >
-                    {{ t(`home.categories.${cat}`) }}
-                </button>
-            </div>
-
-            <!-- 示例卡片网格 -->
-            <div class="examples-grid">
-                <div
-                    v-for="example in filteredExamples"
-                    :key="example.id"
-                    class="example-card"
-                    @click="navigateToExample(example)"
-                >
-                    <div class="card-header">
-                        <h3 class="card-title">{{ getExampleTitle(example.key) }}</h3>
-                        <span class="card-badge" :class="`badge-${example.category}`">
-                            {{ t(`home.categories.${example.category}`) }}
-                        </span>
-                    </div>
-                    <p class="card-description">{{ getExampleDescription(example.key) }}</p>
-                    <div class="card-footer">
-                        <span class="card-arrow">→</span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- 页脚 -->
-            <div class="home-footer">
-                <div class="footer-contact">
-                    <span>Contact: </span>
-                    <a href="mailto:stoneraoy@gmail.com" class="contact-email"
-                        >stoneraoy@gmail.com</a
+                <!-- 分类过滤 -->
+                <div class="category-filter">
+                    <button
+                        v-for="cat in categories"
+                        :key="cat"
+                        :class="['category-btn', { active: selectedCategory === cat }]"
+                        @click="selectedCategory = cat"
                     >
+                        {{ t(`home.categories.${cat}`) }}
+                    </button>
+                </div>
+
+                <!-- 示例列表 -->
+                <div class="examples-list">
+                    <div
+                        v-for="example in filteredExamples"
+                        :key="example.id"
+                        :class="['example-item', { active: selectedExample?.id === example.id }]"
+                        @click="selectExample(example)"
+                    >
+                        <div class="item-header">
+                            <h3 class="item-title">{{ getExampleTitle(example.key) }}</h3>
+                            <span class="item-badge" :class="`badge-${example.category}`">
+                                {{ t(`home.categories.${example.category}`) }}
+                            </span>
+                        </div>
+                        <p class="item-description">{{ getExampleDescription(example.key) }}</p>
+                    </div>
+                </div>
+
+                <!-- 页脚 -->
+                <div class="sidebar-footer">
+                    <div class="footer-contact">
+                        <span>Contact: </span>
+                        <a href="mailto:stoneraoy@gmail.com" class="contact-email"
+                            >stoneraoy@gmail.com</a
+                        >
+                    </div>
+                </div>
+            </div>
+
+            <!-- 右侧：案例展示区域 -->
+            <div class="content-area">
+                <div v-if="!selectedExample" class="empty-state">
+                    <div class="empty-icon">📋</div>
+                    <h3 class="empty-title">请从左侧选择一个案例</h3>
+                    <p class="empty-desc">点击左侧列表中的任意案例，在此处查看效果</p>
+                </div>
+                <div v-else class="iframe-container">
+                    <div class="iframe-header">
+                        <h2 class="iframe-title">{{ getExampleTitle(selectedExample.key) }}</h2>
+                        <button
+                            class="open-new-tab-btn"
+                            @click="openInNewTab"
+                            title="在新标签页打开"
+                        >
+                            <svg
+                                width="16"
+                                height="16"
+                                viewBox="0 0 16 16"
+                                fill="none"
+                                xmlns="http://www.w3.org/2000/svg"
+                            >
+                                <path
+                                    d="M14 9V13C14 13.5304 13.7893 14.0391 13.4142 14.4142C13.0391 14.7893 12.5304 15 12 15H3C2.46957 15 1.96086 14.7893 1.58579 14.4142C1.21071 14.0391 1 13.5304 1 13V4C1 3.46957 1.21071 2.96086 1.58579 2.58579C1.96086 2.21071 2.46957 2 3 2H7M11 1H15M15 1V5M15 1L7 9"
+                                    stroke="currentColor"
+                                    stroke-width="1.5"
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                />
+                            </svg>
+                            <span>在新窗口打开</span>
+                        </button>
+                    </div>
+                    <iframe
+                        :key="selectedExample.id"
+                        :src="getIframeSrc(selectedExample.route)"
+                        class="example-iframe"
+                        frameborder="0"
+                    ></iframe>
                 </div>
             </div>
         </div>
@@ -75,6 +116,9 @@ const { t } = useI18n();
 // 分类选项
 const categories = ['all', 'basic', 'advanced', 'effects', 'geometry'];
 const selectedCategory = ref('all');
+
+// 当前选中的案例
+const selectedExample = ref(null);
 
 // 示例数据（使用 key 来映射 i18n）
 const examples = ref([
@@ -212,9 +256,21 @@ const getExampleDescription = (key) => {
     return t(`home.examples.${key}.description`);
 };
 
-// 导航到示例
-const navigateToExample = (example) => {
-    router.push(example.route);
+// 选择案例（在 iframe 中显示）
+const selectExample = (example) => {
+    selectedExample.value = example;
+};
+
+// 获取 iframe 的 src（添加 sceneOnly 参数）
+const getIframeSrc = (route) => {
+    return `${route}?sceneOnly=true`;
+};
+
+// 在新标签页打开当前案例（不带 sceneOnly 参数，显示完整布局）
+const openInNewTab = () => {
+    if (selectedExample.value) {
+        window.open(selectedExample.value.route, '_blank');
+    }
 };
 
 // 返回首页
@@ -224,47 +280,46 @@ const navigateToHome = () => {
 </script>
 
 <style scoped>
-.home-page {
-    min-height: 100vh;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+.examples-page {
+    height: 100vh;
     display: flex;
     flex-direction: column;
-    position: relative;
+    background: #f5f7fa;
 }
 
-/* 返回按钮容器 */
-.back-button-container {
-    padding: 20px 40px;
+/* 顶部导航栏 */
+.top-navbar {
     display: flex;
-    justify-content: flex-start;
+    align-items: center;
+    padding: 16px 24px;
+    background: white;
+    border-bottom: 1px solid #e0e0e0;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }
 
 .back-button {
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    padding: 10px 24px;
-    background: rgba(255, 255, 255, 0.15);
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.3);
-    color: white;
-    border-radius: 8px;
+    padding: 8px 16px;
+    background: white;
+    border: 1px solid #e0e0e0;
+    color: #333;
+    border-radius: 6px;
     cursor: pointer;
-    font-size: 15px;
+    font-size: 14px;
     font-weight: 500;
     transition: all 0.3s ease;
-    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
 }
 
 .back-button:hover {
-    background: rgba(255, 255, 255, 0.25);
-    border-color: rgba(255, 255, 255, 0.5);
-    transform: translateX(-3px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    background: #f5f7fa;
+    border-color: #667eea;
+    color: #667eea;
 }
 
 .back-arrow {
-    font-size: 18px;
+    font-size: 16px;
     transition: transform 0.3s ease;
 }
 
@@ -272,154 +327,143 @@ const navigateToHome = () => {
     transform: translateX(-3px);
 }
 
-.home-container {
-    flex: 1;
-    width: 100%;
-    max-width: 1400px;
+.page-title {
+    font-size: 20px;
+    font-weight: 600;
+    color: #333;
     margin: 0 auto;
-    padding: 0 15px 20px;
 }
 
-.home-header {
+.navbar-spacer {
+    width: 100px;
+}
+
+/* 左右分栏容器 */
+.split-container {
+    flex: 1;
     display: flex;
-    justify-content: center;
-    align-items: center;
-    margin-bottom: 30px;
-    color: white;
+    overflow: hidden;
 }
 
-.header-content {
-    text-align: center;
+/* 左侧边栏 */
+.sidebar {
+    width: 380px;
+    background: white;
+    border-right: 1px solid #e0e0e0;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
 }
 
-.title {
-    font-size: 42px;
-    font-weight: bold;
-    margin-bottom: 8px;
-    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+.sidebar-header {
+    padding: 24px 20px 16px;
+    border-bottom: 1px solid #e0e0e0;
 }
 
-.subtitle {
+.sidebar-title {
     font-size: 18px;
-    opacity: 0.95;
+    font-weight: 600;
+    color: #333;
     margin-bottom: 4px;
 }
 
-.version {
-    font-size: 14px;
-    opacity: 0.8;
+.sidebar-version {
+    font-size: 13px;
+    color: #999;
 }
 
 /* 分类过滤 */
 .category-filter {
     display: flex;
-    justify-content: center;
-    gap: 10px;
-    margin-bottom: 25px;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 16px 20px;
+    border-bottom: 1px solid #e0e0e0;
 }
 
 .category-btn {
-    padding: 8px 20px;
-    background: rgba(255, 255, 255, 0.1);
-    border: 1px solid rgba(255, 255, 255, 0.3);
-    color: white;
-    border-radius: 20px;
+    padding: 6px 14px;
+    background: white;
+    border: 1px solid #e0e0e0;
+    color: #666;
+    border-radius: 16px;
     cursor: pointer;
-    font-size: 14px;
+    font-size: 13px;
     transition: all 0.3s;
 }
 
 .category-btn:hover {
-    background: rgba(255, 255, 255, 0.2);
-    transform: translateY(-2px);
+    background: #f5f7fa;
+    border-color: #667eea;
+    color: #667eea;
 }
 
 .category-btn.active {
-    background: rgba(255, 255, 255, 0.3);
-    border-color: rgba(255, 255, 255, 0.6);
-    font-weight: bold;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-color: #667eea;
+    color: white;
+    font-weight: 600;
 }
 
-/* 示例卡片网格 - 更紧凑的布局 */
-.examples-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 16px;
-    margin-bottom: 40px;
+/* 示例列表 */
+.examples-list {
+    flex: 1;
+    overflow-y: auto;
+    padding: 12px;
 }
 
-.example-card {
+.example-item {
+    padding: 16px;
+    margin-bottom: 8px;
     background: white;
-    border-radius: 12px;
-    padding: 20px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-    transition: all 0.3s ease;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
     cursor: pointer;
-    position: relative;
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
+    transition: all 0.3s ease;
 }
 
-.example-card::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 3px;
-    background: linear-gradient(90deg, #667eea, #764ba2);
-    transform: scaleX(0);
-    transition: transform 0.3s ease;
+.example-item:hover {
+    border-color: #667eea;
+    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.15);
+    transform: translateX(4px);
 }
 
-.example-card:hover::before {
-    transform: scaleX(1);
+.example-item.active {
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+    border-color: #667eea;
+    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.2);
 }
 
-.example-card:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
-}
-
-.card-header {
+.item-header {
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
-    margin-bottom: 10px;
-    gap: 10px;
+    margin-bottom: 8px;
+    gap: 8px;
 }
 
-.card-title {
-    font-size: 16px;
+.item-title {
+    font-size: 15px;
     color: #333;
     font-weight: 600;
-    line-height: 1.3;
+    line-height: 1.4;
     flex: 1;
 }
 
-.card-description {
+.item-description {
     color: #666;
     line-height: 1.5;
     font-size: 13px;
-    margin-bottom: 12px;
-    flex: 1;
 }
 
-.card-footer {
-    display: flex;
-    justify-content: flex-end;
-    align-items: center;
-    margin-top: auto;
-}
-
-.card-badge {
+.item-badge {
     display: inline-block;
-    padding: 4px 10px;
-    border-radius: 12px;
+    padding: 3px 8px;
+    border-radius: 10px;
     font-size: 11px;
     font-weight: 600;
     color: white;
+    flex-shrink: 0;
 }
 
 .badge-basic {
@@ -434,112 +478,218 @@ const navigateToHome = () => {
     background: linear-gradient(135deg, #fa709a, #fee140);
 }
 
-.card-arrow {
-    font-size: 20px;
-    color: #667eea;
-    transition: transform 0.3s ease;
+.badge-geometry {
+    background: linear-gradient(135deg, #4facfe, #00f2fe);
 }
 
-.example-card:hover .card-arrow {
-    transform: translateX(4px);
+.badge-expert {
+    background: linear-gradient(135deg, #fa709a, #fee140);
 }
 
-/* 页脚 */
-.home-footer {
-    text-align: center;
-    color: white;
-    opacity: 0.9;
-    font-size: 13px;
-    padding: 20px 0;
+/* 侧边栏页脚 */
+.sidebar-footer {
+    padding: 16px 20px;
+    border-top: 1px solid #e0e0e0;
+    background: #fafafa;
 }
 
 .footer-contact {
     display: flex;
     justify-content: center;
     align-items: center;
-    gap: 8px;
-    opacity: 0.9;
+    gap: 6px;
+    font-size: 13px;
+    color: #666;
 }
 
 .contact-email {
-    color: #fff;
+    color: #667eea;
     text-decoration: none;
-    padding: 4px 10px;
+    padding: 2px 8px;
     border-radius: 4px;
-    background: rgba(255, 255, 255, 0.15);
+    background: #f0f0f0;
     transition: all 0.3s ease;
 }
 
 .contact-email:hover {
-    background: rgba(255, 255, 255, 0.25);
+    background: #e0e0e0;
     text-decoration: underline;
 }
 
-/* 响应式 */
+/* 右侧内容区域 */
+.content-area {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    background: #fafafa;
+    overflow: hidden;
+}
+
+/* 空状态 */
+.empty-state {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: #999;
+}
+
+.empty-icon {
+    font-size: 64px;
+    margin-bottom: 16px;
+}
+
+.empty-title {
+    font-size: 20px;
+    color: #666;
+    margin-bottom: 8px;
+}
+
+.empty-desc {
+    font-size: 14px;
+    color: #999;
+}
+
+/* iframe 容器 */
+.iframe-container {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.iframe-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 24px;
+    background: white;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.iframe-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: #333;
+    margin: 0;
+}
+
+.open-new-tab-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    background: white;
+    border: 1px solid #e0e0e0;
+    color: #667eea;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.open-new-tab-btn:hover {
+    background: #f5f7fa;
+    border-color: #667eea;
+    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.15);
+}
+
+.example-iframe {
+    flex: 1;
+    width: 100%;
+    border: none;
+    background: white;
+}
+
+/* 响应式设计 */
 @media (max-width: 1024px) {
-    .examples-grid {
-        grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-        gap: 14px;
+    .sidebar {
+        width: 320px;
+    }
+
+    .page-title {
+        font-size: 18px;
     }
 }
 
 @media (max-width: 768px) {
-    .back-button-container {
-        padding: 15px 20px;
-        justify-content: center;
+    .split-container {
+        flex-direction: column;
     }
 
-    .back-button {
-        padding: 8px 20px;
-        font-size: 14px;
+    .sidebar {
+        width: 100%;
+        max-height: 40vh;
+        border-right: none;
+        border-bottom: 1px solid #e0e0e0;
     }
 
-    .home-container {
-        padding: 0 10px 15px;
+    .content-area {
+        flex: 1;
     }
 
-    .home-header {
-        margin-bottom: 20px;
+    .top-navbar {
+        padding: 12px 16px;
     }
 
-    .title {
-        font-size: 32px;
-    }
-
-    .subtitle {
+    .page-title {
         font-size: 16px;
     }
 
-    .version {
+    .navbar-spacer {
+        width: 80px;
+    }
+
+    .back-button {
+        padding: 6px 12px;
         font-size: 13px;
     }
 
-    .category-filter {
-        flex-wrap: wrap;
-        gap: 8px;
-        margin-bottom: 20px;
-    }
-
-    .category-btn {
-        padding: 6px 14px;
-        font-size: 13px;
-    }
-
-    .examples-grid {
-        grid-template-columns: 1fr;
-        gap: 12px;
-    }
-
-    .example-card {
+    .sidebar-header {
         padding: 16px;
     }
 
-    .card-title {
-        font-size: 15px;
+    .sidebar-title {
+        font-size: 16px;
     }
 
-    .card-description {
+    .category-filter {
+        padding: 12px 16px;
+    }
+
+    .examples-list {
+        padding: 8px;
+    }
+
+    .example-item {
+        padding: 12px;
+    }
+
+    .item-title {
+        font-size: 14px;
+    }
+
+    .item-description {
         font-size: 12px;
+    }
+
+    .iframe-header {
+        padding: 12px 16px;
+    }
+
+    .iframe-title {
+        font-size: 16px;
+    }
+
+    .open-new-tab-btn {
+        padding: 6px 12px;
+        font-size: 12px;
+    }
+
+    .open-new-tab-btn span {
+        display: none;
     }
 }
 </style>

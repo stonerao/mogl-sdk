@@ -70,19 +70,34 @@ export class ModelLoader extends Component {
         // 配置 Draco 解码器路径
         this.coreLoader.setDracoDecoderPath(this.config.dracoDecoderPath);
 
-        // 加载模型
-        await this.loadModel();
+        // ✅ 修复：异步加载模型但不阻塞 onMounted 返回
+        // 这样外部代码可以在模型加载完成前注册事件监听器
+        this.loadModel()
+            .then(() => {
+                // 模型加载完成后的后续操作
+                // 设置交互对象
+                this.setupInteractiveObjects();
 
-        // 设置交互对象
-        this.setupInteractiveObjects();
-
-        // 如果启用了烘焙光照且设置了自动应用，则应用烘焙光照
-        if (this.config.bakedLighting.enabled && this.config.bakedLighting.autoApply) {
-            await this.applyBakedLighting(this.config.bakedLighting.textureMapping, {
-                mode: this.config.bakedLighting.mode,
-                intensity: this.config.bakedLighting.intensity
+                // 如果启用了烘焙光照且设置了自动应用，则应用烘焙光照
+                if (this.config.bakedLighting.enabled && this.config.bakedLighting.autoApply) {
+                    this.applyBakedLighting(this.config.bakedLighting.textureMapping, {
+                        mode: this.config.bakedLighting.mode,
+                        intensity: this.config.bakedLighting.intensity
+                    }).catch((error) => {
+                        // eslint-disable-next-line no-console
+                        console.error('ModelLoader: Failed to apply baked lighting', error);
+                    });
+                }
+            })
+            .catch((error) => {
+                // loadModel 内部已经处理了错误并触发了 'error' 事件
+                // 这里只是确保 Promise rejection 被捕获，避免未处理的 rejection 警告
+                // eslint-disable-next-line no-console
+                console.error('ModelLoader: Model loading failed in onMounted', error);
             });
-        }
+
+        // onMounted 立即返回，不等待模型加载完成
+        // 这样 scene.add() 可以立即返回组件实例
     }
 
     /**

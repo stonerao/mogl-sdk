@@ -1,5 +1,10 @@
 <template>
-    <SplitLayout :code="sourceCode" language="javascript" title="AreaBlock - 区域块组件">
+    <SplitLayout
+        :code="sourceCode"
+        language="javascript"
+        title="AreaBlock - 区域块组件"
+        :sceneOnly="isSceneOnly"
+    >
         <div ref="sceneContainer" class="scene-container"></div>
 
         <GuiPanel title="区域块控制">
@@ -111,6 +116,10 @@ import {
     GuiButton,
     GuiInfoItem
 } from '@/components/Gui';
+import { useSceneOnly } from '../../composables/useSceneOnly';
+
+// 检测是否为 sceneOnly 模式
+const isSceneOnly = useSceneOnly();
 
 const sceneContainer = ref(null);
 const fps = ref(60);

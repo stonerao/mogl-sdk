@@ -1,5 +1,10 @@
 <template>
-    <SplitLayout :code="sourceCode" language="javascript" title="01 - Hello World">
+    <SplitLayout
+        :code="sourceCode"
+        language="javascript"
+        title="01 - Hello World"
+        :sceneOnly="isSceneOnly"
+    >
         <!-- 3D 场景容器 -->
         <div ref="sceneContainer" class="scene-container"></div>
 
@@ -19,6 +24,10 @@ import { GridHelper } from '@w3d/components';
 import * as THREE from 'three';
 import SplitLayout from '../../components/SplitLayout.vue';
 import { GuiPanel, GuiInfoItem } from '../../components/Gui';
+import { useSceneOnly } from '../../composables/useSceneOnly';
+
+// 检测是否为 sceneOnly 模式
+const isSceneOnly = useSceneOnly();
 
 const sceneContainer = ref(null);
 const fps = ref(60);

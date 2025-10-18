@@ -1,5 +1,10 @@
 <template>
-    <SplitLayout :code="sourceCode" language="javascript" :title="$t('extrudedPolygon.title')">
+    <SplitLayout
+        :code="sourceCode"
+        language="javascript"
+        :title="$t('extrudedPolygon.title')"
+        :sceneOnly="isSceneOnly"
+    >
         <div ref="sceneContainer" class="scene-container">
             <GuiPanel :title="$t('extrudedPolygon.controls')">
                 <GuiSection :title="$t('extrudedPolygon.presetShapes')">
@@ -190,8 +195,12 @@ import {
     GuiCheckbox,
     GuiInfoItem
 } from '@/components/Gui';
+import { useSceneOnly } from '../../composables/useSceneOnly';
 
 const { t } = useI18n();
+
+// 检测是否为 sceneOnly 模式
+const isSceneOnly = useSceneOnly();
 
 // 场景容器引用
 const sceneContainer = ref(null);

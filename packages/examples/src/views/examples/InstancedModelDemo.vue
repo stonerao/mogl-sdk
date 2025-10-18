@@ -1,5 +1,10 @@
 <template>
-    <SplitLayout :code="sourceCode" language="javascript" title="InstancedModel - 实例化模型组件">
+    <SplitLayout
+        :code="sourceCode"
+        language="javascript"
+        title="InstancedModel - 实例化模型组件"
+        :sceneOnly="isSceneOnly"
+    >
         <!-- 3D 场景容器 -->
         <div ref="sceneContainer" class="scene-container"></div>
 
@@ -106,8 +111,12 @@ import {
     GuiInfoItem
 } from '@/components/Gui';
 import SplitLayout from '../../components/SplitLayout.vue';
+import { useSceneOnly } from '../../composables/useSceneOnly';
 
 const { t } = useI18n();
+
+// 检测是否为 sceneOnly 模式
+const isSceneOnly = useSceneOnly();
 
 // 场景容器引用
 const sceneContainer = ref(null);

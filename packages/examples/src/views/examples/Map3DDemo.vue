@@ -1,5 +1,10 @@
 <template>
-    <SplitLayout :code="sourceCode" language="javascript" title="09 - 三维地图 (3D Map)">
+    <SplitLayout
+        :code="sourceCode"
+        language="javascript"
+        title="09 - 三维地图 (3D Map)"
+        :sceneOnly="isSceneOnly"
+    >
         <!-- 3D 场景容器 -->
         <div ref="sceneContainer" class="scene-container"></div>
 
@@ -89,6 +94,10 @@ import {
     GuiButton
 } from '@/components/Gui';
 import SplitLayout from '../../components/SplitLayout.vue';
+import { useSceneOnly } from '../../composables/useSceneOnly';
+
+// 检测是否为 sceneOnly 模式
+const isSceneOnly = useSceneOnly();
 
 const sceneContainer = ref(null);
 const selectedMap = ref('china');

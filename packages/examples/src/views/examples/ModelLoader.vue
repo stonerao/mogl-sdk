@@ -1,5 +1,10 @@
 <template>
-    <SplitLayout :code="sourceCode" language="javascript" title="04 - Model Loader">
+    <SplitLayout
+        :code="sourceCode"
+        language="javascript"
+        title="04 - Model Loader"
+        :sceneOnly="isSceneOnly"
+    >
         <div class="scene-container" ref="sceneContainer">
             <!-- 加载状态 -->
             <template v-if="isLoading">
@@ -201,6 +206,10 @@ import {
 } from '@/components/Gui';
 import SplitLayout from '../../components/SplitLayout.vue';
 import * as THREE from 'three';
+import { useSceneOnly } from '../../composables/useSceneOnly';
+
+// 检测是否为 sceneOnly 模式
+const isSceneOnly = useSceneOnly();
 
 const sceneContainer = ref(null);
 const isLoading = ref(false);

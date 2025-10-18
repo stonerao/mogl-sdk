@@ -1,5 +1,10 @@
 <template>
-    <SplitLayout :code="sourceCode" language="javascript" title="18 - Path Tracer">
+    <SplitLayout
+        :code="sourceCode"
+        language="javascript"
+        title="18 - Path Tracer"
+        :sceneOnly="isSceneOnly"
+    >
         <div class="scene-container" ref="sceneContainer">
             <!-- 加载状态 -->
             <template v-if="isLoading">
@@ -168,6 +173,10 @@ import {
     GuiLoading
 } from '@/components/Gui';
 import SplitLayout from '../../components/SplitLayout.vue';
+import { useSceneOnly } from '../../composables/useSceneOnly';
+
+// 检测是否为 sceneOnly 模式
+const isSceneOnly = useSceneOnly();
 
 const sceneContainer = ref(null);
 const isLoading = ref(false);
@@ -353,7 +362,6 @@ onMounted(async () => {
             size: 20,
             divisions: 20
         });
-
         // 加载模型
         isLoading.value = true;
         loadingText.value = '加载模型中...';
@@ -364,13 +372,14 @@ onMounted(async () => {
             scale: 1.0,
             position: [0, 0, 0]
         });
-
+        console.log(model);
         // 监听加载进度
-        model.on('loadProgress', (data) => {
+        /* model.on('loadProgress', (data) => {
             loadingProgress.value = Math.round(data.progress * 100);
         });
 
         model.on('loadComplete', async () => {
+
             isLoading.value = false;
             loadingText.value = '初始化路径追踪器...';
 
@@ -378,8 +387,8 @@ onMounted(async () => {
             scene.scene.remove(model.model);
 
             // 创建路径追踪器
-            await createPathTracer();
-        });
+        }); */
+        await createPathTracer();
     } catch (error) {
         console.error('初始化失败:', error);
         isLoading.value = false;
@@ -400,7 +409,7 @@ const createPathTracer = async () => {
 
         pathTracer = await scene.add('PathTracer', {
             name: 'pathtracer',
-            model: model.model, // 使用 model.model 获取实际的 THREE.Group
+            model: model.componentScene, // 使用 model.model 获取实际的 THREE.Group
             samples: renderSettings.samples,
             tiles: renderSettings.tiles,
             resolutionScale: renderSettings.resolutionScale,

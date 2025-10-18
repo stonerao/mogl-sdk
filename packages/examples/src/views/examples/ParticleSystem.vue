@@ -1,5 +1,10 @@
 <template>
-    <SplitLayout :code="sourceCode" language="javascript" title="06 - Particle System">
+    <SplitLayout
+        :code="sourceCode"
+        language="javascript"
+        title="06 - Particle System"
+        :sceneOnly="isSceneOnly"
+    >
         <div class="scene-container" ref="sceneContainer">
             <!-- 加载状态 -->
             <template v-if="isLoading">
@@ -315,6 +320,10 @@ import {
     GuiTextInput
 } from '@/components/Gui';
 import SplitLayout from '../../components/SplitLayout.vue';
+import { useSceneOnly } from '../../composables/useSceneOnly';
+
+// 检测是否为 sceneOnly 模式
+const isSceneOnly = useSceneOnly();
 
 const sceneContainer = ref(null);
 const isLoading = ref(false);

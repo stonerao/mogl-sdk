@@ -111,7 +111,7 @@ const navigateToExamples = () => {
 <style scoped>
 .intro-page {
     min-height: 100vh;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: #f5f7fa;
     display: flex;
     flex-direction: column;
     position: relative;
@@ -139,9 +139,9 @@ const navigateToExamples = () => {
 
 .lang-btn {
     padding: 8px 16px;
-    background: rgba(255, 255, 255, 0.1);
-    border: 1px solid rgba(255, 255, 255, 0.3);
-    color: white;
+    background: white;
+    border: 1px solid #e0e0e0;
+    color: #333;
     border-radius: 6px;
     cursor: pointer;
     font-size: 14px;
@@ -149,17 +149,18 @@ const navigateToExamples = () => {
 }
 
 .lang-btn:hover {
-    background: rgba(255, 255, 255, 0.2);
-    border-color: rgba(255, 255, 255, 0.5);
+    background: #f0f0f0;
+    border-color: #667eea;
 }
 
 .lang-btn.active {
-    background: rgba(255, 255, 255, 0.3);
-    border-color: rgba(255, 255, 255, 0.6);
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-color: #667eea;
+    color: white;
     font-weight: bold;
 }
 
-/* 主要内容 - 移除白色背景 */
+/* 主要内容 */
 .intro-content {
     width: 100%;
     padding: 40px 20px;
@@ -174,18 +175,18 @@ const navigateToExamples = () => {
 .intro-title {
     font-size: 56px;
     font-weight: bold;
-    color: white;
+    color: #333;
     margin-bottom: 20px;
-    text-shadow: 0 2px 20px rgba(0, 0, 0, 0.3);
+    text-shadow: none;
 }
 
 .intro-subtitle {
     font-size: 18px;
-    color: rgba(255, 255, 255, 0.95);
+    color: #666;
     line-height: 1.8;
     max-width: 700px;
     margin: 0 auto;
-    text-shadow: 0 1px 10px rgba(0, 0, 0, 0.2);
+    text-shadow: none;
 }
 
 /* 特性网格 */
@@ -200,16 +201,15 @@ const navigateToExamples = () => {
     text-align: center;
     padding: 30px 20px;
     border-radius: 12px;
-    background: rgba(255, 255, 255, 0.15);
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    background: white;
+    border: 1px solid #e0e0e0;
     transition: all 0.3s ease;
 }
 
 .feature-card:hover {
     transform: translateY(-5px);
-    background: rgba(255, 255, 255, 0.25);
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    border-color: #667eea;
+    box-shadow: 0 10px 30px rgba(102, 126, 234, 0.15);
 }
 
 .feature-icon {
@@ -220,16 +220,16 @@ const navigateToExamples = () => {
 .feature-title {
     font-size: 20px;
     font-weight: 600;
-    color: white;
+    color: #333;
     margin-bottom: 10px;
-    text-shadow: 0 1px 5px rgba(0, 0, 0, 0.2);
+    text-shadow: none;
 }
 
 .feature-desc {
     font-size: 14px;
-    color: rgba(255, 255, 255, 0.9);
+    color: #666;
     line-height: 1.6;
-    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    text-shadow: none;
 }
 
 /* 操作按钮 */
@@ -292,15 +292,15 @@ const navigateToExamples = () => {
 .intro-footer {
     width: 100%;
     padding: 30px 20px;
-    background: rgba(0, 0, 0, 0.2);
-    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    background: white;
+    border-top: 1px solid #e0e0e0;
 }
 
 .footer-content {
     max-width: 1000px;
     margin: 0 auto;
     text-align: center;
-    color: rgba(255, 255, 255, 0.9);
+    color: #666;
     font-size: 14px;
 }
 
@@ -309,16 +309,16 @@ const navigateToExamples = () => {
 }
 
 .contact-link {
-    color: white;
+    color: #667eea;
     text-decoration: none;
     padding: 4px 10px;
     border-radius: 4px;
-    background: rgba(255, 255, 255, 0.15);
+    background: #f0f0f0;
     transition: all 0.3s ease;
 }
 
 .contact-link:hover {
-    background: rgba(255, 255, 255, 0.25);
+    background: #e0e0e0;
     text-decoration: underline;
 }
 
@@ -329,7 +329,7 @@ const navigateToExamples = () => {
     gap: 10px;
     flex-wrap: wrap;
     font-size: 13px;
-    color: rgba(255, 255, 255, 0.8);
+    color: #999;
 }
 
 .footer-item {
@@ -337,7 +337,7 @@ const navigateToExamples = () => {
 }
 
 .footer-separator {
-    color: rgba(255, 255, 255, 0.5);
+    color: #ccc;
 }
 
 /* 响应式 */

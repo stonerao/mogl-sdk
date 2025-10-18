@@ -200,31 +200,6 @@ export class PathTracer extends Component {
             this.scene.scene.background = gradientMap;
             this.gradientMap = gradientMap;
         }
-
-        // 设置环境贴图
-        if (this.config.environment) {
-            this.setEnvironment(this.config.environment);
-        }
-    }
-
-    /**
-     * 设置环境贴图
-     */
-    async setEnvironment(texture) {
-        if (this.config.envMapBlur > 0 && this.BlurredEnvMapGenerator) {
-            const renderer = this.scene.renderer.instance;
-            const envMapGenerator = new this.BlurredEnvMapGenerator(renderer);
-            const blurredEnvMap = envMapGenerator.generate(texture, this.config.envMapBlur);
-            this.scene.scene.environment = blurredEnvMap;
-            this.blurredEnvMap = blurredEnvMap;
-        } else {
-            this.scene.scene.environment = texture;
-        }
-
-        // 更新环境
-        if (this.pathTracer) {
-            this.pathTracer.updateEnvironment();
-        }
     }
 
     /**
@@ -595,11 +570,6 @@ export class PathTracer extends Component {
             if (this.floor.material.map) {
                 this.floor.material.map.dispose();
             }
-        }
-
-        // 清理环境贴图
-        if (this.blurredEnvMap) {
-            this.blurredEnvMap.dispose();
         }
 
         if (this.gradientMap) {

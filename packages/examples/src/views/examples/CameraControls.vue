@@ -1,5 +1,10 @@
 <template>
-    <SplitLayout :code="sourceCode" language="javascript" title="02 - Camera Controls">
+    <SplitLayout
+        :code="sourceCode"
+        language="javascript"
+        title="02 - Camera Controls"
+        :sceneOnly="isSceneOnly"
+    >
         <div class="scene-container" ref="sceneContainer">
             <GuiLoading
                 :visible="isLoading"
@@ -145,6 +150,10 @@ import {
     GuiNumberInput
 } from '@/components/Gui';
 import * as THREE from 'three';
+import { useSceneOnly } from '../../composables/useSceneOnly';
+
+// 检测是否为 sceneOnly 模式
+const isSceneOnly = useSceneOnly();
 
 const sceneContainer = ref(null);
 const isLoading = ref(false);

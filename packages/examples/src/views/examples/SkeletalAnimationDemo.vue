@@ -1,5 +1,10 @@
 <template>
-    <SplitLayout :code="sourceCode" language="javascript" title="19 - Skeletal Animation">
+    <SplitLayout
+        :code="sourceCode"
+        language="javascript"
+        title="19 - Skeletal Animation"
+        :sceneOnly="isSceneOnly"
+    >
         <div class="scene-container" ref="sceneContainer">
             <template v-if="isLoading">
                 <GuiLoading :progress="loadingProgress" :text="loadingText" />
@@ -88,6 +93,10 @@ import {
     GuiLoading
 } from '@/components/Gui';
 import SplitLayout from '../../components/SplitLayout.vue';
+import { useSceneOnly } from '../../composables/useSceneOnly';
+
+// 检测是否为 sceneOnly 模式
+const isSceneOnly = useSceneOnly();
 
 const sceneContainer = ref(null);
 const isLoading = ref(true);
@@ -142,8 +151,11 @@ onMounted(async () => {
         },
         camera: {
             fov: 45,
-            position: [3, 1.5, 3],
+            position: [3, 3.5, 3],
             lookAt: [0, 1, 0]
+        },
+        controls: {
+            target: { x: -1, y: -1, z: -1 }
         }
     });
 

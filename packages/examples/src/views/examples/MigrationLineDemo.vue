@@ -1,5 +1,10 @@
 <template>
-    <SplitLayout :code="sourceCode" language="javascript" title="MigrationLine - 迁移线动画组件">
+    <SplitLayout
+        :code="sourceCode"
+        language="javascript"
+        title="MigrationLine - 迁移线动画组件"
+        :sceneOnly="isSceneOnly"
+    >
         <!-- 3D 场景容器 -->
         <div ref="sceneContainer" class="scene-container"></div>
 
@@ -178,6 +183,10 @@ import {
 } from '@/components/Gui';
 import * as THREE from 'three';
 import SplitLayout from '../../components/SplitLayout.vue';
+import { useSceneOnly } from '../../composables/useSceneOnly';
+
+// 检测是否为 sceneOnly 模式
+const isSceneOnly = useSceneOnly();
 
 const sceneContainer = ref(null);
 const fps = ref(60);

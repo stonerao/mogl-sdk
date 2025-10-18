@@ -38,7 +38,8 @@ export class Scene {
         // 配置选项
         this.options = Object.assign(
             {
-                isRendering: true
+                isRendering: true,
+                isResize: true
             },
             options
         );
@@ -51,7 +52,7 @@ export class Scene {
         this.camera = null;
         this.controls = null;
         this.light = null;
-        console.log(options);
+
         // 管理器
         this.componentManager = new ComponentManager(this);
         this.eventSystem = new EventSystem(this);
@@ -100,13 +101,35 @@ export class Scene {
         // 初始化事件系统（在 renderer 创建后）
         this.eventSystem.init();
 
+        // ✅ 根据配置启用或禁用窗口大小自动调整
+        if (this.options.isResize) {
+            this.enableResize();
+        }
+
         // 标记为已初始化
         this.isInitialized = true;
 
         // 开始渲染循环
         this.start();
-
         return this;
+    }
+
+    /**
+     * 启用窗口大小自动调整
+     */
+    enableResize() {
+        if (this.renderer) {
+            this.renderer.enableResize();
+        }
+    }
+
+    /**
+     * 禁用窗口大小自动调整
+     */
+    disableResize() {
+        if (this.renderer) {
+            this.renderer.disableResize();
+        }
     }
 
     /**
@@ -203,6 +226,9 @@ export class Scene {
     dispose() {
         // 停止渲染
         this.stop();
+
+        // 禁用窗口大小自动调整
+        this.disableResize();
 
         // 销毁组件
         this.componentManager.dispose();

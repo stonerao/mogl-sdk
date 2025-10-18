@@ -25,6 +25,7 @@ export class Controls {
             autoRotateSpeed: 2.0,
             minDistance: 1,
             maxDistance: 1000,
+            target: { x: 0, y: 0, z: 0 },
             ...options
         };
 
@@ -42,11 +43,21 @@ export class Controls {
      * 应用配置选项
      */
     applyOptions() {
-        Object.keys(this.options).forEach((key) => {
-            if (key in this.instance) {
-                this.instance[key] = this.options[key];
-            }
-        });
+        if (!this.instance) return;
+        this.instance.enableDamping = this.options.enableDamping;
+        this.instance.dampingFactor = this.options.dampingFactor;
+        this.instance.enableZoom = this.options.enableZoom;
+        this.instance.enableRotate = this.options.enableRotate;
+        this.instance.enablePan = this.options.enablePan;
+        this.instance.autoRotate = this.options.autoRotate;
+        this.instance.autoRotateSpeed = this.options.autoRotateSpeed;
+        this.instance.minDistance = this.options.minDistance;
+        this.instance.maxDistance = this.options.maxDistance;
+        this.instance.target.set(
+            this.options.target.x,
+            this.options.target.y,
+            this.options.target.z
+        );
     }
 
     /**

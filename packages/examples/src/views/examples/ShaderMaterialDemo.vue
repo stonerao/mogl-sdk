@@ -3,6 +3,7 @@
         :code="sourceCode"
         language="javascript"
         :title="t('home.examples.17-shader-material.title')"
+        :sceneOnly="isSceneOnly"
     >
         <!-- 3D 场景容器 -->
         <div ref="sceneContainer" class="scene-container"></div>
@@ -161,8 +162,12 @@ import {
     GuiLoading
 } from '@/components/Gui';
 import SplitLayout from '../../components/SplitLayout.vue';
+import { useSceneOnly } from '../../composables/useSceneOnly';
 
 const { t } = useI18n();
+
+// 检测是否为 sceneOnly 模式
+const isSceneOnly = useSceneOnly();
 
 // 场景容器引用
 const sceneContainer = ref(null);
@@ -184,7 +189,7 @@ const isLoading = ref(true);
 const loadProgress = ref(0);
 
 // 当前材质名称
-const currentMaterialName = ref('basicColor');
+const currentMaterialName = ref('diffusion');
 
 // 材质列表
 const materialList = ref([]);
@@ -359,15 +364,7 @@ const loadModel = async () => {
             url: '/models/plane.glb'
         });
 
-        // 监听加载进度事件
-        modelLoader.on('progress', ({ progress }) => {
-            loadProgress.value = progress * 100;
-            // eslint-disable-next-line no-console
-            console.log('加载进度:', loadProgress.value.toFixed(0) + '%');
-        });
-
-        // 监听加载完成事件
-        modelLoader.on('loaded', ({ model }) => {
+        modelLoader.on('loadComplete', ({ model }) => {
             // eslint-disable-next-line no-console
             console.log('模型加载完成事件触发');
             loadedModel = model;
@@ -379,8 +376,6 @@ const loadModel = async () => {
 
             // 设置加载完成状态
             isLoading.value = false;
-            // eslint-disable-next-line no-console
-            console.log('isLoading 设置为 false');
             addLog('模型加载完成');
         });
 

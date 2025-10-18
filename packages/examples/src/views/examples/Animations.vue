@@ -1,5 +1,10 @@
 <template>
-    <SplitLayout :code="sourceCode" language="javascript" title="05 - Path Animations">
+    <SplitLayout
+        :code="sourceCode"
+        language="javascript"
+        title="05 - Path Animations"
+        :sceneOnly="isSceneOnly"
+    >
         <div class="scene-container" ref="sceneContainer">
             <GuiLoading
                 :visible="isLoading"
@@ -192,6 +197,10 @@ import {
     GuiRadio
 } from '@/components/Gui';
 import * as THREE from 'three';
+import { useSceneOnly } from '../../composables/useSceneOnly';
+
+// 检测是否为 sceneOnly 模式
+const isSceneOnly = useSceneOnly();
 
 // 基础状态
 const sceneContainer = ref(null);

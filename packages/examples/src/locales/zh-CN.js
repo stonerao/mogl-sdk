@@ -32,7 +32,8 @@ export default {
             basic: '基础',
             advanced: '高级',
             effects: '特效',
-            geometry: '几何体'
+            geometry: '几何体',
+            expert: '进阶'
         },
         examples: {
             '01-hello-world': {

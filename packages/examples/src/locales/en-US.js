@@ -33,7 +33,8 @@ export default {
             basic: 'Basic',
             advanced: 'Advanced',
             effects: 'Effects',
-            geometry: 'Geometry'
+            geometry: 'Geometry',
+            expert: 'Expert'
         },
         examples: {
             '01-hello-world': {

@@ -3,6 +3,7 @@
         :code="sourceCode || '// 加载中...'"
         language="javascript"
         :title="'07 - Advanced Model Loader'"
+        :sceneOnly="isSceneOnly"
     >
         <!-- 3D 场景容器 -->
         <div ref="sceneContainer" class="scene-container"></div>
@@ -184,6 +185,10 @@ import {
     GuiCheckbox
 } from '@/components/Gui';
 import SplitLayout from '../../components/SplitLayout.vue';
+import { useSceneOnly } from '../../composables/useSceneOnly';
+
+// 检测是否为 sceneOnly 模式
+const isSceneOnly = useSceneOnly();
 
 const sceneContainer = ref(null);
 const isLoading = ref(false);
