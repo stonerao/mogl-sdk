@@ -2,27 +2,27 @@
     <SplitLayout
         :code="sourceCode"
         language="javascript"
-        title="Pipeline - 管道效果组件"
+        title="Pipeline - Pipeline Effect Component"
         :sceneOnly="isSceneOnly"
     >
-        <!-- 3D 场景容器 -->
+        <!-- 3D Scene Container -->
         <div ref="sceneContainer" class="scene-container"></div>
 
-        <!-- 控制面板 -->
-        <GuiPanel title="管道效果控制" width="wide">
-            <!-- 管道配置 -->
-            <GuiSection title="管道配置">
+        <!-- Control Panel -->
+        <GuiPanel title="Pipeline Effect Controls" width="wide">
+            <!-- Pipeline Configuration -->
+            <GuiSection title="Pipeline Configuration">
                 <GuiSlider
-                    label="管道半径"
+                    label="Pipeline Radius"
                     v-model="pipelineConfig.radius"
                     :min="0.1"
                     :max="2"
                     :step="0.1"
                     :precision="2"
                 />
-                <GuiColorPicker label="管道颜色" v-model="pipelineConfig.color" />
+                <GuiColorPicker label="Pipeline Color" v-model="pipelineConfig.color" />
                 <GuiSlider
-                    label="透明度"
+                    label="Opacity"
                     v-model="pipelineConfig.opacity"
                     :min="0.1"
                     :max="1"
@@ -30,14 +30,14 @@
                     :precision="2"
                 />
                 <GuiSlider
-                    label="分段数"
+                    label="Segments"
                     v-model="pipelineConfig.segments"
                     :min="16"
                     :max="128"
                     :step="8"
                 />
                 <GuiSlider
-                    label="显示进度"
+                    label="Display Progress"
                     v-model="pipelineConfig.progress"
                     :min="0"
                     :max="100"
@@ -45,30 +45,30 @@
                     suffix="%"
                 />
                 <div class="button-group">
-                    <GuiButton label="添加管道" @click="addRandomPipeline" />
+                    <GuiButton label="Add Pipeline" @click="addRandomPipeline" />
                     <GuiButton
-                        label="清除所有管道"
+                        label="Clear All Pipelines"
                         variant="secondary"
                         @click="clearAllPipelines"
                     />
                 </div>
             </GuiSection>
 
-            <!-- 流光效果配置 -->
-            <GuiSection title="流光效果">
-                <GuiCheckbox label="启用流光效果" v-model="flowConfig.enabled" />
+            <!-- Flow Light Effect Configuration -->
+            <GuiSection title="Flow Light Effect">
+                <GuiCheckbox label="Enable Flow Light Effect" v-model="flowConfig.enabled" />
                 <template v-if="flowConfig.enabled">
                     <GuiSlider
-                        label="流光速度"
+                        label="Flow Light Speed"
                         v-model="flowConfig.speed"
                         :min="0.1"
                         :max="5"
                         :step="0.1"
                         :precision="1"
                     />
-                    <GuiColorPicker label="流光颜色" v-model="flowConfig.color" />
+                    <GuiColorPicker label="Flow Light Color" v-model="flowConfig.color" />
                     <GuiSlider
-                        label="流光宽度"
+                        label="Flow Light Width"
                         v-model="flowConfig.width"
                         :min="0.05"
                         :max="0.5"
@@ -76,7 +76,7 @@
                         :precision="2"
                     />
                     <GuiSlider
-                        label="流光强度"
+                        label="Flow Light Intensity"
                         v-model="flowConfig.intensity"
                         :min="0.5"
                         :max="3"
@@ -86,8 +86,8 @@
                 </template>
             </GuiSection>
 
-            <!-- 管道列表 -->
-            <GuiSection :title="`管道列表 (${pipelineList.length})`">
+            <!-- Pipeline List -->
+            <GuiSection :title="`Pipeline List (${pipelineList.length})`">
                 <template v-if="pipelineList.length > 0">
                     <div class="pipeline-list">
                         <div v-for="pipe in pipelineList" :key="pipe.id" class="pipeline-item">
@@ -97,12 +97,12 @@
                             </div>
                             <div class="pipeline-actions">
                                 <GuiButton
-                                    label="动画"
+                                    label="Animate"
                                     size="small"
                                     @click="animateProgress(pipe.id)"
                                 />
                                 <GuiButton
-                                    label="删除"
+                                    label="Delete"
                                     variant="secondary"
                                     size="small"
                                     @click="removePipeline(pipe.id)"
@@ -113,14 +113,14 @@
                 </template>
             </GuiSection>
 
-            <!-- 性能统计 -->
-            <GuiSection title="性能统计">
+            <!-- Performance Statistics -->
+            <GuiSection title="Performance Statistics">
                 <GuiInfoItem label="FPS" :value="fps" />
-                <GuiInfoItem label="管道数量" :value="pipelineCount" />
+                <GuiInfoItem label="Pipeline Count" :value="pipelineCount" />
             </GuiSection>
 
-            <!-- 事件日志 -->
-            <GuiSection title="事件日志">
+            <!-- Event Log -->
+            <GuiSection title="Event Log">
                 <div class="event-log">
                     <div v-for="(log, index) in eventLogs" :key="index" class="log-item">
                         {{ log }}
@@ -147,7 +147,7 @@ import {
 import SplitLayout from '../../components/SplitLayout.vue';
 import { useSceneOnly } from '../../composables/useSceneOnly';
 
-// 检测是否为 sceneOnly 模式
+// Detect if in sceneOnly mode
 const isSceneOnly = useSceneOnly();
 
 const sceneContainer = ref(null);
@@ -161,7 +161,7 @@ let pipelineComponent = null;
 let pipelineCounter = 0;
 let fpsUpdateInterval = null;
 
-// 管道配置
+// Pipeline configuration
 const pipelineConfig = reactive({
     radius: 0.5,
     color: '#00ff00',
@@ -170,7 +170,7 @@ const pipelineConfig = reactive({
     progress: 100
 });
 
-// 流光效果配置
+// Flow light effect configuration
 const flowConfig = reactive({
     enabled: true,
     speed: 1.0,
@@ -179,11 +179,11 @@ const flowConfig = reactive({
     intensity: 1.5
 });
 
-// 源代码展示
+// Source code display
 const sourceCode = `import { Scene } from '@w3d/core';
 import { Pipeline, GridHelper } from '@w3d/components';
 
-// 创建场景
+// Create scene
 const scene = new Scene(container, {
   renderer: {
     antialias: true,
@@ -198,7 +198,7 @@ const scene = new Scene(container, {
 
 scene.init();
 
-// 添加灯光
+// Add lighting
 scene.light.addAmbient({
   color: '#ffffff',
   intensity: 0.6
@@ -210,18 +210,18 @@ scene.light.addDirectional({
   position: [10, 10, 5]
 });
 
-// 注册组件
+// Register components
 scene.registerComponent('Pipeline', Pipeline);
 scene.registerComponent('GridHelper', GridHelper);
 
-// 添加网格
+// Add grid
 await scene.add('GridHelper', {
   name: 'grid',
   size: 40,
   divisions: 40
 });
 
-// 添加管道组件
+// Add pipeline component
 const pipeline = await scene.add('Pipeline', {
   name: 'my-pipelines',
   globalConfig: {

@@ -34,9 +34,9 @@
                     />
                 </GuiSection>
 
-                <GuiSection title="侧面配置（拉伸的垂直面）">
+                <GuiSection title="Side Configuration (Extruded Vertical Faces)">
                     <GuiCheckbox
-                        label="启用侧面纹理"
+                        label="Enable Side Texture"
                         :modelValue="!!polygonConfig.side.textureUrl"
                         @update:modelValue="
                             (val) => {
@@ -48,7 +48,7 @@
 
                     <template v-if="polygonConfig.side.textureUrl">
                         <GuiSlider
-                            label="侧面纹理重复 (U)"
+                            label="Side Texture Repeat (U)"
                             v-model="polygonConfig.side.textureRepeat[0]"
                             @change="updatePolygon"
                             :min="1"
@@ -56,7 +56,7 @@
                             :step="1"
                         />
                         <GuiSlider
-                            label="侧面纹理重复 (V)"
+                            label="Side Texture Repeat (V)"
                             v-model="polygonConfig.side.textureRepeat[1]"
                             @change="updatePolygon"
                             :min="1"
@@ -67,27 +67,27 @@
 
                     <template v-if="!polygonConfig.side.textureUrl">
                         <GuiCheckbox
-                            label="启用侧面渐变"
+                            label="Enable Side Gradient"
                             v-model="polygonConfig.side.useGradient"
                             @change="updatePolygon"
                         />
                         <GuiColorPicker
-                            label="侧面底部颜色"
+                            label="Side Bottom Color"
                             v-model="polygonConfig.side.bottomColor"
                             @change="updatePolygon"
                         />
                         <GuiColorPicker
                             v-if="polygonConfig.side.useGradient"
-                            label="侧面顶部颜色"
+                            label="Side Top Color"
                             v-model="polygonConfig.side.topColor"
                             @change="updatePolygon"
                         />
                     </template>
                 </GuiSection>
 
-                <GuiSection title="正面配置（底部和顶部平面）">
+                <GuiSection title="Face Configuration (Bottom and Top Planes)">
                     <GuiCheckbox
-                        label="启用正面纹理"
+                        label="Enable Face Texture"
                         :modelValue="!!polygonConfig.face.textureUrl"
                         @update:modelValue="
                             (val) => {
@@ -99,7 +99,7 @@
 
                     <template v-if="polygonConfig.face.textureUrl">
                         <GuiSlider
-                            label="正面纹理重复 (U)"
+                            label="Face Texture Repeat (U)"
                             v-model="polygonConfig.face.textureRepeat[0]"
                             @change="updatePolygon"
                             :min="1"
@@ -107,7 +107,7 @@
                             :step="1"
                         />
                         <GuiSlider
-                            label="正面纹理重复 (V)"
+                            label="Face Texture Repeat (V)"
                             v-model="polygonConfig.face.textureRepeat[1]"
                             @change="updatePolygon"
                             :min="1"
@@ -118,24 +118,24 @@
 
                     <template v-if="!polygonConfig.face.textureUrl">
                         <GuiCheckbox
-                            label="启用正面渐变"
+                            label="Enable Face Gradient"
                             v-model="polygonConfig.face.useGradient"
                             @change="updatePolygon"
                         />
                         <GuiColorPicker
-                            label="正面底部颜色"
+                            label="Face Bottom Color"
                             v-model="polygonConfig.face.bottomColor"
                             @change="updatePolygon"
                         />
                         <GuiColorPicker
                             v-if="polygonConfig.face.useGradient"
-                            label="正面顶部颜色"
+                            label="Face Top Color"
                             v-model="polygonConfig.face.topColor"
                             @change="updatePolygon"
                         />
                         <GuiSlider
                             v-if="polygonConfig.face.useGradient"
-                            label="正面渐变角度"
+                            label="Face Gradient Angle"
                             v-model="polygonConfig.face.gradientAngle"
                             @change="updatePolygon"
                             :min="0"
@@ -168,7 +168,7 @@
                     <GuiInfoItem :label="$t('extrudedPolygon.faces')" :value="stats.faces" />
                 </GuiSection>
 
-                <GuiSection title="事件日志">
+                <GuiSection title="Event Log">
                     <div class="event-log">
                         <div v-for="(log, index) in eventLogs" :key="index" class="log-item">
                             {{ log }}
@@ -199,61 +199,61 @@ import { useSceneOnly } from '../../composables/useSceneOnly';
 
 const { t } = useI18n();
 
-// 检测是否为 sceneOnly 模式
+// Detect if in sceneOnly mode
 const isSceneOnly = useSceneOnly();
 
-// 场景容器引用
+// Scene container reference
 const sceneContainer = ref(null);
 
-// 事件日志
+// Event logs
 const eventLogs = ref([]);
 
-// 统计信息
+// Statistics
 const stats = reactive({
     vertices: 0,
     faces: 0
 });
 
-// W3D 场景实例
+// W3D scene instance
 let scene = null;
 
-// ExtrudedPolygon 组件实例
+// ExtrudedPolygon component instance
 let extrudedPolygon = null;
 
-// 预设形状选择
+// Preset shape selection
 const selectedPreset = ref('rectangle');
 
-// 多边形配置（新的配置结构）
+// Polygon configuration (new configuration structure)
 const polygonConfig = reactive({
     height: 10,
 
-    // 侧面配置
+    // Side configuration
     side: {
-        textureUrl: null, // 侧面纹理 URL
-        textureRepeat: [1, 1], // 侧面纹理重复次数
-        useGradient: true, // 是否启用侧面渐变
-        bottomColor: '#00ff00', // 侧面底部颜色
-        topColor: '#0000ff' // 侧面顶部颜色
+        textureUrl: null, // Side texture URL
+        textureRepeat: [1, 1], // Side texture repeat count
+        useGradient: true, // Enable side gradient
+        bottomColor: '#00ff00', // Side bottom color
+        topColor: '#0000ff' // Side top color
     },
 
-    // 正面配置
+    // Face configuration
     face: {
-        textureUrl: '/images/n_2.jpg', // 正面纹理 URL
-        textureRepeat: [2, 2], // 正面纹理重复次数
-        useGradient: false, // 是否启用正面渐变
-        bottomColor: '#ff0000', // 正面底部颜色
-        topColor: '#ffff00', // 正面顶部颜色
-        gradientAngle: 0 // 正面渐变角度（度）
+        textureUrl: '/images/n_2.jpg', // Face texture URL
+        textureRepeat: [2, 2], // Face texture repeat count
+        useGradient: false, // Enable face gradient
+        bottomColor: '#ff0000', // Face bottom color
+        topColor: '#ffff00', // Face top color
+        gradientAngle: 0 // Face gradient angle (degrees)
     },
 
-    // 材质配置
+    // Material configuration
     opacity: 1.0,
     wireframe: false,
     sideMaterialType: 'standard',
     faceMaterialType: 'standard'
 });
 
-// 预设形状点位数据
+// Preset shape point data
 const presets = {
     rectangle: [
         [-10, 0],
@@ -274,7 +274,7 @@ const presets = {
     ]
 };
 
-// 添加日志
+// Add log
 const addLog = (message) => {
     const timestamp = new Date().toLocaleTimeString();
     eventLogs.value.unshift(`[${timestamp}] ${message}`);
@@ -283,7 +283,7 @@ const addLog = (message) => {
     }
 };
 
-// 更新统计信息
+// Update statistics
 const updateStats = () => {
     if (extrudedPolygon && extrudedPolygon.geometry) {
         stats.vertices = extrudedPolygon.geometry.attributes.position.count;
@@ -293,7 +293,7 @@ const updateStats = () => {
     }
 };
 
-// 生成正多边形点位
+// Generate regular polygon points
 function generateRegularPolygon(sides, radius) {
     const points = [];
     for (let i = 0; i < sides; i++) {

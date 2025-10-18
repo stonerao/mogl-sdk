@@ -2,23 +2,23 @@
     <SplitLayout
         :code="sourceCode"
         language="javascript"
-        title="AreaBlock - 区域块组件"
+        title="AreaBlock - Area Block Component"
         :sceneOnly="isSceneOnly"
     >
         <div ref="sceneContainer" class="scene-container"></div>
 
-        <GuiPanel title="区域块控制">
-            <GuiSection title="区域块配置">
-                <GuiColorPicker label="区域颜色" v-model="areaConfig.color" />
+        <GuiPanel title="Area Block Control">
+            <GuiSection title="Area Block Configuration">
+                <GuiColorPicker label="Area Color" v-model="areaConfig.color" />
                 <GuiSlider
-                    label="墙壁高度"
+                    label="Wall Height"
                     v-model="areaConfig.wallHeight"
                     :min="1"
                     :max="20"
                     :step="1"
                 />
                 <GuiSlider
-                    label="墙壁透明度"
+                    label="Wall Opacity"
                     v-model="areaConfig.wallOpacity"
                     :min="0.1"
                     :max="1"
@@ -26,7 +26,7 @@
                     :precision="2"
                 />
                 <GuiSlider
-                    label="底部透明度"
+                    label="Bottom Opacity"
                     v-model="areaConfig.bottomOpacity"
                     :min="0.1"
                     :max="1"
@@ -34,14 +34,14 @@
                     :precision="2"
                 />
                 <GuiSlider
-                    label="边框宽度"
+                    label="Border Width"
                     v-model="areaConfig.borderWidth"
                     :min="1"
                     :max="10"
                     :step="1"
                 />
                 <GuiSlider
-                    label="动画速度"
+                    label="Animation Speed"
                     v-model="areaConfig.animationSpeed"
                     :min="0.1"
                     :max="3"
@@ -49,34 +49,39 @@
                     :precision="1"
                 />
                 <GuiSelect
-                    label="显示模式"
+                    label="Display Mode"
                     v-model="displayMode"
                     :options="[
-                        { value: 'all', label: '墙壁+底部' },
-                        { value: 'wall', label: '只显示墙壁' },
-                        { value: 'bottom', label: '只显示底部' },
-                        { value: 'border', label: '只显示边框' }
+                        { value: 'all', label: 'Wall + Bottom' },
+                        { value: 'wall', label: 'Wall Only' },
+                        { value: 'bottom', label: 'Bottom Only' },
+                        { value: 'border', label: 'Border Only' }
                     ]"
                 />
                 <GuiSelect
-                    label="形状类型"
+                    label="Shape Type"
                     v-model="areaShapeType"
                     :options="[
-                        { value: 'square', label: '正方形' },
-                        { value: 'triangle', label: '三角形' },
-                        { value: 'hexagon', label: '六边形' },
-                        { value: 'random', label: '随机多边形' }
+                        { value: 'square', label: 'Square' },
+                        { value: 'triangle', label: 'Triangle' },
+                        { value: 'hexagon', label: 'Hexagon' },
+                        { value: 'random', label: 'Random Polygon' }
                     ]"
                 />
-                <GuiButton label="添加区域块" block @click="addRandomArea" />
-                <GuiButton label="清除所有区域块" variant="danger" block @click="clearAllAreas" />
+                <GuiButton label="Add Area Block" block @click="addRandomArea" />
+                <GuiButton
+                    label="Clear All Area Blocks"
+                    variant="danger"
+                    block
+                    @click="clearAllAreas"
+                />
 
                 <div v-if="areaList.length > 0" class="area-list">
-                    <h5 class="list-title">区域块列表 ({{ areaList.length }})</h5>
+                    <h5 class="list-title">Area Block List ({{ areaList.length }})</h5>
                     <div v-for="area in areaList" :key="area.id" class="area-item">
                         <span class="area-name">{{ area.userData?.name || area.id }}</span>
                         <GuiButton
-                            label="删除"
+                            label="Delete"
                             variant="danger"
                             size="small"
                             @click="removeArea(area.id)"
@@ -85,12 +90,12 @@
                 </div>
             </GuiSection>
 
-            <GuiSection title="性能统计">
+            <GuiSection title="Performance Statistics">
                 <GuiInfoItem label="FPS:" :value="fps" />
-                <GuiInfoItem label="区域块数量:" :value="areaCount" />
+                <GuiInfoItem label="Area Block Count:" :value="areaCount" />
             </GuiSection>
 
-            <GuiSection title="事件日志">
+            <GuiSection title="Event Log">
                 <div class="event-log">
                     <div v-for="(log, index) in eventLogs" :key="index" class="log-item">
                         {{ log }}
@@ -118,7 +123,7 @@ import {
 } from '@/components/Gui';
 import { useSceneOnly } from '../../composables/useSceneOnly';
 
-// 检测是否为 sceneOnly 模式
+// Detect if in sceneOnly mode
 const isSceneOnly = useSceneOnly();
 
 const sceneContainer = ref(null);
@@ -134,7 +139,7 @@ let areaBlockComponent = null;
 let areaCounter = 0;
 let fpsUpdateInterval = null;
 
-// 区域块配置
+// Area block configuration
 const areaConfig = reactive({
     color: '#00ff00',
     wallHeight: 5,
@@ -144,7 +149,7 @@ const areaConfig = reactive({
     animationSpeed: 1.0
 });
 
-// 根据显示模式计算显示参数
+// Calculate display parameters based on display mode
 const displayConfig = computed(() => {
     switch (displayMode.value) {
         case 'wall':
@@ -159,11 +164,11 @@ const displayConfig = computed(() => {
     }
 });
 
-// 源代码展示
+// Source code display
 const sourceCode = `import { Scene } from '@w3d/core';
 import { AreaBlock, GridHelper } from '@w3d/components';
 
-// 创建场景
+// Create scene
 const scene = new Scene(container, {
   renderer: {
     antialias: true,
@@ -178,7 +183,7 @@ const scene = new Scene(container, {
 
 scene.init();
 
-// 添加灯光
+// Add lights
 scene.light.addAmbient({
   color: '#ffffff',
   intensity: 0.6
@@ -190,18 +195,18 @@ scene.light.addDirectional({
   position: [10, 10, 5]
 });
 
-// 注册组件
+// Register components
 scene.registerComponent('AreaBlock', AreaBlock);
 scene.registerComponent('GridHelper', GridHelper);
 
-// 添加网格
+// Add grid
 await scene.add('GridHelper', {
   name: 'grid',
   size: 40,
   divisions: 40
 });
 
-// 添加区域块组件
+// Add area block component
 const areaBlock = await scene.add('AreaBlock', {
   name: 'area-blocks',
   areas: [
@@ -224,16 +229,16 @@ const areaBlock = await scene.add('AreaBlock', {
   ]
 });
 
-// 监听事件
+// Listen to events
 areaBlock.on('areaAdded', (data) => {
-  console.log('区域块已添加:', data.areaId);
+  console.log('Area block added:', data.areaId);
 });
 
 areaBlock.on('areaRemoved', (data) => {
-  console.log('区域块已移除:', data.areaId);
+  console.log('Area block removed:', data.areaId);
 });
 
-// 添加新区域块
+// Add new area block
 await areaBlock.addArea({
   id: 'area2',
   points: [
@@ -248,10 +253,10 @@ await areaBlock.addArea({
   showBottom: false
 });
 
-// 移除区域块
+// Remove area block
 areaBlock.removeArea('area1');`;
 
-// 添加日志
+// Add log
 const addLog = (message) => {
     const timestamp = new Date().toLocaleTimeString();
     eventLogs.value.unshift(`[${timestamp}] ${message}`);
@@ -260,10 +265,10 @@ const addLog = (message) => {
     }
 };
 
-// 初始化场景
+// Initialize scene
 const initScene = async () => {
     try {
-        // 创建场景
+        // Create scene
         scene = new Scene(sceneContainer.value, {
             renderer: {
                 antialias: true,
@@ -278,7 +283,7 @@ const initScene = async () => {
 
         scene.init();
 
-        // 添加灯光
+        // Add lights
         scene.light.addAmbient({
             color: '#ffffff',
             intensity: 0.6
@@ -290,14 +295,14 @@ const initScene = async () => {
             position: [10, 10, 5]
         });
 
-        // 启用自动调整大小
+        // Enable auto resize
         scene.renderer.enableResize();
 
-        // 注册组件
+        // Register components
         scene.registerComponent('GridHelper', GridHelper);
         scene.registerComponent('AreaBlock', AreaBlock);
 
-        // 添加网格辅助
+        // Add grid helper
         await scene.add('GridHelper', {
             name: 'grid',
             size: 40,
@@ -305,13 +310,13 @@ const initScene = async () => {
             color: '#888888'
         });
 
-        // 注册 AreaBlock 组件
+        // Register AreaBlock component
 
-        // 创建区域块组件
+        // Create area block component
         areaBlockComponent = await scene.add('AreaBlock', {
             name: 'area-blocks',
             areas: [
-                // 示例 1：墙壁+底部
+                // Example 1: Wall + Bottom
                 {
                     id: 'demo-area-1',
                     points: [
@@ -327,9 +332,9 @@ const initScene = async () => {
                     showWall: true,
                     showBottom: true,
                     showBorder: true,
-                    userData: { name: '墙壁+底部' }
+                    userData: { name: 'Wall + Bottom' }
                 },
-                // 示例 2：只显示墙壁
+                // Example 2: Wall Only
                 {
                     id: 'demo-area-2',
                     points: [
@@ -344,9 +349,9 @@ const initScene = async () => {
                     showWall: true,
                     showBottom: false,
                     showBorder: true,
-                    userData: { name: '只显示墙壁' }
+                    userData: { name: 'Wall Only' }
                 },
-                // 示例 3：只显示底部
+                // Example 3: Bottom Only
                 {
                     id: 'demo-area-3',
                     points: [
@@ -360,9 +365,9 @@ const initScene = async () => {
                     showWall: false,
                     showBottom: true,
                     showBorder: true,
-                    userData: { name: '只显示底部' }
+                    userData: { name: 'Bottom Only' }
                 },
-                // 示例 4：只显示边框
+                // Example 4: Border Only
                 {
                     id: 'demo-area-4',
                     points: [
@@ -375,39 +380,39 @@ const initScene = async () => {
                     showWall: false,
                     showBottom: false,
                     showBorder: true,
-                    userData: { name: '只显示边框' }
+                    userData: { name: 'Border Only' }
                 }
             ]
         });
 
-        // 暴露到 window 对象以便调试
+        // Expose to window object for debugging
         window.__w3d_areaBlock__ = areaBlockComponent;
 
-        // 监听事件
+        // Listen to events
         areaBlockComponent.on('areaAdded', (data) => {
-            addLog(`区域块已添加: ${data.areaId}`);
+            addLog(`Area block added: ${data.areaId}`);
             updateAreaList();
         });
 
         areaBlockComponent.on('areaRemoved', (data) => {
-            addLog(`区域块已移除: ${data.areaId}`);
+            addLog(`Area block removed: ${data.areaId}`);
             updateAreaList();
         });
 
-        // 更新统计
+        // Update statistics
         updateStats();
 
-        // 启动 FPS 监控
+        // Start FPS monitoring
         startFPSMonitor();
 
-        addLog('场景初始化完成');
+        addLog('Scene initialization complete');
     } catch (error) {
-        console.error('初始化场景失败:', error);
-        addLog(`错误: ${error.message}`);
+        console.error('Scene initialization failed:', error);
+        addLog(`Error: ${error.message}`);
     }
 };
 
-// FPS 监控
+// FPS Monitoring
 const updateFPS = () => {
     if (scene && scene.renderer && scene.renderer.renderer) {
         const info = scene.renderer.renderer.info;
@@ -419,17 +424,17 @@ const startFPSMonitor = () => {
     fpsUpdateInterval = setInterval(updateFPS, 100);
 };
 
-// 更新统计
+// Update statistics
 const updateStats = () => {
     if (!areaBlockComponent) return;
 
     areaCount.value = areaBlockComponent.getAllAreas().length;
 
-    // 更新区域块列表
+    // Update area block list
     updateAreaList();
 };
 
-// 更新区域块列表
+// Update area block list
 const updateAreaList = () => {
     if (!areaBlockComponent) return;
 
@@ -438,13 +443,13 @@ const updateAreaList = () => {
     areaCount.value = areas.length;
 };
 
-// 生成区域块点位
+// Generate area block points
 const generateAreaPoints = (shapeType, centerX, centerZ, size) => {
     const points = [];
 
     switch (shapeType) {
         case 'square':
-            // 正方形
+            // Square
             points.push(
                 { x: centerX - size / 2, y: 0, z: centerZ - size / 2 },
                 { x: centerX + size / 2, y: 0, z: centerZ - size / 2 },
@@ -454,7 +459,7 @@ const generateAreaPoints = (shapeType, centerX, centerZ, size) => {
             break;
 
         case 'triangle':
-            // 等边三角形
+            // Equilateral triangle
             const height = (size * Math.sqrt(3)) / 2;
             points.push(
                 { x: centerX, y: 0, z: centerZ - height / 2 },
@@ -464,7 +469,7 @@ const generateAreaPoints = (shapeType, centerX, centerZ, size) => {
             break;
 
         case 'hexagon':
-            // 六边形
+            // Hexagon
             const radius = size / 2;
             for (let i = 0; i < 6; i++) {
                 const angle = (Math.PI / 3) * i;
@@ -477,7 +482,7 @@ const generateAreaPoints = (shapeType, centerX, centerZ, size) => {
             break;
 
         case 'random':
-            // 随机多边形（5-8个点）
+            // Random polygon (5-8 points)
             const pointCount = 5 + Math.floor(Math.random() * 4);
             const angleStep = (Math.PI * 2) / pointCount;
             for (let i = 0; i < pointCount; i++) {
@@ -495,23 +500,23 @@ const generateAreaPoints = (shapeType, centerX, centerZ, size) => {
     return points;
 };
 
-// 添加随机区域块
+// Add random area block
 const addRandomArea = async () => {
     if (!areaBlockComponent) return;
 
     areaCounter++;
     const newId = `area-${Date.now()}-${areaCounter}`;
 
-    // 随机位置和大小
+    // Random position and size
     const range = 12;
     const centerX = (Math.random() - 0.5) * range * 2;
     const centerZ = (Math.random() - 0.5) * range * 2;
     const size = 5 + Math.random() * 10;
 
-    // 生成点位
+    // Generate points
     const points = generateAreaPoints(areaShapeType.value, centerX, centerZ, size);
 
-    // 随机颜色
+    // Random color
     const colors = ['#00ff00', '#ff0000', '#0000ff', '#ffff00', '#ff00ff', '#00ffff'];
     const randomColor = colors[Math.floor(Math.random() * colors.length)];
 
@@ -525,37 +530,37 @@ const addRandomArea = async () => {
         borderWidth: areaConfig.borderWidth,
         animationSpeed: areaConfig.animationSpeed,
         ...displayConfig.value,
-        userData: { name: `区域块 ${areaCounter}` }
+        userData: { name: `Area Block ${areaCounter}` }
     });
 
-    addLog(`添加区域块: ${newId}`);
+    addLog(`Area block added: ${newId}`);
     updateStats();
 };
 
-// 移除区域块
+// Remove area block
 const removeArea = async (areaId) => {
     if (!areaBlockComponent) return;
 
     areaBlockComponent.removeArea(areaId);
-    addLog(`移除区域块: ${areaId}`);
+    addLog(`Area block removed: ${areaId}`);
     updateStats();
 };
 
-// 清除所有区域块
+// Clear all area blocks
 const clearAllAreas = () => {
     if (!areaBlockComponent) return;
 
     areaBlockComponent.clearAreas();
-    addLog('清除所有区域块');
+    addLog('All area blocks cleared');
     updateStats();
 };
 
-// 组件挂载
+// Component mounted
 onMounted(() => {
     initScene();
 });
 
-// 组件卸载
+// Component unmounted
 onUnmounted(() => {
     if (fpsUpdateInterval) {
         clearInterval(fpsUpdateInterval);

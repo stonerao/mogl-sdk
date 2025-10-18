@@ -2,18 +2,18 @@
     <SplitLayout
         :code="sourceCode"
         language="javascript"
-        title="ImageMarker - 图片点位组件"
+        title="ImageMarker - Image Marker Component"
         :sceneOnly="isSceneOnly"
     >
-        <!-- 3D 场景容器 -->
+        <!-- 3D Scene Container -->
         <div ref="sceneContainer" class="scene-container"></div>
 
-        <!-- 控制面板 -->
-        <GuiPanel title="图片点位控制" width="wide">
-            <!-- 点位配置 -->
-            <GuiSection title="点位配置">
+        <!-- Control Panel -->
+        <GuiPanel title="Image Marker Controls" width="wide">
+            <!-- Marker Configuration -->
+            <GuiSection title="Marker Configuration">
                 <GuiSelect
-                    label="渲染类型"
+                    label="Render Type"
                     v-model="markerConfig.type"
                     :options="[
                         { value: 'sprite', label: 'Sprite' },
@@ -22,17 +22,17 @@
                 />
 
                 <GuiSlider
-                    label="图片大小"
+                    label="Image Size"
                     v-model="markerConfig.size"
                     :min="1"
                     :max="20"
                     :step="0.5"
                 />
 
-                <GuiColorPicker label="颜色叠加" v-model="markerConfig.color" />
+                <GuiColorPicker label="Color Overlay" v-model="markerConfig.color" />
 
                 <GuiSlider
-                    label="透明度"
+                    label="Opacity"
                     v-model="markerConfig.opacity"
                     :min="0.1"
                     :max="1"
@@ -41,7 +41,7 @@
                 />
 
                 <GuiSlider
-                    label="位置偏移 Y"
+                    label="Position Offset Y"
                     v-model="markerConfig.offset.y"
                     :min="-10"
                     :max="10"
@@ -49,21 +49,21 @@
                 />
 
                 <GuiCheckbox
-                    label="大小随距离衰减 (Sprite)"
+                    label="Size Attenuation by Distance (Sprite)"
                     v-model="markerConfig.sizeAttenuation"
                 />
 
-                <GuiCheckbox label="显示文字标签" v-model="markerConfig.showLabel" />
+                <GuiCheckbox label="Show Text Label" v-model="markerConfig.showLabel" />
 
                 <template v-if="markerConfig.showLabel">
                     <GuiTextInput
-                        label="标签文字"
+                        label="Label Text"
                         v-model="markerConfig.labelText"
-                        placeholder="输入标签文字"
+                        placeholder="Enter label text"
                     />
 
                     <GuiSlider
-                        label="标签偏移 Y"
+                        label="Label Offset Y"
                         v-model="markerConfig.labelOffset.y"
                         :min="0"
                         :max="5"
@@ -72,14 +72,18 @@
                 </template>
 
                 <div class="button-group">
-                    <GuiButton label="添加点位" @click="addRandomMarker" />
-                    <GuiButton label="清除所有点位" variant="secondary" @click="clearAllMarkers" />
+                    <GuiButton label="Add Marker" @click="addRandomMarker" />
+                    <GuiButton
+                        label="Clear All Markers"
+                        variant="secondary"
+                        @click="clearAllMarkers"
+                    />
                 </div>
             </GuiSection>
 
-            <!-- 点位列表 -->
+            <!-- Marker List -->
             <template v-if="markerList.length > 0">
-                <GuiSection title="点位列表">
+                <GuiSection title="Marker List">
                     <div class="marker-list">
                         <div v-for="marker in markerList" :key="marker.id" class="marker-item">
                             <div class="marker-info">
@@ -90,23 +94,23 @@
                             </div>
                             <div class="marker-actions">
                                 <GuiButton
-                                    label="切换"
+                                    label="Toggle"
                                     size="small"
                                     @click="toggleMarkerState(marker.id)"
                                 />
                                 <GuiButton
                                     v-if="marker.label"
-                                    label="标签"
+                                    label="Label"
                                     size="small"
                                     @click="toggleLabel(marker.id)"
                                 />
                                 <GuiButton
-                                    label="移动"
+                                    label="Move"
                                     size="small"
                                     @click="moveMarker(marker.id)"
                                 />
                                 <GuiButton
-                                    label="删除"
+                                    label="Delete"
                                     size="small"
                                     variant="secondary"
                                     @click="removeMarker(marker.id)"
@@ -117,14 +121,14 @@
                 </GuiSection>
             </template>
 
-            <!-- 性能统计 -->
-            <GuiSection title="性能统计">
+            <!-- Performance Statistics -->
+            <GuiSection title="Performance Statistics">
                 <GuiInfoItem label="FPS" :value="fps" />
-                <GuiInfoItem label="点位数量" :value="markerCount" />
+                <GuiInfoItem label="Marker Count" :value="markerCount" />
             </GuiSection>
 
-            <!-- 事件日志 -->
-            <GuiSection title="事件日志">
+            <!-- Event Log -->
+            <GuiSection title="Event Log">
                 <div class="event-log">
                     <div v-for="(log, index) in eventLogs" :key="index" class="log-item">
                         {{ log }}

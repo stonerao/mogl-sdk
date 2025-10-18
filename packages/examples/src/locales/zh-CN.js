@@ -111,6 +111,10 @@ export default {
             '19-skeletal-animation': {
                 title: '19 - Skeletal Animation',
                 description: '骨骼动画系统 - 加载和控制带骨骼的角色动画'
+            },
+            '20-post-processing': {
+                title: '20 - Post Processing',
+                description: '后期处理效果 - Sobel边缘检测、SSR反射、Bloom泛光、AO环境光遮蔽'
             }
         }
     },

@@ -1,6 +1,7 @@
 import { Component } from '@w3d/core';
 import { ModelLoader as CoreModelLoader } from '@w3d/core';
 import * as THREE from 'three';
+import { handleBake } from './Bake';
 
 /**
  * ModelLoader 模型加载器组件
@@ -77,17 +78,6 @@ export class ModelLoader extends Component {
                 // 模型加载完成后的后续操作
                 // 设置交互对象
                 this.setupInteractiveObjects();
-
-                // 如果启用了烘焙光照且设置了自动应用，则应用烘焙光照
-                if (this.config.bakedLighting.enabled && this.config.bakedLighting.autoApply) {
-                    this.applyBakedLighting(this.config.bakedLighting.textureMapping, {
-                        mode: this.config.bakedLighting.mode,
-                        intensity: this.config.bakedLighting.intensity
-                    }).catch((error) => {
-                        // eslint-disable-next-line no-console
-                        console.error('ModelLoader: Failed to apply baked lighting', error);
-                    });
-                }
             })
             .catch((error) => {
                 // loadModel 内部已经处理了错误并触发了 'error' 事件
@@ -142,9 +132,6 @@ export class ModelLoader extends Component {
             // 应用阴影
             this.applyShadow();
 
-            // 添加到场景
-            this.add(this.model);
-
             // 处理动画
             if (this.config.animations && this.animations.length > 0) {
                 this.setupAnimations(this.animations);
@@ -157,6 +144,20 @@ export class ModelLoader extends Component {
                 gltf: this.gltf, // 向后兼容
                 model: this.model // 添加 model 属性以便直接访问
             };
+
+            // 如果启用了烘焙光照且设置了自动应用，则应用烘焙光照
+            if (this.config.bakedLighting.enabled && this.config.bakedLighting.autoApply) {
+                this.applyBakedLighting(this.config.bakedLighting.textureMapping, {
+                    mode: this.config.bakedLighting.mode,
+                    intensity: this.config.bakedLighting.intensity
+                }).catch((error) => {
+                    // eslint-disable-next-line no-console
+                    console.error('ModelLoader: Failed to apply baked lighting', error);
+                });
+            }
+            // 添加到场景
+            this.add(this.model);
+
             this.emit('loadComplete', loadCompleteData);
             this.emit('loaded', loadCompleteData); // 向后兼容
         } catch (error) {
@@ -344,6 +345,7 @@ export class ModelLoader extends Component {
      */
     getAnimationNames() {
         if (!this.animations) return [];
+        console.log(this.animations);
         return this.animations.map(
             (clip) => clip.name || `Animation ${this.animations.indexOf(clip)}`
         );
@@ -605,6 +607,8 @@ export class ModelLoader extends Component {
      * @param {string} options.mode - 应用模式：'map' 或 'lightMap'
      * @param {number} options.intensity - 光照强度（仅 lightMap 模式）
      * @param {number} options.channel - UV 通道索引：0=UV1, 1=UV2
+     * @param {number} options.flipY - 是否翻转纹理Y轴
+     * @param {number} options.IndependentMaterial - 是否独立材质 公用材质时需要独立
      */
     async applyBakedLighting(textureMapping = {}, options = {}) {
         if (!this.model) {
@@ -616,7 +620,9 @@ export class ModelLoader extends Component {
         const {
             mode = 'map',
             intensity = 1.0,
-            channel = this.config.bakedLighting.channel || 1 // 读取 channel 配置
+            channel = this.config.bakedLighting.channel || 1, // 读取 channel 配置
+            flipY = this.config.bakedLighting.flipY || false, // 读取 flipY 配置
+            IndependentMaterial = this.config.bakedLighting.IndependentMaterial || true // 读取 IndependentMaterial 配置
         } = options;
 
         try {
@@ -675,7 +681,9 @@ export class ModelLoader extends Component {
                         mode,
                         intensity,
                         matchSource,
-                        channel
+                        channel,
+                        flipY,
+                        IndependentMaterial
                     );
                     loadPromises.push(promise);
                 }
@@ -710,6 +718,8 @@ export class ModelLoader extends Component {
      * @param {number} intensity - 光照强度
      * @param {string} matchSource - 匹配来源描述
      * @param {number} channel - UV 通道索引
+     * @param {number} flipY - 是否翻转纹理Y轴
+     * @param {number} IndependentMaterial - 是否独立材质
      */
     async loadAndApplyBakeTexture(
         mesh,
@@ -717,13 +727,22 @@ export class ModelLoader extends Component {
         mode,
         intensity,
         _matchSource = '',
-        channel = 1
+        channel = 1,
+        flipY = false,
+        IndependentMaterial = true
     ) {
         return new Promise((resolve, reject) => {
             // 检查缓存
             if (this.bakedTextureCache.has(texturePath)) {
                 const cachedTexture = this.bakedTextureCache.get(texturePath);
-                this.applyTextureToMesh(mesh, cachedTexture, mode, intensity, channel);
+                this.applyTextureToMesh({
+                    mesh,
+                    cachedTexture,
+                    mode,
+                    intensity,
+                    channel,
+                    IndependentMaterial
+                });
                 resolve(mesh);
                 return;
             }
@@ -734,14 +753,20 @@ export class ModelLoader extends Component {
                 // 加载成功
                 (texture) => {
                     // GLB/GLTF 模型必须设置 flipY = false
-                    texture.flipY = false;
+                    texture.flipY = flipY;
                     texture.colorSpace = THREE.SRGBColorSpace;
 
                     // 缓存纹理
                     this.bakedTextureCache.set(texturePath, texture);
-
                     // 应用到网格
-                    this.applyTextureToMesh(mesh, texture, mode, intensity, channel);
+                    this.applyTextureToMesh({
+                        mesh,
+                        texture,
+                        mode,
+                        intensity,
+                        channel,
+                        IndependentMaterial
+                    });
 
                     resolve(mesh);
                 },
@@ -764,23 +789,28 @@ export class ModelLoader extends Component {
      * @param {string} mode - 应用模式
      * @param {number} intensity - 光照强度
      * @param {number} channel - UV 通道索引：0=UV1, 1=UV2
+     * @param {number} IndependentMaterial - 是否独立材质
      */
-    applyTextureToMesh(mesh, texture, mode, intensity, channel = 1) {
+    applyTextureToMesh({ mesh, texture, mode, intensity, channel = 1, IndependentMaterial }) {
         // 保存原始材质（如果还没有保存）
         if (!this.originalMaterials.has(mesh.uuid)) {
             this.originalMaterials.set(mesh.uuid, mesh.material);
         }
 
         // 重要：克隆材质以避免共享问题
-        mesh.material = mesh.material.clone();
+        if (IndependentMaterial) {
+            mesh.material = mesh.material.clone();
+        }
+        texture.channel = channel;
 
         if (mode === 'lightMap') {
             // 设置 UV 通道（重要：lightMap 通常使用 UV2）
-            texture.channel = channel;
 
             // 使用光照贴图模式
             mesh.material.lightMap = texture;
             mesh.material.lightMapIntensity = intensity;
+        } else if (mode === 'bake') {
+            handleBake({ mesh, texture, intensity });
         } else {
             // 使用替换贴图模式（通常使用默认 UV1）
             mesh.material.map = texture;

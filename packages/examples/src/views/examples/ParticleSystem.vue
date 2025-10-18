@@ -6,18 +6,18 @@
         :sceneOnly="isSceneOnly"
     >
         <div class="scene-container" ref="sceneContainer">
-            <!-- 加载状态 -->
+            <!-- Loading State -->
             <template v-if="isLoading">
                 <GuiLoading :progress="loadingProgress" :text="loadingText" />
             </template>
 
-            <!-- 控制面板 -->
+            <!-- Control Panel -->
             <template v-if="!isLoading">
-                <GuiPanel title="粒子系统控制" width="wide">
-                    <!-- 粒子参数控制 -->
-                    <GuiSection title="粒子参数">
+                <GuiPanel title="Particle System Controls" width="wide">
+                    <!-- Particle Parameter Control -->
+                    <GuiSection title="Particle Parameters">
                         <GuiSlider
-                            label="粒子数量"
+                            label="Particle Count"
                             v-model="particleSettings.count"
                             :min="100"
                             :max="10000"
@@ -25,7 +25,7 @@
                             @update:modelValue="updateParticleCount"
                         />
                         <GuiSlider
-                            label="粒子大小"
+                            label="Particle Size"
                             v-model="particleSettings.size"
                             :min="0.1"
                             :max="5"
@@ -34,7 +34,7 @@
                             @update:modelValue="updateParticleSize"
                         />
                         <GuiSlider
-                            label="生命周期"
+                            label="Lifetime"
                             v-model="particleSettings.lifetime"
                             :min="1"
                             :max="10"
@@ -44,7 +44,7 @@
                             @update:modelValue="updateParticleLifetime"
                         />
                         <GuiSlider
-                            label="发射速率"
+                            label="Emission Rate"
                             v-model="particleSettings.emissionRate"
                             :min="10"
                             :max="1000"
@@ -53,22 +53,22 @@
                             @update:modelValue="updateEmissionRate"
                         />
                         <GuiColorPicker
-                            label="粒子颜色"
+                            label="Particle Color"
                             v-model="particleSettings.color"
                             @update:modelValue="updateParticleColor"
                         />
                     </GuiSection>
 
-                    <!-- 发射器配置 -->
-                    <GuiSection title="发射器配置">
+                    <!-- Emitter Configuration -->
+                    <GuiSection title="Emitter Configuration">
                         <GuiSelect
-                            label="发射器形状"
+                            label="Emitter Shape"
                             v-model="emitterSettings.shape"
                             :options="[
-                                { value: 'point', label: '点' },
-                                { value: 'sphere', label: '球体' },
-                                { value: 'box', label: '盒子' },
-                                { value: 'cone', label: '圆锥' }
+                                { value: 'point', label: 'Point' },
+                                { value: 'sphere', label: 'Sphere' },
+                                { value: 'box', label: 'Box' },
+                                { value: 'cone', label: 'Cone' }
                             ]"
                             @update:modelValue="updateEmitterShape"
                         />
@@ -93,7 +93,7 @@
                             />
                         </div>
                         <GuiSlider
-                            label="发射范围"
+                            label="Emission Range"
                             v-model="emitterSettings.range"
                             :min="0.1"
                             :max="5"
@@ -102,7 +102,7 @@
                             @update:modelValue="updateEmitterRange"
                         />
                         <GuiSlider
-                            label="初始速度 (最小)"
+                            label="Initial Velocity (Min)"
                             v-model="emitterSettings.velocity.min"
                             :min="0"
                             :max="20"
@@ -111,7 +111,7 @@
                             @update:modelValue="updateVelocity"
                         />
                         <GuiSlider
-                            label="初始速度 (最大)"
+                            label="Initial Velocity (Max)"
                             v-model="emitterSettings.velocity.max"
                             :min="0"
                             :max="20"
@@ -121,10 +121,10 @@
                         />
                     </GuiSection>
 
-                    <!-- 物理设置 -->
-                    <GuiSection title="物理设置">
+                    <!-- Physics Settings -->
+                    <GuiSection title="Physics Settings">
                         <GuiSlider
-                            label="重力"
+                            label="Gravity"
                             v-model="physicsSettings.gravity"
                             :min="-20"
                             :max="20"
@@ -133,7 +133,7 @@
                             @update:modelValue="updateGravity"
                         />
                         <GuiSlider
-                            label="阻力"
+                            label="Damping"
                             v-model="physicsSettings.damping"
                             :min="0"
                             :max="1"
@@ -142,40 +142,43 @@
                             @update:modelValue="updateDamping"
                         />
                         <GuiSelect
-                            label="混合模式"
+                            label="Blend Mode"
                             v-model="physicsSettings.blendMode"
                             :options="[
-                                { value: 'normal', label: '正常' },
-                                { value: 'additive', label: '叠加' },
-                                { value: 'multiply', label: '相乘' },
-                                { value: 'screen', label: '滤色' }
+                                { value: 'normal', label: 'Normal' },
+                                { value: 'additive', label: 'Additive' },
+                                { value: 'multiply', label: 'Multiply' },
+                                { value: 'screen', label: 'Screen' }
                             ]"
                             @update:modelValue="updateBlendMode"
                         />
                     </GuiSection>
 
-                    <!-- 预设效果 -->
-                    <GuiSection title="预设效果">
+                    <!-- Preset Effects -->
+                    <GuiSection title="Preset Effects">
                         <div class="button-group">
-                            <GuiButton label="🔥 火焰" @click="loadPresetEffect('fire')" />
-                            <GuiButton label="💨 烟雾" @click="loadPresetEffect('smoke')" />
-                            <GuiButton label="🌧️ 雨" @click="loadPresetEffect('rain')" />
-                            <GuiButton label="❄️ 雪" @click="loadPresetEffect('snow')" />
-                            <GuiButton label="⭐ 星星" @click="loadPresetEffect('stars')" />
-                            <GuiButton label="💥 爆炸" @click="loadPresetEffect('explosion')" />
+                            <GuiButton label="🔥 Fire" @click="loadPresetEffect('fire')" />
+                            <GuiButton label="💨 Smoke" @click="loadPresetEffect('smoke')" />
+                            <GuiButton label="🌧️ Rain" @click="loadPresetEffect('rain')" />
+                            <GuiButton label="❄️ Snow" @click="loadPresetEffect('snow')" />
+                            <GuiButton label="⭐ Stars" @click="loadPresetEffect('stars')" />
+                            <GuiButton
+                                label="💥 Explosion"
+                                @click="loadPresetEffect('explosion')"
+                            />
                         </div>
                     </GuiSection>
 
-                    <!-- 纹理设置 -->
-                    <GuiSection title="纹理设置">
+                    <!-- Texture Settings -->
+                    <GuiSection title="Texture Settings">
                         <GuiTextInput
-                            label="纹理路径"
+                            label="Texture Path"
                             v-model="textureSettings.path"
                             placeholder="/images/lensflare0.png"
                             @change="updateTexture"
                         />
                         <GuiSlider
-                            label="纹理重复 X"
+                            label="Texture Repeat X"
                             v-model="textureSettings.repeatX"
                             :min="0.1"
                             :max="5"
@@ -184,7 +187,7 @@
                             @update:modelValue="updateTextureRepeat"
                         />
                         <GuiSlider
-                            label="纹理重复 Y"
+                            label="Texture Repeat Y"
                             v-model="textureSettings.repeatY"
                             :min="0.1"
                             :max="5"
@@ -199,30 +202,30 @@
                         </template>
                     </GuiSection>
 
-                    <!-- Shader 设置 -->
-                    <GuiSection title="自定义 Shader">
+                    <!-- Shader Settings -->
+                    <GuiSection title="Custom Shader">
                         <GuiCheckbox
-                            label="启用自定义 Shader"
+                            label="Enable Custom Shader"
                             v-model="shaderSettings.useCustomShader"
                             @update:modelValue="updateShaderMode"
                         />
 
                         <template v-if="shaderSettings.useCustomShader">
                             <GuiSelect
-                                label="Shader 类型"
+                                label="Shader Type"
                                 v-model="shaderSettings.type"
                                 :options="[
-                                    { value: 'glow', label: '发光效果' },
-                                    { value: 'sparkle', label: '闪烁效果' },
-                                    { value: 'fire', label: '火焰效果' },
-                                    { value: 'smoke', label: '烟雾效果' }
+                                    { value: 'glow', label: 'Glow Effect' },
+                                    { value: 'sparkle', label: 'Sparkle Effect' },
+                                    { value: 'fire', label: 'Fire Effect' },
+                                    { value: 'smoke', label: 'Smoke Effect' }
                                 ]"
                                 @update:modelValue="updateShaderType"
                             />
 
                             <template v-if="shaderSettings.type === 'glow'">
                                 <GuiSlider
-                                    label="发光强度"
+                                    label="Glow Intensity"
                                     v-model="shaderSettings.glowIntensity"
                                     :min="0.1"
                                     :max="3"
@@ -234,7 +237,7 @@
 
                             <template v-if="shaderSettings.type === 'sparkle'">
                                 <GuiSlider
-                                    label="闪烁频率"
+                                    label="Sparkle Frequency"
                                     v-model="shaderSettings.sparkleFrequency"
                                     :min="1"
                                     :max="20"
@@ -250,7 +253,7 @@
                                 "
                             >
                                 <GuiSlider
-                                    label="噪声缩放"
+                                    label="Noise Scale"
                                     v-model="shaderSettings.noiseScale"
                                     :min="0.1"
                                     :max="5"
@@ -262,38 +265,38 @@
                         </template>
                     </GuiSection>
 
-                    <!-- 控制按钮 -->
-                    <GuiSection title="控制">
+                    <!-- Control Buttons -->
+                    <GuiSection title="Controls">
                         <div class="button-group">
                             <GuiButton
-                                :label="isEmitting ? '停止发射' : '开始发射'"
+                                :label="isEmitting ? 'Stop Emission' : 'Start Emission'"
                                 :disabled="!particleSystem"
                                 @click="startParticles"
                             />
                             <GuiButton
-                                label="清除粒子"
+                                label="Clear Particles"
                                 variant="secondary"
                                 :disabled="!particleSystem"
                                 @click="clearParticles"
                             />
                             <GuiButton
-                                label="重置设置"
+                                label="Reset Settings"
                                 variant="secondary"
                                 @click="resetSettings"
                             />
                         </div>
                     </GuiSection>
 
-                    <!-- 粒子信息 -->
+                    <!-- Particle Information -->
                     <template v-if="particleSystem">
-                        <GuiSection title="粒子信息">
-                            <GuiInfoItem label="活跃粒子" :value="activeParticleCount" />
+                        <GuiSection title="Particle Information">
+                            <GuiInfoItem label="Active Particles" :value="activeParticleCount" />
                             <GuiInfoItem
-                                label="发射状态"
-                                :value="isEmitting ? '发射中' : '已停止'"
+                                label="Emission Status"
+                                :value="isEmitting ? 'Emitting' : 'Stopped'"
                             />
-                            <GuiInfoItem label="当前帧率" :value="`${currentFPS} FPS`" />
-                            <GuiInfoItem label="渲染模式" :value="physicsSettings.blendMode" />
+                            <GuiInfoItem label="Current FPS" :value="`${currentFPS} FPS`" />
+                            <GuiInfoItem label="Render Mode" :value="physicsSettings.blendMode" />
                         </GuiSection>
                     </template>
                 </GuiPanel>
@@ -322,7 +325,7 @@ import {
 import SplitLayout from '../../components/SplitLayout.vue';
 import { useSceneOnly } from '../../composables/useSceneOnly';
 
-// 检测是否为 sceneOnly 模式
+// Detect if in sceneOnly mode
 const isSceneOnly = useSceneOnly();
 
 const sceneContainer = ref(null);
@@ -330,12 +333,12 @@ const isLoading = ref(false);
 const loadingText = ref('');
 const loadingProgress = ref(0);
 
-// 粒子系统状态
+// Particle system state
 const isEmitting = ref(false);
 const activeParticleCount = ref(0);
 const currentFPS = ref(60);
 
-// 粒子设置
+// Particle settings
 const particleSettings = reactive({
     count: 1000,
     size: 1.0,
@@ -344,7 +347,7 @@ const particleSettings = reactive({
     color: '#00ff88'
 });
 
-// 发射器设置
+// Emitter settings
 const emitterSettings = reactive({
     shape: 'point',
     position: { x: 0, y: 0, z: 0 },

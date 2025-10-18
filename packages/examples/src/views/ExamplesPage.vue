@@ -235,6 +235,12 @@ const examples = ref([
         key: '19-skeletal-animation',
         category: 'advanced',
         route: '/examples/19-skeletal-animation'
+    },
+    {
+        id: 20,
+        key: '20-post-processing',
+        category: 'effects',
+        route: '/examples/20-post-processing'
     }
 ]);
 

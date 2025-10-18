@@ -69,9 +69,7 @@ export class EventEmitter {
      */
     emit(event, ...args) {
         const listeners = this.events.get(event);
-        // console.log(listeners, event);
         if (listeners) {
-            console.log('listeners', event, listeners);
             listeners.forEach((listener) => {
                 try {
                     listener(...args);

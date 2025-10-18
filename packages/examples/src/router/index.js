@@ -197,6 +197,25 @@ const routes = [
             category: 'advanced'
         }
     },
+    {
+        path: '/examples/20-post-processing',
+        name: 'PostProcessingDemo',
+        component: () => import('../views/examples/PostProcessingDemo.vue'),
+        meta: {
+            title: '20 - Post Processing',
+            category: 'effects'
+        }
+    },
+
+    {
+        path: '/public/DigitalFactory',
+        name: 'DigitalFactory',
+        component: () => import('../views/public/DigitalFactory/index.vue'),
+        meta: {
+            title: 'Digital Factory',
+            category: 'public'
+        }
+    },
 
     {
         path: '/:pathMatch(.*)*',

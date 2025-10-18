@@ -11,37 +11,37 @@
             </template>
 
             <template v-if="!isLoading">
-                <GuiPanel title="骨骼动画控制" width="wide">
-                    <!-- 动画选择 -->
-                    <GuiSection title="动画选择">
+                <GuiPanel title="Skeletal Animation Controls" width="wide">
+                    <!-- Animation Selection -->
+                    <GuiSection title="Animation Selection">
                         <GuiSelect
-                            label="当前动画"
+                            label="Current Animation"
                             v-model="currentAnimation"
                             :options="animationOptions"
                             @update:modelValue="switchAnimation"
                         />
-                        <GuiInfoItem label="动画数量" :value="animationList.length" />
+                        <GuiInfoItem label="Animation Count" :value="animationList.length" />
                         <GuiInfoItem
-                            label="当前状态"
-                            :value="isPlaying ? '播放中' : isPaused ? '已暂停' : '已停止'"
+                            label="Current Status"
+                            :value="isPlaying ? 'Playing' : isPaused ? 'Paused' : 'Stopped'"
                         />
                     </GuiSection>
 
-                    <!-- 播放控制 -->
-                    <GuiSection title="播放控制">
+                    <!-- Playback Control -->
+                    <GuiSection title="Playback Control">
                         <div class="button-group">
                             <GuiButton
-                                :label="isPlaying ? '暂停' : '播放'"
+                                :label="isPlaying ? 'Pause' : 'Play'"
                                 @click="togglePlayPause"
                             />
-                            <GuiButton label="停止" variant="secondary" @click="stopAnimation" />
+                            <GuiButton label="Stop" variant="secondary" @click="stopAnimation" />
                         </div>
                     </GuiSection>
 
-                    <!-- 动画参数 -->
-                    <GuiSection title="动画参数">
+                    <!-- Animation Parameters -->
+                    <GuiSection title="Animation Parameters">
                         <GuiSlider
-                            label="播放速度"
+                            label="Playback Speed"
                             v-model="animationSpeed"
                             :min="0.1"
                             :max="3.0"
@@ -50,21 +50,21 @@
                             @update:modelValue="updateSpeed"
                         />
                         <GuiCheckbox
-                            label="循环播放"
+                            label="Loop Animation"
                             v-model="loopAnimation"
                             @update:modelValue="updateLoopMode"
                         />
                     </GuiSection>
 
-                    <!-- 模型信息 -->
-                    <GuiSection title="模型信息">
-                        <GuiInfoItem label="骨骼数量" :value="skeletonInfo.boneCount" />
-                        <GuiInfoItem label="网格数量" :value="modelInfo.meshCount" />
-                        <GuiInfoItem label="材质数量" :value="modelInfo.materialCount" />
+                    <!-- Model Information -->
+                    <GuiSection title="Model Information">
+                        <GuiInfoItem label="Bone Count" :value="skeletonInfo.boneCount" />
+                        <GuiInfoItem label="Mesh Count" :value="modelInfo.meshCount" />
+                        <GuiInfoItem label="Material Count" :value="modelInfo.materialCount" />
                     </GuiSection>
 
-                    <!-- 事件日志 -->
-                    <GuiSection title="事件日志">
+                    <!-- Event Log -->
+                    <GuiSection title="Event Log">
                         <div class="event-log">
                             <div v-for="(log, index) in eventLogs" :key="index" class="log-item">
                                 <span class="log-time">{{ log.time }}</span>
@@ -95,7 +95,7 @@ import {
 import SplitLayout from '../../components/SplitLayout.vue';
 import { useSceneOnly } from '../../composables/useSceneOnly';
 
-// 检测是否为 sceneOnly 模式
+// Detect if in sceneOnly mode
 const isSceneOnly = useSceneOnly();
 
 const sceneContainer = ref(null);
@@ -239,25 +239,27 @@ const loadModel = async () => {
                 addLog(`动画播放完成: ${data.name}`);
             }
         });
+        // 绑定动画事件监听器
+        modelComponent.on('loaded', (data) => {
+            // 获取动画列表
+            const animations = modelComponent.getAnimationNames();
+            console.log('Available animations:', animations);
 
-        // 获取动画列表
-        const animations = modelComponent.getAnimationNames();
-        console.log('Available animations:', animations);
+            if (animations && animations.length > 0) {
+                animationList.value = animations;
+                animationOptions.value = animations.map((name, index) => ({
+                    value: name,
+                    label: name || `Animation ${index + 1}`
+                }));
+                currentAnimation.value = animations[0];
+                addLog(`加载了 ${animations.length} 个动画`);
+            } else {
+                addLog('模型中没有找到动画数据');
+            }
 
-        if (animations && animations.length > 0) {
-            animationList.value = animations;
-            animationOptions.value = animations.map((name, index) => ({
-                value: name,
-                label: name || `Animation ${index + 1}`
-            }));
-            currentAnimation.value = animations[0];
-            addLog(`加载了 ${animations.length} 个动画`);
-        } else {
-            addLog('模型中没有找到动画数据');
-        }
-
-        // 获取模型信息
-        updateModelInfo();
+            // 获取模型信息
+            updateModelInfo();
+        });
 
         loadingProgress.value = 100;
         isLoading.value = false;

@@ -2,24 +2,24 @@
     <SplitLayout
         :code="sourceCode"
         language="javascript"
-        title="MigrationLine - 迁移线动画组件"
+        title="MigrationLine - Migration Line Animation Component"
         :sceneOnly="isSceneOnly"
     >
-        <!-- 3D 场景容器 -->
+        <!-- 3D Scene Container -->
         <div ref="sceneContainer" class="scene-container"></div>
 
-        <!-- 控制面板 -->
-        <GuiPanel title="迁移线控制" width="wide">
-            <!-- 全局配置 -->
-            <GuiSection title="全局配置">
+        <!-- Control Panel -->
+        <GuiPanel title="Migration Line Controls" width="wide">
+            <!-- Global Configuration -->
+            <GuiSection title="Global Configuration">
                 <GuiColorPicker
-                    label="颜色"
+                    label="Color"
                     v-model="globalConfig.color"
                     @update:modelValue="updateGlobalConfig"
                 />
 
                 <GuiSlider
-                    label="持续时间"
+                    label="Duration"
                     v-model="globalConfig.duration"
                     :min="1000"
                     :max="10000"
@@ -29,7 +29,7 @@
                 />
 
                 <GuiSlider
-                    label="速度"
+                    label="Speed"
                     v-model="globalConfig.speed"
                     :min="0.1"
                     :max="3"
@@ -39,13 +39,13 @@
                 />
 
                 <GuiCheckbox
-                    label="循环播放"
+                    label="Loop Playback"
                     v-model="globalConfig.loop"
                     @update:modelValue="updateGlobalConfig"
                 />
 
                 <GuiSlider
-                    label="发光强度"
+                    label="Glow Intensity"
                     v-model="globalConfig.glowIntensity"
                     :min="0"
                     :max="3"
@@ -55,7 +55,7 @@
                 />
 
                 <GuiSlider
-                    label="流动速度"
+                    label="Flow Speed"
                     v-model="globalConfig.flowSpeed"
                     :min="0.1"
                     :max="3"
@@ -65,12 +65,12 @@
                 />
             </GuiSection>
 
-            <!-- 区域块配置 -->
-            <GuiSection title="区域块配置">
-                <GuiColorPicker label="区域颜色" v-model="areaConfig.color" />
+            <!-- Area Block Configuration -->
+            <GuiSection title="Area Block Configuration">
+                <GuiColorPicker label="Area Color" v-model="areaConfig.color" />
 
                 <GuiSlider
-                    label="墙壁高度"
+                    label="Wall Height"
                     v-model="areaConfig.wallHeight"
                     :min="1"
                     :max="20"
@@ -78,7 +78,7 @@
                 />
 
                 <GuiSlider
-                    label="边框宽度"
+                    label="Border Width"
                     v-model="areaConfig.borderWidth"
                     :min="1"
                     :max="10"
@@ -86,7 +86,7 @@
                 />
 
                 <GuiSlider
-                    label="动画速度"
+                    label="Animation Speed"
                     v-model="areaConfig.animationSpeed"
                     :min="0.1"
                     :max="3"
@@ -94,69 +94,73 @@
                     :precision="1"
                 />
 
-                <GuiCheckbox label="显示墙壁" v-model="areaConfig.showWall" />
+                <GuiCheckbox label="Show Wall" v-model="areaConfig.showWall" />
 
                 <GuiSelect
-                    label="形状类型"
+                    label="Shape Type"
                     v-model="areaShapeType"
                     :options="[
-                        { value: 'square', label: '正方形' },
-                        { value: 'triangle', label: '三角形' },
-                        { value: 'hexagon', label: '六边形' },
-                        { value: 'random', label: '随机多边形' }
+                        { value: 'square', label: 'Square' },
+                        { value: 'triangle', label: 'Triangle' },
+                        { value: 'hexagon', label: 'Hexagon' },
+                        { value: 'random', label: 'Random Polygon' }
                     ]"
                 />
 
                 <div class="button-group">
-                    <GuiButton label="添加区域块" @click="addRandomArea" />
-                    <GuiButton label="清除所有区域块" variant="secondary" @click="clearAllAreas" />
+                    <GuiButton label="Add Area Block" @click="addRandomArea" />
+                    <GuiButton
+                        label="Clear All Area Blocks"
+                        variant="secondary"
+                        @click="clearAllAreas"
+                    />
                 </div>
 
-                <!-- 区域块列表 -->
+                <!-- Area Block List -->
                 <template v-if="areaList.length > 0">
                     <div class="area-list">
                         <div v-for="area in areaList" :key="area.id" class="area-item">
                             <span class="area-name">{{ area.userData?.name || area.id }}</span>
-                            <GuiButton label="删除" size="small" @click="removeArea(area.id)" />
+                            <GuiButton label="Delete" size="small" @click="removeArea(area.id)" />
                         </div>
                     </div>
                 </template>
             </GuiSection>
 
-            <!-- 动画控制 -->
-            <GuiSection title="动画控制">
+            <!-- Animation Control -->
+            <GuiSection title="Animation Control">
                 <div class="button-group">
-                    <GuiButton label="全部播放" @click="startAll" />
-                    <GuiButton label="全部暂停" variant="secondary" @click="pauseAll" />
-                    <GuiButton label="全部停止" variant="secondary" @click="stopAll" />
-                    <GuiButton label="清除全部" variant="secondary" @click="clearAll" />
+                    <GuiButton label="Play All" @click="startAll" />
+                    <GuiButton label="Pause All" variant="secondary" @click="pauseAll" />
+                    <GuiButton label="Stop All" variant="secondary" @click="stopAll" />
+                    <GuiButton label="Clear All" variant="secondary" @click="clearAll" />
                 </div>
             </GuiSection>
 
-            <!-- 添加迁移线 -->
-            <GuiSection title="添加迁移线">
+            <!-- Add Migration Line -->
+            <GuiSection title="Add Migration Line">
                 <GuiSelect
-                    label="路径类型"
+                    label="Path Type"
                     v-model="newLinePathType"
                     :options="[
-                        { value: 'simple', label: '简单路径 (A→B)' },
-                        { value: 'multi', label: '多段路径 (A→B→C)' },
-                        { value: 'curve', label: '曲线路径' }
+                        { value: 'simple', label: 'Simple Path (A→B)' },
+                        { value: 'multi', label: 'Multi-segment Path (A→B→C)' },
+                        { value: 'curve', label: 'Curve Path' }
                     ]"
                 />
-                <GuiButton label="添加随机迁移线" @click="addRandomLine" />
+                <GuiButton label="Add Random Migration Line" @click="addRandomLine" />
             </GuiSection>
 
-            <!-- 性能统计 -->
-            <GuiSection title="性能统计">
+            <!-- Performance Statistics -->
+            <GuiSection title="Performance Statistics">
                 <GuiInfoItem label="FPS" :value="fps" />
-                <GuiInfoItem label="迁移线数量" :value="lineCount" />
-                <GuiInfoItem label="区域块数量" :value="areaCount" />
-                <GuiInfoItem label="播放中" :value="playingCount" />
+                <GuiInfoItem label="Migration Line Count" :value="lineCount" />
+                <GuiInfoItem label="Area Block Count" :value="areaCount" />
+                <GuiInfoItem label="Playing" :value="playingCount" />
             </GuiSection>
 
-            <!-- 事件日志 -->
-            <GuiSection title="事件日志">
+            <!-- Event Log -->
+            <GuiSection title="Event Log">
                 <div class="event-log">
                     <div v-for="(log, index) in eventLogs" :key="index" class="log-item">
                         {{ log }}
@@ -185,7 +189,7 @@ import * as THREE from 'three';
 import SplitLayout from '../../components/SplitLayout.vue';
 import { useSceneOnly } from '../../composables/useSceneOnly';
 
-// 检测是否为 sceneOnly 模式
+// Detect if in sceneOnly mode
 const isSceneOnly = useSceneOnly();
 
 const sceneContainer = ref(null);
@@ -204,18 +208,18 @@ let lineCounter = 0;
 let areaCounter = 0;
 let fpsUpdateInterval = null;
 
-// 全局配置（只保留 Shader 类型）
+// Global configuration (Shader type only)
 const globalConfig = reactive({
     color: '#00ff00',
     duration: 3000,
     speed: 1,
     loop: true,
-    // Shader 特定配置
+    // Shader-specific configuration
     glowIntensity: 1.5,
     flowSpeed: 1.0
 });
 
-// 区域块配置
+// Area block configuration
 const areaConfig = reactive({
     color: '#00ff00',
     wallHeight: 5,
@@ -225,11 +229,11 @@ const areaConfig = reactive({
     showWall: true
 });
 
-// 源代码展示
+// Source code display
 const sourceCode = `import { Scene } from '@w3d/core';
 import { MigrationLine, GridHelper } from '@w3d/components';
 
-// 创建场景
+// Create scene
 const scene = new Scene(container, {
   renderer: {
     antialias: true,
@@ -244,7 +248,7 @@ const scene = new Scene(container, {
 
 scene.init();
 
-// 添加灯光
+// Add lighting
 scene.light.addAmbient({
   color: '#ffffff',
   intensity: 0.6
@@ -256,18 +260,18 @@ scene.light.addDirectional({
   position: [10, 10, 5]
 });
 
-// 注册组件
+// Register components
 scene.registerComponent('MigrationLine', MigrationLine);
 scene.registerComponent('GridHelper', GridHelper);
 
-// 添加网格
+// Add grid
 await scene.add('GridHelper', {
   name: 'grid',
   size: 40,
   divisions: 40
 });
 
-// 添加迁移线
+// Add migration line
 const migrationLines = await scene.add('MigrationLine', {
   name: 'migration-lines',
   globalConfig: {
@@ -292,20 +296,20 @@ const migrationLines = await scene.add('MigrationLine', {
   ]
 });
 
-// 监听事件
+// Listen for events
 migrationLines.on('start', (data) => {
-  console.log('动画开始:', data.lineId);
+  console.log('Animation started:', data.lineId);
 });
 
 migrationLines.on('complete', (data) => {
-  console.log('动画完成:', data.lineId);
+  console.log('Animation completed:', data.lineId);
 });
 
 migrationLines.on('update', (data) => {
-  console.log('进度:', data.progress);
+  console.log('Progress:', data.progress);
 });`;
 
-// 添加事件日志
+// Add event log
 const addLog = (message) => {
     const timestamp = new Date().toLocaleTimeString();
     eventLogs.value.unshift(`[${timestamp}] ${message}`);
@@ -314,12 +318,12 @@ const addLog = (message) => {
     }
 };
 
-// 初始化场景
+// Initialize scene
 const initScene = async () => {
     if (!sceneContainer.value) return;
 
     try {
-        // 创建场景
+        // Create scene
         scene = new Scene(sceneContainer.value, {
             renderer: {
                 antialias: true,
@@ -334,10 +338,10 @@ const initScene = async () => {
 
         scene.init();
 
-        // 暴露到 window 对象以便调试
+        // Expose to window object for debugging
         window.__w3d_scene__ = scene;
 
-        // 添加灯光
+        // Add lighting
         scene.light.addAmbient({
             color: '#ffffff',
             intensity: 0.6
@@ -349,14 +353,14 @@ const initScene = async () => {
             position: [10, 10, 5]
         });
 
-        // 启用自动调整大小
+        // Enable auto-resize
         scene.renderer.enableResize();
 
-        // 注册组件
+        // Register components
         scene.registerComponent('MigrationLine', MigrationLine);
         scene.registerComponent('GridHelper', GridHelper);
 
-        // 添加网格辅助
+        // Add grid helper
         await scene.add('GridHelper', {
             name: 'grid',
             size: 40,
@@ -364,10 +368,10 @@ const initScene = async () => {
             color: '#888888'
         });
 
-        // 添加一些参考立方体
+        // Add some reference cubes
         createReferenceCubes();
 
-        // 创建迁移线组件
+        // Create migration line component
         migrationLineComponent = await scene.add('MigrationLine', {
             name: 'migration-lines',
             globalConfig: {
@@ -389,7 +393,7 @@ const initScene = async () => {
                         { x: 15, y: 0, z: 15 }
                     ],
                     color: '#00ff00',
-                    userData: { name: '示例线条 1' }
+                    userData: { name: 'Example Line 1' }
                 },
                 {
                     id: 'line2',
@@ -400,7 +404,7 @@ const initScene = async () => {
                     ],
                     color: '#ff0000',
                     delay: 500,
-                    userData: { name: '示例线条 2' }
+                    userData: { name: 'Example Line 2' }
                 },
                 {
                     id: 'line3',
@@ -412,7 +416,7 @@ const initScene = async () => {
                     ],
                     color: '#0000ff',
                     delay: 1000,
-                    userData: { name: '示例线条 3' }
+                    userData: { name: 'Example Line 3' }
                 }
             ],
             areas: [
@@ -427,7 +431,7 @@ const initScene = async () => {
                     color: '#00ff00',
                     wallHeight: 6,
                     wallOpacity: 0.5,
-                    userData: { name: '示例区域 1' }
+                    userData: { name: 'Example Area 1' }
                 },
                 {
                     id: 'demo-area-2',
@@ -440,52 +444,52 @@ const initScene = async () => {
                     color: '#0088ff',
                     wallHeight: 4,
                     wallOpacity: 0.3,
-                    userData: { name: '示例区域 2' }
+                    userData: { name: 'Example Area 2' }
                 }
             ]
         });
 
-        // 暴露到 window 对象以便调试
+        // Expose to window object for debugging
         window.__w3d_migrationLine__ = migrationLineComponent;
 
-        // 监听事件
+        // Listen for events
         migrationLineComponent.on('start', (data) => {
-            addLog(`开始: ${data.lineId}`);
+            addLog(`Started: ${data.lineId}`);
         });
 
         migrationLineComponent.on('complete', (data) => {
-            addLog(`完成: ${data.lineId}`);
+            addLog(`Completed: ${data.lineId}`);
         });
 
         migrationLineComponent.on('loop', (data) => {
-            addLog(`循环: ${data.lineId}`);
+            addLog(`Loop: ${data.lineId}`);
         });
 
-        // 区域块事件
+        // Area block events
         migrationLineComponent.on('areaAdded', (data) => {
-            addLog(`区域块已添加: ${data.areaId}`);
+            addLog(`Area block added: ${data.areaId}`);
             updateAreaList();
         });
 
         migrationLineComponent.on('areaRemoved', (data) => {
-            addLog(`区域块已移除: ${data.areaId}`);
+            addLog(`Area block removed: ${data.areaId}`);
             updateAreaList();
         });
 
-        // 更新统计
+        // Update statistics
         updateStats();
 
-        // 启动 FPS 监控
+        // Start FPS monitoring
         startFPSMonitor();
 
-        addLog('场景初始化完成');
+        addLog('Scene initialization complete');
     } catch (error) {
-        console.error('初始化场景失败:', error);
-        addLog(`错误: ${error.message}`);
+        console.error('Scene initialization failed:', error);
+        addLog(`Error: ${error.message}`);
     }
 };
 
-// 创建参考立方体
+// Create reference cubes
 const createReferenceCubes = () => {
     const positions = [
         { x: -15, y: 0.5, z: -15, color: '#ff6b6b' },
@@ -507,7 +511,7 @@ const createReferenceCubes = () => {
     });
 };
 
-// 启动 FPS 监控
+// Start FPS monitoring
 const startFPSMonitor = () => {
     let lastTime = performance.now();
     let frames = 0;
@@ -525,7 +529,7 @@ const startFPSMonitor = () => {
     fpsUpdateInterval = setInterval(updateFPS, 100);
 };
 
-// 更新统计
+// Update statistics
 const updateStats = () => {
     if (!migrationLineComponent) return;
 
@@ -538,15 +542,15 @@ const updateStats = () => {
     });
     playingCount.value = playing;
 
-    // 更新区域块列表
+    // Update area block list
     updateAreaList();
 };
 
-// 更新全局配置
+// Update global configuration
 const updateGlobalConfig = async () => {
     if (!migrationLineComponent) return;
 
-    // 更新所有线条
+    // Update all lines
     const allLines = migrationLineComponent.getAllLines();
     for (const lineData of allLines) {
         await migrationLineComponent.updateLine(lineData.id, {
@@ -559,17 +563,17 @@ const updateGlobalConfig = async () => {
         });
     }
 
-    addLog('更新全局配置');
+    addLog('Global configuration updated');
 };
 
-// 添加随机迁移线
+// Add random migration line
 const addRandomLine = async () => {
     if (!migrationLineComponent) return;
 
     lineCounter++;
     const newId = `line-${Date.now()}-${lineCounter}`;
 
-    // 生成随机路径
+    // Generate random path
     let points = [];
     const range = 15;
 
@@ -619,7 +623,7 @@ const addRandomLine = async () => {
             break;
     }
 
-    // 随机颜色
+    // Random color
     const colors = ['#00ff00', '#ff0000', '#0000ff', '#ffff00', '#ff00ff', '#00ffff'];
     const randomColor = colors[Math.floor(Math.random() * colors.length)];
 
@@ -627,20 +631,20 @@ const addRandomLine = async () => {
         id: newId,
         points: points,
         color: randomColor,
-        userData: { name: `随机线条 ${lineCounter}` }
+        userData: { name: `Random Line ${lineCounter}` }
     });
 
-    addLog(`添加迁移线: ${newId}`);
+    addLog(`Migration line added: ${newId}`);
     updateStats();
 };
 
-// 生成区域块点位
+// Generate area block points
 const generateAreaPoints = (shapeType, centerX, centerZ, size) => {
     const points = [];
 
     switch (shapeType) {
         case 'square':
-            // 正方形
+            // Square
             points.push(
                 { x: centerX - size / 2, y: 0, z: centerZ - size / 2 },
                 { x: centerX + size / 2, y: 0, z: centerZ - size / 2 },
@@ -650,7 +654,7 @@ const generateAreaPoints = (shapeType, centerX, centerZ, size) => {
             break;
 
         case 'triangle':
-            // 等边三角形
+            // Equilateral triangle
             const height = (size * Math.sqrt(3)) / 2;
             points.push(
                 { x: centerX, y: 0, z: centerZ - height / 2 },
@@ -660,7 +664,7 @@ const generateAreaPoints = (shapeType, centerX, centerZ, size) => {
             break;
 
         case 'hexagon':
-            // 六边形
+            // Hexagon
             const radius = size / 2;
             for (let i = 0; i < 6; i++) {
                 const angle = (Math.PI / 3) * i;
@@ -673,7 +677,7 @@ const generateAreaPoints = (shapeType, centerX, centerZ, size) => {
             break;
 
         case 'random':
-            // 随机多边形（5-8个点）
+            // Random polygon (5-8 points)
             const pointCount = 5 + Math.floor(Math.random() * 4);
             const angleStep = (Math.PI * 2) / pointCount;
             for (let i = 0; i < pointCount; i++) {
@@ -691,23 +695,23 @@ const generateAreaPoints = (shapeType, centerX, centerZ, size) => {
     return points;
 };
 
-// 添加随机区域块
+// Add random area block
 const addRandomArea = async () => {
     if (!migrationLineComponent) return;
 
     areaCounter++;
     const newId = `area-${Date.now()}-${areaCounter}`;
 
-    // 随机位置和大小
+    // Random position and size
     const range = 12;
     const centerX = (Math.random() - 0.5) * range * 2;
     const centerZ = (Math.random() - 0.5) * range * 2;
     const size = 5 + Math.random() * 10;
 
-    // 生成点位
+    // Generate points
     const points = generateAreaPoints(areaShapeType.value, centerX, centerZ, size);
 
-    // 随机颜色
+    // Random color
     const colors = ['#00ff00', '#ff0000', '#0000ff', '#ffff00', '#ff00ff', '#00ffff'];
     const randomColor = colors[Math.floor(Math.random() * colors.length)];
 
@@ -720,32 +724,32 @@ const addRandomArea = async () => {
         borderWidth: areaConfig.borderWidth,
         animationSpeed: areaConfig.animationSpeed,
         showWall: areaConfig.showWall,
-        userData: { name: `区域块 ${areaCounter}` }
+        userData: { name: `Area Block ${areaCounter}` }
     });
 
-    addLog(`添加区域块: ${newId}`);
+    addLog(`Area block added: ${newId}`);
     updateStats();
 };
 
-// 移除区域块
+// Remove area block
 const removeArea = async (areaId) => {
     if (!migrationLineComponent) return;
 
     migrationLineComponent.removeArea(areaId);
-    addLog(`移除区域块: ${areaId}`);
+    addLog(`Area block removed: ${areaId}`);
     updateStats();
 };
 
-// 清除所有区域块
+// Clear all area blocks
 const clearAllAreas = () => {
     if (!migrationLineComponent) return;
 
     migrationLineComponent.clearAreas();
-    addLog('清除所有区域块');
+    addLog('All area blocks cleared');
     updateStats();
 };
 
-// 更新区域块列表
+// Update area block list
 const updateAreaList = () => {
     if (!migrationLineComponent) return;
 
@@ -754,11 +758,11 @@ const updateAreaList = () => {
     areaCount.value = areas.length;
 };
 
-// 控制按钮
+// Control buttons
 const startAll = () => {
     if (migrationLineComponent) {
         migrationLineComponent.startAll();
-        addLog('全部播放');
+        addLog('Play all');
         updateStats();
     }
 };
@@ -766,7 +770,7 @@ const startAll = () => {
 const pauseAll = () => {
     if (migrationLineComponent) {
         migrationLineComponent.pauseAll();
-        addLog('全部暂停');
+        addLog('Pause all');
         updateStats();
     }
 };
@@ -774,7 +778,7 @@ const pauseAll = () => {
 const stopAll = () => {
     if (migrationLineComponent) {
         migrationLineComponent.stopAll();
-        addLog('全部停止');
+        addLog('Stop all');
         updateStats();
     }
 };
@@ -782,17 +786,17 @@ const stopAll = () => {
 const clearAll = () => {
     if (migrationLineComponent) {
         migrationLineComponent.clearLines();
-        addLog('清除全部');
+        addLog('Clear all');
         updateStats();
     }
 };
 
-// 组件挂载
+// Component mounted
 onMounted(() => {
     initScene();
 });
 
-// 组件卸载
+// Component unmounted
 onUnmounted(() => {
     if (fpsUpdateInterval) {
         clearInterval(fpsUpdateInterval);

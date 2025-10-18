@@ -6,47 +6,47 @@
         :sceneOnly="isSceneOnly"
     >
         <div class="scene-container" ref="sceneContainer">
-            <!-- 加载状态 -->
+            <!-- Loading State -->
             <template v-if="isLoading">
                 <GuiLoading :progress="loadingProgress" :text="loadingText" />
             </template>
 
-            <!-- 渲染进度 -->
+            <!-- Rendering Progress -->
             <template v-if="isRendering">
-                <GuiLoading :progress="renderProgress" text="GPU 路径追踪渲染中..." />
+                <GuiLoading :progress="renderProgress" text="GPU Path Tracing Rendering..." />
             </template>
 
-            <!-- 控制面板 -->
+            <!-- Control Panel -->
             <template v-if="!isLoading">
-                <GuiPanel title="路径追踪控制" width="wide">
-                    <!-- 渲染控制 -->
-                    <GuiSection title="渲染控制">
+                <GuiPanel title="Path Tracing Controls" width="wide">
+                    <!-- Render Control -->
+                    <GuiSection title="Render Control">
                         <div class="button-group">
                             <GuiButton
-                                label="开始渲染"
+                                label="Start Rendering"
                                 :disabled="!pathTracer || isRendering"
                                 @click="startRender"
                             />
                             <GuiButton
-                                label="暂停"
+                                label="Pause"
                                 variant="secondary"
                                 :disabled="!pathTracer || !isRendering"
                                 @click="pauseRender"
                             />
                             <GuiButton
-                                label="继续"
+                                label="Resume"
                                 variant="secondary"
                                 :disabled="!pathTracer || isRendering"
                                 @click="resumeRender"
                             />
                             <GuiButton
-                                label="重置"
+                                label="Reset"
                                 variant="secondary"
                                 :disabled="!pathTracer"
                                 @click="resetRender"
                             />
                             <GuiButton
-                                label="下载图片"
+                                label="Download Image"
                                 variant="secondary"
                                 :disabled="!pathTracer"
                                 @click="downloadRender"
@@ -54,10 +54,10 @@
                         </div>
                     </GuiSection>
 
-                    <!-- 渲染设置 -->
-                    <GuiSection title="渲染设置">
+                    <!-- Render Settings -->
+                    <GuiSection title="Render Settings">
                         <GuiSlider
-                            label="目标采样数"
+                            label="Target Samples"
                             v-model="renderSettings.samples"
                             :min="10"
                             :max="500"
@@ -65,7 +65,7 @@
                             @update:modelValue="updateRenderSettings"
                         />
                         <GuiSlider
-                            label="分辨率缩放"
+                            label="Resolution Scale"
                             v-model="renderSettings.resolutionScale"
                             :min="0.1"
                             :max="1.0"
@@ -74,7 +74,7 @@
                             @update:modelValue="updateRenderSettings"
                         />
                         <GuiSlider
-                            label="分块数 (Tiles)"
+                            label="Tiles"
                             v-model="renderSettings.tiles"
                             :min="1"
                             :max="6"
@@ -82,27 +82,27 @@
                             @update:modelValue="updateRenderSettings"
                         />
                         <GuiCheckbox
-                            label="启用色调映射"
+                            label="Enable Tone Mapping"
                             v-model="renderSettings.toneMapping"
                             @update:modelValue="updateRenderSettings"
                         />
                         <GuiCheckbox
-                            label="透明背景"
+                            label="Transparent Background"
                             v-model="renderSettings.transparentBackground"
                             @update:modelValue="updateRenderSettings"
                         />
                     </GuiSection>
 
-                    <!-- 地板设置 -->
-                    <GuiSection title="地板设置">
+                    <!-- Floor Settings -->
+                    <GuiSection title="Floor Settings">
                         <GuiCheckbox
-                            label="启用地板"
+                            label="Enable Floor"
                             v-model="floorSettings.enabled"
                             @update:modelValue="recreatePathTracer"
                         />
                         <template v-if="floorSettings.enabled">
                             <GuiSlider
-                                label="粗糙度"
+                                label="Roughness"
                                 v-model="floorSettings.roughness"
                                 :min="0"
                                 :max="1"
@@ -111,7 +111,7 @@
                                 @update:modelValue="updateFloorMaterial"
                             />
                             <GuiSlider
-                                label="金属度"
+                                label="Metalness"
                                 v-model="floorSettings.metalness"
                                 :min="0"
                                 :max="1"
@@ -122,16 +122,16 @@
                         </template>
                     </GuiSection>
 
-                    <!-- 材质调整 -->
-                    <GuiSection title="材质调整">
+                    <!-- Material Adjustment -->
+                    <GuiSection title="Material Adjustment">
                         <GuiCheckbox
-                            label="自动调整材质"
+                            label="Auto Adjust Materials"
                             v-model="materialSettings.adjustMaterials"
                             @update:modelValue="recreatePathTracer"
                         />
                         <template v-if="materialSettings.adjustMaterials">
                             <GuiSlider
-                                label="粗糙度缩放"
+                                label="Roughness Scale"
                                 v-model="materialSettings.roughnessScale"
                                 :min="0.1"
                                 :max="1.0"
@@ -140,18 +140,18 @@
                                 @update:modelValue="recreatePathTracer"
                             />
                             <GuiCheckbox
-                                label="启用透射效果"
+                                label="Enable Transmission Effect"
                                 v-model="materialSettings.enableTransmission"
                                 @update:modelValue="recreatePathTracer"
                             />
                         </template>
                     </GuiSection>
 
-                    <!-- 渲染信息 -->
-                    <GuiSection title="渲染信息">
-                        <GuiInfoItem label="状态" :value="renderStatus" />
-                        <GuiInfoItem label="当前采样" :value="currentSamples" />
-                        <GuiInfoItem label="进度" :value="`${renderProgress}%`" />
+                    <!-- Rendering Information -->
+                    <GuiSection title="Rendering Information">
+                        <GuiInfoItem label="Status" :value="renderStatus" />
+                        <GuiInfoItem label="Current Samples" :value="currentSamples" />
+                        <GuiInfoItem label="Progress" :value="`${renderProgress}%`" />
                     </GuiSection>
                 </GuiPanel>
             </template>
@@ -175,24 +175,24 @@ import {
 import SplitLayout from '../../components/SplitLayout.vue';
 import { useSceneOnly } from '../../composables/useSceneOnly';
 
-// 检测是否为 sceneOnly 模式
+// Detect if in sceneOnly mode
 const isSceneOnly = useSceneOnly();
 
 const sceneContainer = ref(null);
 const isLoading = ref(false);
-const loadingText = ref('加载中...');
+const loadingText = ref('Loading...');
 const loadingProgress = ref(0);
 const isRendering = ref(false);
 const renderProgress = ref(0);
 const currentSamples = ref(0);
 const targetSamples = ref(100);
-const renderStatus = ref('未开始');
+const renderStatus = ref('Not started');
 
 let scene = null;
 let pathTracer = null;
 let model = null;
 
-// 渲染设置
+// Render settings
 const renderSettings = reactive({
     samples: 100,
     resolutionScale: 1.0,
@@ -201,25 +201,25 @@ const renderSettings = reactive({
     transparentBackground: false
 });
 
-// 地板设置
+// Floor settings
 const floorSettings = reactive({
     enabled: true,
     roughness: 0.15,
     metalness: 0.9
 });
 
-// 材质设置
+// Material settings
 const materialSettings = reactive({
     adjustMaterials: true,
     roughnessScale: 0.25,
     enableTransmission: true
 });
 
-// 源代码展示
+// Source code display
 const sourceCode = `import { Scene } from '@w3d/core';
 import { PathTracer, ModelLoader } from '@w3d/components';
 
-// 创建场景 (启用相机控制器)
+// Create scene (enable camera controller)
 const scene = new Scene(container, {
   renderer: {
     antialias: true,
@@ -232,18 +232,18 @@ const scene = new Scene(container, {
     lookAt: [0, 0, 0]
   },
   controls: {
-    enabled: true,        // 启用相机控制
-    enableDamping: true   // 启用阻尼效果
+    enabled: true,        // Enable camera control
+    enableDamping: true   // Enable damping effect
   }
 });
 
 scene.init();
 
-// 注册组件
+// Register components
 scene.registerComponent('PathTracer', PathTracer);
 scene.registerComponent('ModelLoader', ModelLoader);
 
-// 加载模型
+// Load model
 const model = await scene.add('ModelLoader', {
   name: 'christmas',
   url: '/models/christmas.glb',
@@ -251,15 +251,15 @@ const model = await scene.add('ModelLoader', {
   position: [0, 0, 0]
 });
 
-// 等待模型加载完成
+// Wait for model loading to complete
 model.on('loadComplete', async () => {
-  // 从场景中移除模型 (PathTracer 会重新添加)
+  // Remove model from scene (PathTracer will re-add it)
   scene.scene.remove(model.model);
 
-  // 创建路径追踪器 (使用 model.model 获取实际的 THREE.Group)
+  // Create path tracer (use model.model to get actual THREE.Group)
   const pathTracer = await scene.add('PathTracer', {
     name: 'pathtracer',
-    model: model.model,  // ⚠️ 重要: 使用 model.model 而不是 model
+    model: model.model,  // ⚠️ Important: use model.model instead of model
     samples: 100,
     tiles: 3,
     resolutionScale: 1.0,
@@ -278,34 +278,34 @@ model.on('loadComplete', async () => {
     autoStart: true
   });
 
-  // 监听相机变化 (自动支持)
+  // Listen for camera changes (auto-supported)
   pathTracer.on('cameraChanged', () => {
-    console.log('相机位置改变,重新渲染中...');
+    console.log('Camera position changed, re-rendering...');
   });
 
-  // 监听渲染进度
+  // Listen for render progress
   pathTracer.on('progress', (data) => {
     const percent = (data.progress * 100).toFixed(1);
-    console.log(\`渲染进度: \${percent}%\`);
-    console.log(\`采样数: \${data.samples}/\${data.targetSamples}\`);
+    console.log(\`Render progress: \${percent}%\`);
+    console.log(\`Samples: \${data.samples}/\${data.targetSamples}\`);
   });
 
-  // 监听渲染完成
+  // Listen for render completion
   pathTracer.on('complete', (data) => {
-    console.log('渲染完成!', data.samples);
-    // 可以下载渲染结果
+    console.log('Rendering complete!', data.samples);
+    // Can download render result
     pathTracer.download('pathtraced-render.png');
   });
 
-  // 控制方法
-  // pathTracer.start();   // 开始渲染
-  // pathTracer.pause();   // 暂停渲染
-  // pathTracer.resume();  // 恢复渲染
-  // pathTracer.reset();   // 重置渲染
+  // Control methods
+  // pathTracer.start();   // Start rendering
+  // pathTracer.pause();   // Pause rendering
+  // pathTracer.resume();  // Resume rendering
+  // pathTracer.reset();   // Reset rendering
 });
 
-// 用户可以自由旋转、缩放、平移相机
-// PathTracer 会自动更新并重新渲染
+// Users can freely rotate, scale, and pan the camera
+// PathTracer will automatically update and re-render
 
 `;
 
@@ -331,7 +331,7 @@ onMounted(async () => {
 
         scene.init();
 
-        // 添加灯光
+        // Add lighting
         scene.light.addAmbient({
             color: '#ffffff',
             intensity: 0.6
@@ -343,12 +343,12 @@ onMounted(async () => {
             position: [5, 5, 5]
         });
 
-        // 注册组件
+        // Register components
         scene.registerComponent('PathTracer', PathTracer);
         scene.registerComponent('ModelLoader', ModelLoader);
         scene.registerComponent('GridHelper', GridHelper);
         scene.registerComponent('HDRLoader', HDRLoader);
-        // 加载 HDR 环境贴图
+        // Load HDR environment map
         await scene.add('HDRLoader', {
             name: 'environment',
             url: '/textures/blouberg_sunrise_2_1k.hdr',
@@ -356,15 +356,15 @@ onMounted(async () => {
             asEnvironment: true,
             asBackground: true
         });
-        // 添加网格
+        // Add grid
         await scene.add('GridHelper', {
             name: 'grid',
             size: 20,
             divisions: 20
         });
-        // 加载模型
+        // Load model
         isLoading.value = true;
-        loadingText.value = '加载模型中...';
+        loadingText.value = 'Loading model...';
 
         model = await scene.add('ModelLoader', {
             name: 'christmas',
@@ -373,43 +373,42 @@ onMounted(async () => {
             position: [0, 0, 0]
         });
         console.log(model);
-        // 监听加载进度
-        /* model.on('loadProgress', (data) => {
+        // Listen for load progress
+        model.on('loadProgress', (data) => {
             loadingProgress.value = Math.round(data.progress * 100);
         });
 
         model.on('loadComplete', async () => {
-
             isLoading.value = false;
-            loadingText.value = '初始化路径追踪器...';
+            loadingText.value = 'Initializing path tracer...';
 
-            // 从场景中移除模型 (PathTracer 会重新添加)
+            // Remove model from scene (PathTracer will re-add it)
             scene.scene.remove(model.model);
 
-            // 创建路径追踪器
-        }); */
-        await createPathTracer();
+            // Create path tracer
+            await createPathTracer();
+        });
     } catch (error) {
-        console.error('初始化失败:', error);
+        console.error('Initialization failed:', error);
         isLoading.value = false;
     }
 });
 
-// 创建路径追踪器
+// Create path tracer
 const createPathTracer = async () => {
     try {
-        // 移除旧的路径追踪器
+        // Remove old path tracer
         if (pathTracer) {
             scene.remove('pathtracer');
             pathTracer = null;
         }
 
         isLoading.value = true;
-        loadingText.value = '初始化路径追踪器...';
+        loadingText.value = 'Initializing path tracer...';
 
         pathTracer = await scene.add('PathTracer', {
             name: 'pathtracer',
-            model: model.componentScene, // 使用 model.model 获取实际的 THREE.Group
+            model: model.componentScene, // Use model.model to get actual THREE.Group
             samples: renderSettings.samples,
             tiles: renderSettings.tiles,
             resolutionScale: renderSettings.resolutionScale,
@@ -429,25 +428,25 @@ const createPathTracer = async () => {
             autoStart: true
         });
 
-        // 监听渲染事件
+        // Listen for render events
         pathTracer.on('start', () => {
             isRendering.value = true;
-            renderStatus.value = '渲染中';
+            renderStatus.value = 'Rendering';
         });
 
         pathTracer.on('pause', () => {
             isRendering.value = false;
-            renderStatus.value = '已暂停';
+            renderStatus.value = 'Paused';
         });
 
         pathTracer.on('resume', () => {
             isRendering.value = true;
-            renderStatus.value = '渲染中';
+            renderStatus.value = 'Rendering';
         });
 
         pathTracer.on('stop', () => {
             isRendering.value = false;
-            renderStatus.value = '已停止';
+            renderStatus.value = 'Stopped';
         });
 
         pathTracer.on('progress', (data) => {
@@ -458,14 +457,14 @@ const createPathTracer = async () => {
 
         pathTracer.on('complete', () => {
             isRendering.value = false;
-            renderStatus.value = '渲染完成';
+            renderStatus.value = 'Rendering complete';
         });
 
         isLoading.value = false;
         isRendering.value = true;
-        renderStatus.value = '渲染中';
+        renderStatus.value = 'Rendering';
     } catch (error) {
-        console.error('创建路径追踪器失败:', error);
+        console.error('Failed to create path tracer:', error);
         isLoading.value = false;
     }
 };
@@ -503,7 +502,7 @@ const downloadRender = () => {
     }
 };
 
-// 更新渲染设置
+// Update render settings
 const updateRenderSettings = () => {
     if (!pathTracer) return;
 
@@ -511,7 +510,7 @@ const updateRenderSettings = () => {
     pathTracer.setResolutionScale(renderSettings.resolutionScale);
     pathTracer.setTiles(renderSettings.tiles);
 
-    // 更新色调映射和背景需要重新创建
+    // Updating tone mapping and background requires recreation
     if (
         pathTracer.config.toneMapping !== renderSettings.toneMapping ||
         pathTracer.config.transparentBackground !== renderSettings.transparentBackground
@@ -520,7 +519,7 @@ const updateRenderSettings = () => {
     }
 };
 
-// 更新地板材质
+// Update floor material
 const updateFloorMaterial = () => {
     if (!pathTracer || !pathTracer.floor) return;
 
@@ -529,7 +528,7 @@ const updateFloorMaterial = () => {
     pathTracer.updateMaterials();
 };
 
-// 重新创建路径追踪器
+// Recreate path tracer
 const recreatePathTracer = async () => {
     await createPathTracer();
 };
@@ -553,7 +552,7 @@ onUnmounted(() => {
     background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
 }
 
-/* 按钮组 */
+/* Button group */
 .button-group {
     display: flex;
     flex-direction: column;

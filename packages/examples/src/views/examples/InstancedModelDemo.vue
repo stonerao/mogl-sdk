@@ -2,24 +2,24 @@
     <SplitLayout
         :code="sourceCode"
         language="javascript"
-        title="InstancedModel - 实例化模型组件"
+        title="InstancedModel - Instanced Model Component"
         :sceneOnly="isSceneOnly"
     >
-        <!-- 3D 场景容器 -->
+        <!-- 3D Scene Container -->
         <div ref="sceneContainer" class="scene-container"></div>
 
-        <!-- 控制面板 -->
-        <GuiPanel title="实例化模型控制" width="wide">
-            <!-- 加载状态 -->
+        <!-- Control Panel -->
+        <GuiPanel title="Instanced Model Controls" width="wide">
+            <!-- Loading State -->
             <template v-if="isLoading">
-                <GuiLoading :progress="loadProgress" text="加载模型中..." />
+                <GuiLoading :progress="loadProgress" text="Loading model..." />
             </template>
 
-            <!-- 实例配置 -->
+            <!-- Instance Configuration -->
             <template v-if="!isLoading">
-                <GuiSection title="实例配置">
+                <GuiSection title="Instance Configuration">
                     <GuiSlider
-                        label="实例数量"
+                        label="Instance Count"
                         v-model="instanceConfig.instanceCount"
                         :min="100"
                         :max="5000"
@@ -28,19 +28,19 @@
                     />
 
                     <GuiSelect
-                        label="布局方式"
+                        label="Layout Method"
                         v-model="instanceConfig.layout"
                         :options="[
-                            { value: 'grid', label: '网格布局' },
-                            { value: 'random', label: '随机布局' },
-                            { value: 'custom', label: '自定义数据' }
+                            { value: 'grid', label: 'Grid Layout' },
+                            { value: 'random', label: 'Random Layout' },
+                            { value: 'custom', label: 'Custom Data' }
                         ]"
                         @update:modelValue="recreateInstances"
                     />
 
                     <template v-if="instanceConfig.layout === 'grid'">
                         <GuiSlider
-                            label="网格间距 X"
+                            label="Grid Spacing X"
                             v-model="instanceConfig.spacing.x"
                             :min="5"
                             :max="20"
@@ -49,7 +49,7 @@
                         />
 
                         <GuiSlider
-                            label="网格间距 Z"
+                            label="Grid Spacing Z"
                             v-model="instanceConfig.spacing.z"
                             :min="5"
                             :max="20"
@@ -59,30 +59,30 @@
                     </template>
                 </GuiSection>
 
-                <!-- 颜色配置 -->
-                <GuiSection title="颜色配置">
+                <!-- Color Configuration -->
+                <GuiSection title="Color Configuration">
                     <GuiColorPicker
-                        label="默认颜色"
+                        label="Default Color"
                         v-model="instanceConfig.normalColor"
                         @update:modelValue="updateColors"
                     />
 
-                    <GuiColorPicker label="悬停颜色" v-model="instanceConfig.hoverColor" />
+                    <GuiColorPicker label="Hover Color" v-model="instanceConfig.hoverColor" />
 
-                    <GuiColorPicker label="点击颜色" v-model="instanceConfig.clickedColor" />
+                    <GuiColorPicker label="Click Color" v-model="instanceConfig.clickedColor" />
 
-                    <GuiButton label="重置所有颜色" @click="resetAllColors" />
+                    <GuiButton label="Reset All Colors" @click="resetAllColors" />
                 </GuiSection>
 
-                <!-- 性能统计 -->
-                <GuiSection title="性能统计">
+                <!-- Performance Statistics -->
+                <GuiSection title="Performance Statistics">
                     <GuiInfoItem label="FPS" :value="fps" />
-                    <GuiInfoItem label="实例数量" :value="instanceConfig.instanceCount" />
-                    <GuiInfoItem label="已点击" :value="clickedCount" />
+                    <GuiInfoItem label="Instance Count" :value="instanceConfig.instanceCount" />
+                    <GuiInfoItem label="Clicked" :value="clickedCount" />
                 </GuiSection>
 
-                <!-- 事件日志 -->
-                <GuiSection title="事件日志">
+                <!-- Event Log -->
+                <GuiSection title="Event Log">
                     <div class="event-log">
                         <div v-for="(log, index) in eventLogs" :key="index" class="log-item">
                             <span class="log-time">{{ log.time }}</span>
@@ -115,23 +115,23 @@ import { useSceneOnly } from '../../composables/useSceneOnly';
 
 const { t } = useI18n();
 
-// 检测是否为 sceneOnly 模式
+// Detect if in sceneOnly mode
 const isSceneOnly = useSceneOnly();
 
-// 场景容器引用
+// Scene container reference
 const sceneContainer = ref(null);
 
-// 场景实例
+// Scene instance
 let scene = null;
 
-// InstancedModel 组件实例
+// InstancedModel component instance
 let instancedModel = null;
 
-// 加载状态
+// Loading state
 const isLoading = ref(true);
 const loadProgress = ref(0);
 
-// 实例配置
+// Instance configuration
 const instanceConfig = reactive({
     instanceCount: 1000,
     layout: 'grid',
@@ -142,11 +142,11 @@ const instanceConfig = reactive({
     clickedColor: '#ff0000'
 });
 
-// 性能统计
+// Performance statistics
 const fps = ref(60);
 const clickedCount = ref(0);
 
-// 事件日志
+// Event logs
 const eventLogs = ref([]);
 const maxLogs = 10;
 

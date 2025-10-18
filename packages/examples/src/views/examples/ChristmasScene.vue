@@ -6,28 +6,28 @@
         :sceneOnly="isSceneOnly"
     >
         <div class="scene-container" ref="sceneContainer">
-            <!-- 加载状态 -->
+            <!-- Loading State -->
             <GuiLoading v-if="isLoading" :progress="loadingProgress" :text="loadingText" />
 
-            <!-- 控制面板 -->
-            <GuiPanel title="模型加载器" width="wide">
-                <!-- 模型加载 -->
-                <GuiSection title="模型加载">
+            <!-- Control Panel -->
+            <GuiPanel title="Model Loader" width="wide">
+                <!-- Model Loading -->
+                <GuiSection title="Model Loading">
                     <GuiTextInput
-                        label="模型 URL"
+                        label="Model URL"
                         v-model="modelConfig.url"
-                        placeholder="输入模型文件 URL"
+                        placeholder="Enter model file URL"
                         @enter="loadModel"
                     />
                     <div class="button-group">
                         <GuiButton
-                            label="加载模型"
+                            label="Load Model"
                             variant="primary"
                             :disabled="!modelConfig.url"
                             @click="loadModel"
                         />
                         <GuiButton
-                            label="清除模型"
+                            label="Clear Model"
                             variant="secondary"
                             :disabled="!currentModel"
                             @click="clearModel"
@@ -35,9 +35,9 @@
                     </div>
                 </GuiSection>
 
-                <!-- 模型变换 -->
+                <!-- Model Transform -->
                 <template v-if="currentModel">
-                    <GuiSection title="模型变换 - 位置">
+                    <GuiSection title="Model Transform - Position">
                         <div class="position-grid">
                             <GuiNumberInput
                                 label="X"
@@ -60,9 +60,9 @@
                         </div>
                     </GuiSection>
 
-                    <GuiSection title="模型变换 - 旋转">
+                    <GuiSection title="Model Transform - Rotation">
                         <GuiSlider
-                            label="X 轴"
+                            label="X Axis"
                             v-model="modelTransform.rotation.x"
                             :min="0"
                             :max="360"
@@ -71,7 +71,7 @@
                             @update:modelValue="updateModelTransform"
                         />
                         <GuiSlider
-                            label="Y 轴"
+                            label="Y Axis"
                             v-model="modelTransform.rotation.y"
                             :min="0"
                             :max="360"
@@ -80,7 +80,7 @@
                             @update:modelValue="updateModelTransform"
                         />
                         <GuiSlider
-                            label="Z 轴"
+                            label="Z Axis"
                             v-model="modelTransform.rotation.z"
                             :min="0"
                             :max="360"
@@ -90,9 +90,9 @@
                         />
                     </GuiSection>
 
-                    <GuiSection title="模型变换 - 缩放">
+                    <GuiSection title="Model Transform - Scale">
                         <GuiSlider
-                            label="统一缩放"
+                            label="Uniform Scale"
                             v-model="modelTransform.scale.uniform"
                             :min="0.1"
                             :max="3"
@@ -102,30 +102,30 @@
                             @update:modelValue="updateUniformScale"
                         />
                         <GuiCheckbox
-                            label="锁定比例"
+                            label="Lock Aspect Ratio"
                             v-model="modelTransform.scale.lockAspect"
                             @update:modelValue="updateModelTransform"
                         />
                     </GuiSection>
                 </template>
 
-                <!-- 交互事件配置 -->
+                <!-- Interactive Event Configuration -->
                 <template v-if="currentModel">
-                    <GuiSection title="交互事件配置">
+                    <GuiSection title="Interactive Event Configuration">
                         <GuiSelect
-                            label="交互模式"
+                            label="Interactive Mode"
                             v-model="interactionConfig.mode"
                             :options="[
-                                { value: 'disabled', label: '禁用' },
-                                { value: 'all', label: '全部启用' },
-                                { value: 'selected', label: '选择性启用' }
+                                { value: 'disabled', label: 'Disabled' },
+                                { value: 'all', label: 'Enable All' },
+                                { value: 'selected', label: 'Selective Enable' }
                             ]"
                             @update:modelValue="updateInteractionMode"
                         />
 
                         <template v-if="interactionConfig.mode === 'selected'">
                             <div class="mesh-selection">
-                                <label class="mesh-label">可交互 Mesh</label>
+                                <label class="mesh-label">Interactive Meshes</label>
                                 <div class="mesh-list">
                                     <div
                                         v-for="mesh in availableMeshes"
@@ -158,27 +158,30 @@
                             </div>
                         </template>
 
-                        <GuiInfoItem label="当前可交互对象" :value="currentInteractiveCount" />
+                        <GuiInfoItem
+                            label="Current Interactive Objects"
+                            :value="currentInteractiveCount"
+                        />
                         <div v-if="performanceWarning" class="warning">
                             ⚠️ {{ performanceWarning }}
                         </div>
                     </GuiSection>
                 </template>
 
-                <!-- 模型信息 -->
+                <!-- Model Info -->
                 <template v-if="currentModel">
-                    <GuiSection title="模型信息">
-                        <GuiInfoItem label="Mesh 数量" :value="modelInfo.meshCount" />
-                        <GuiInfoItem label="材质数量" :value="modelInfo.materialCount" />
-                        <GuiInfoItem label="顶点数量" :value="modelInfo.vertexCount" />
-                        <GuiInfoItem label="文件大小" :value="modelInfo.fileSize" />
+                    <GuiSection title="Model Info">
+                        <GuiInfoItem label="Mesh Count" :value="modelInfo.meshCount" />
+                        <GuiInfoItem label="Material Count" :value="modelInfo.materialCount" />
+                        <GuiInfoItem label="Vertex Count" :value="modelInfo.vertexCount" />
+                        <GuiInfoItem label="File Size" :value="modelInfo.fileSize" />
                     </GuiSection>
                 </template>
 
-                <!-- 重置按钮 -->
+                <!-- Reset Button -->
                 <GuiSection>
                     <GuiButton
-                        label="重置变换"
+                        label="Reset Transform"
                         variant="secondary"
                         :disabled="!currentModel"
                         @click="resetTransform"
@@ -209,7 +212,7 @@ import {
 import * as THREE from 'three';
 import { useSceneOnly } from '../../composables/useSceneOnly';
 
-// 检测是否为 sceneOnly 模式
+// Detect if in sceneOnly mode
 const isSceneOnly = useSceneOnly();
 
 const sceneContainer = ref(null);
@@ -217,25 +220,25 @@ const isLoading = ref(false);
 const loadingText = ref('');
 const loadingProgress = ref(0);
 
-// 模型配置
+// Model configuration
 const modelConfig = reactive({
     url: '/models/christmas.glb'
 });
 
-// 模型变换状态
+// Model transform state
 const modelTransform = reactive({
     position: { x: 0, y: 0, z: 0 },
     rotation: { x: 0, y: 0, z: 0 },
     scale: { uniform: 1, lockAspect: true }
 });
 
-// 交互配置
+// Interaction configuration
 const interactionConfig = reactive({
     mode: 'disabled', // 'disabled', 'all', 'selected'
     selectedMeshes: []
 });
 
-// 模型信息
+// Model information
 const modelInfo = reactive({
     meshCount: 0,
     materialCount: 0,
@@ -251,12 +254,12 @@ let scene = null;
 let currentModel = ref(null);
 let gridHelper = null;
 
-// 源代码展示
+// Source code display
 const sourceCode = `import { Scene } from '@w3d/core';
 import { ModelLoader, GridHelper } from '@w3d/components';
 import * as THREE from 'three';
 
-// 创建场景
+// Create scene
 const scene = new Scene(container, {
   renderer: {
     antialias: true,
@@ -269,18 +272,18 @@ const scene = new Scene(container, {
   }
 });
 
-// 初始化场景
+// Initialize scene
 scene.init();
 
-// 启用阴影和自动调整大小
+// Enable shadows and auto resize
 scene.renderer.enableShadow(true);
 scene.renderer.enableResize();
 
-// 注册组件
+// Register components
 scene.registerComponent('ModelLoader', ModelLoader);
 scene.registerComponent('GridHelper', GridHelper);
 
-// 添加网格辅助
+// Add grid helper
 scene.add('GridHelper', {
   name: 'grid',
   size: 20,
@@ -288,87 +291,87 @@ scene.add('GridHelper', {
   color: '#888888'
 });
 
-// ===== 模型加载配置 =====
+// ===== Model Loading Configuration =====
 
-// 1. 基础模型加载
+// 1. Basic model loading
 const model = await scene.add('ModelLoader', {
   name: 'building',
   url: './models/christmas.glb',
 
-  // 交互事件配置 (interactiveMeshes)
-  // false (默认) - 禁用所有事件，最佳性能
-  // '*' - 启用所有 Mesh 事件，性能影响较大
-  // 数组 - 仅对指定名称的 Mesh 启用事件（推荐）
+  // Interactive event configuration (interactiveMeshes)
+  // false (default) - Disable all events, best performance
+  // '*' - Enable all Mesh events, significant performance impact
+  // Array - Enable events only for specified Mesh names (recommended)
   interactiveMeshes: false,
 
-  // 模型变换
+  // Model transform
   position: [0, 0, 0],
   rotation: [0, 0, 0],
   scale: [1, 1, 1]
 });
 
-// 2. 选择性启用事件（推荐）
+// 2. Selective event enabling (recommended)
 const interactiveModel = await scene.add('ModelLoader', {
   name: 'interactive-building',
   url: '/models/ShaderBall.glb',
-  interactiveMeshes: ['行政大楼', '办公楼A', '停车场']
+  interactiveMeshes: ['Admin Building', 'Office A', 'Parking Lot']
 });
 
-// 3. 动态修改交互配置
-// 启用指定 Mesh 的事件
-model.setInteractiveMeshes(['建筑物A', '建筑物B']);
+// 3. Dynamically modify interactive configuration
+// Enable events for specified Meshes
+model.setInteractiveMeshes(['Building A', 'Building B']);
 
-// 启用所有 Mesh 的事件（谨慎使用）
+// Enable events for all Meshes (use with caution)
 model.setInteractiveMeshes('*');
 
-// 禁用所有事件
+// Disable all events
 model.setInteractiveMeshes(false);
 
-// ===== 模型变换控制 =====
+// ===== Model Transform Control =====
 
-// 位置变换
+// Position transform
 model.setPosition(x, y, z);
 model.position.set(x, y, z);
 
-// 旋转变换（弧度）
+// Rotation transform (radians)
 model.setRotation(rx, ry, rz);
 model.rotation.set(rx, ry, rz);
 
-// 缩放变换
+// Scale transform
 model.setScale(sx, sy, sz);
 model.scale.set(sx, sy, sz);
 
-// ===== 模型信息获取 =====
+// ===== Model Information Retrieval =====
 
-// 获取模型中的所有 Mesh
+// Get all Meshes in the model
 const meshes = model.getMeshes();
-console.log('Mesh 数量:', meshes.length);
+console.log('Mesh count:', meshes.length);
 
-// 获取可交互的对象
+// Get interactive objects
 const interactiveObjects = model.getInteractiveObjects();
-console.log('可交互对象数量:', interactiveObjects.length);
+console.log('Interactive object count:', interactiveObjects.length);
 
-// 检查 Mesh 是否可交互
+// Check if Mesh is interactive
 const isInteractive = model.isMeshInteractive(someMesh);
 
-// ===== 事件监听 =====
+// ===== Event Listening =====
 
-// 监听模型加载完成
+// Listen to model loaded event
 model.addEventListener('loaded', (event) => {
-  console.log('模型加载完成:', event.detail);
+  console.log('Model loaded:', event.detail);
 });
 
-// 监听 Mesh 点击事件
+// Listen to Mesh click event
 model.addEventListener('click', (event) => {
-  console.log('点击了 Mesh:', event.detail.object.name);
+  console.log('Clicked Mesh:', event.detail.object.name);
 });
 
-// 监听 Mesh 鼠标移入事件
+// Listen to Mesh mouse enter event
 model.addEventListener('mouseenter', (event) => {
-  console.log('鼠标移入 Mesh:', event.detail.object.name);
+  console.log('Mouse entered Mesh:', event.detail.object.name);
 });
 
-// 启动渲染
+// Start rendering
 scene.start();`;
 onMounted(() => {
     initScene();
@@ -378,16 +381,16 @@ onUnmounted(() => {
     cleanup();
 });
 
-// 初始化场景
+// Initialize scene
 const initScene = async () => {
     if (!sceneContainer.value) return;
 
     try {
         isLoading.value = true;
-        loadingText.value = '初始化场景...';
+        loadingText.value = 'Initializing scene...';
         loadingProgress.value = 10;
 
-        // 创建场景
+        // Create scene
         scene = new Scene(sceneContainer.value, {
             renderer: {
                 antialias: true,
@@ -401,19 +404,19 @@ const initScene = async () => {
         });
 
         loadingProgress.value = 30;
-        loadingText.value = '初始化渲染器...';
+        loadingText.value = 'Initializing renderer...';
 
-        // 初始化场景
+        // Initialize scene
         scene.init();
 
-        // 启用阴影和自动调整大小
+        // Enable shadows and auto resize
         scene.renderer.enableShadow(true);
         scene.renderer.enableResize();
 
         loadingProgress.value = 50;
-        loadingText.value = '设置灯光...';
+        loadingText.value = 'Setting up lights...';
 
-        // 添加基础灯光
+        // Add basic lighting
         scene.light.addAmbient({
             color: '#ffffff',
             intensity: 0.6
@@ -427,74 +430,74 @@ const initScene = async () => {
         });
 
         loadingProgress.value = 70;
-        loadingText.value = '添加场景对象...';
+        loadingText.value = 'Adding scene objects...';
 
-        // 注册组件
+        // Register components
         scene.registerComponent('ModelLoader', ModelLoader);
 
         loadingProgress.value = 100;
-        loadingText.value = '完成';
+        loadingText.value = 'Complete';
 
-        // 启动渲染
+        // Start rendering
         scene.start();
 
-        // 延迟隐藏加载状态
+        // Delay hiding loading state
         setTimeout(() => {
             isLoading.value = false;
         }, 500);
     } catch (error) {
         console.error('Scene initialization failed:', error);
-        loadingText.value = '初始化失败';
+        loadingText.value = 'Initialization failed';
         setTimeout(() => {
             isLoading.value = false;
         }, 1000);
     }
 };
 
-// 加载模型
+// Load model
 const loadModel = async () => {
     if (!scene || !modelConfig.url) return;
 
     try {
         isLoading.value = true;
-        loadingText.value = '加载模型...';
+        loadingText.value = 'Loading model...';
         loadingProgress.value = 0;
 
-        // 清除现有模型
+        // Clear existing model
         if (currentModel.value) {
             scene.remove(currentModel.value.name);
             currentModel.value = null;
         }
 
-        // 加载新模型
+        // Load new model
         currentModel.value = await scene.add('ModelLoader', {
             name: 'loaded-model',
             url: modelConfig.url,
             interactiveMeshes: false
         });
 
-        // 更新模型信息
+        // Update model info
         updateModelInfo();
 
-        // 重置变换
+        // Reset transform
         resetTransform();
 
         loadingProgress.value = 100;
-        loadingText.value = '模型加载完成';
+        loadingText.value = 'Model loaded successfully';
 
         setTimeout(() => {
             isLoading.value = false;
         }, 500);
     } catch (error) {
         console.error('Model loading failed:', error);
-        loadingText.value = '模型加载失败';
+        loadingText.value = 'Model loading failed';
         setTimeout(() => {
             isLoading.value = false;
         }, 1000);
     }
 };
 
-// 清除模型
+// Clear model
 const clearModel = () => {
     if (currentModel.value && scene) {
         scene.remove(currentModel.value.name);
@@ -504,7 +507,7 @@ const clearModel = () => {
         currentInteractiveCount.value = 0;
         performanceWarning.value = '';
 
-        // 重置模型信息
+        // Reset model info
         modelInfo.meshCount = 0;
         modelInfo.materialCount = 0;
         modelInfo.vertexCount = 0;
@@ -512,38 +515,38 @@ const clearModel = () => {
     }
 };
 
-// 更新模型变换
+// Update model transform
 const updateModelTransform = () => {
     if (!currentModel.value) return;
 
-    // 位置
+    // Position
     currentModel.value.position.set(
         modelTransform.position.x,
         modelTransform.position.y,
         modelTransform.position.z
     );
 
-    // 旋转（度转弧度）
+    // Rotation (degrees to radians)
     currentModel.value.rotation.set(
         (modelTransform.rotation.x * Math.PI) / 180,
         (modelTransform.rotation.y * Math.PI) / 180,
         (modelTransform.rotation.z * Math.PI) / 180
     );
 
-    // 缩放
+    // Scale
     if (modelTransform.scale.lockAspect) {
         const scale = modelTransform.scale.uniform;
         currentModel.value.scale.set(scale, scale, scale);
     }
 };
-// 更新统一缩放
+// Update uniform scale
 const updateUniformScale = () => {
     if (modelTransform.scale.lockAspect) {
         updateModelTransform();
     }
 };
 
-// 更新交互模式
+// Update interaction mode
 const updateInteractionMode = () => {
     if (!currentModel.value) return;
 
@@ -563,44 +566,44 @@ const updateInteractionMode = () => {
             interactiveMeshes = false;
     }
 
-    // 应用交互配置
+    // Apply interactive configuration
     currentModel.value.setInteractiveMeshes(interactiveMeshes);
 
-    // 更新状态
+    // Update status
     updateInteractionStatus();
 };
 
-// 更新交互状态
+// Update interaction status
 const updateInteractionStatus = () => {
     if (!currentModel.value) return;
 
     const interactiveObjects = currentModel.value.getInteractiveObjects();
     currentInteractiveCount.value = interactiveObjects.length;
 
-    // 性能警告
+    // Performance warning
     if (interactionConfig.mode === 'all' && availableMeshes.value.length > 50) {
-        performanceWarning.value = `启用了 ${availableMeshes.value.length} 个 Mesh 的事件，可能影响性能`;
+        performanceWarning.value = `Enabled events for ${availableMeshes.value.length} Meshes, may impact performance`;
     } else {
         performanceWarning.value = '';
     }
 };
 
-// 更新模型信息
+// Update model info
 const updateModelInfo = () => {
     if (!currentModel.value) return;
 
     try {
-        // 获取所有 Mesh
+        // Get all Meshes
         const meshes = currentModel.value.getMeshes ? currentModel.value.getMeshes() : [];
         availableMeshes.value = meshes.map((mesh) => ({
             name: mesh.name || 'Unnamed Mesh',
             uuid: mesh.uuid
         }));
 
-        // 统计信息
+        // Statistics
         modelInfo.meshCount = meshes.length;
 
-        // 统计材质数量
+        // Count materials
         const materials = new Set();
         let vertexCount = 0;
 
@@ -621,14 +624,14 @@ const updateModelInfo = () => {
         modelInfo.materialCount = materials.size;
         modelInfo.vertexCount = vertexCount;
 
-        // 文件大小（模拟）
+        // File size (simulated)
         modelInfo.fileSize = `${Math.round(vertexCount / 1000)}KB`;
     } catch (error) {
         console.error('Failed to update model info:', error);
     }
 };
 
-// 重置变换
+// Reset transform
 const resetTransform = () => {
     modelTransform.position.x = 0;
     modelTransform.position.y = 0;
@@ -641,7 +644,7 @@ const resetTransform = () => {
     updateModelTransform();
 };
 
-// 清理资源
+// Cleanup resources
 const cleanup = () => {
     console.log('Cleaning up Model Loader example');
 

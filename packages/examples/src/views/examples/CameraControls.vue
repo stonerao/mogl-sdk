@@ -13,8 +13,8 @@
                 :progress="loadingProgress"
             />
 
-            <GuiPanel title="相机控制">
-                <GuiSection title="相机位置">
+            <GuiPanel title="Camera Controls">
+                <GuiSection title="Camera Position">
                     <div class="position-controls">
                         <GuiNumberInput
                             label="X"
@@ -37,9 +37,9 @@
                     </div>
                 </GuiSection>
 
-                <GuiSection title="相机参数">
+                <GuiSection title="Camera Parameters">
                     <GuiSlider
-                        label="视野角度 (FOV)"
+                        label="Field of View (FOV)"
                         v-model="cameraParams.fov"
                         :min="10"
                         :max="120"
@@ -48,7 +48,7 @@
                         @change="updateCameraParams"
                     />
                     <GuiSlider
-                        label="近裁剪面"
+                        label="Near Clipping Plane"
                         v-model="cameraParams.near"
                         :min="0.1"
                         :max="10"
@@ -57,7 +57,7 @@
                         @change="updateCameraParams"
                     />
                     <GuiSlider
-                        label="远裁剪面"
+                        label="Far Clipping Plane"
                         v-model="cameraParams.far"
                         :min="100"
                         :max="10000"
@@ -67,14 +67,14 @@
                     />
                 </GuiSection>
 
-                <GuiSection title="控制器设置">
+                <GuiSection title="Controls Settings">
                     <GuiCheckbox
-                        label="启用阻尼"
+                        label="Enable Damping"
                         v-model="controlsSettings.enableDamping"
                         @change="updateControlsSettings"
                     />
                     <GuiSlider
-                        label="阻尼系数"
+                        label="Damping Factor"
                         v-model="controlsSettings.dampingFactor"
                         :min="0.01"
                         :max="0.2"
@@ -84,12 +84,12 @@
                         :disabled="!controlsSettings.enableDamping"
                     />
                     <GuiCheckbox
-                        label="自动旋转"
+                        label="Auto Rotate"
                         v-model="controlsSettings.autoRotate"
                         @change="updateControlsSettings"
                     />
                     <GuiSlider
-                        label="旋转速度"
+                        label="Rotation Speed"
                         v-model="controlsSettings.autoRotateSpeed"
                         :min="0.5"
                         :max="10"
@@ -100,9 +100,9 @@
                     />
                 </GuiSection>
 
-                <GuiSection title="距离限制">
+                <GuiSection title="Distance Limits">
                     <GuiSlider
-                        label="最小距离"
+                        label="Min Distance"
                         v-model="controlsSettings.minDistance"
                         :min="1"
                         :max="50"
@@ -110,7 +110,7 @@
                         @change="updateControlsSettings"
                     />
                     <GuiSlider
-                        label="最大距离"
+                        label="Max Distance"
                         v-model="controlsSettings.maxDistance"
                         :min="100"
                         :max="2000"
@@ -119,16 +119,16 @@
                     />
                 </GuiSection>
 
-                <GuiSection title="预设位置">
+                <GuiSection title="Preset Positions">
                     <div class="preset-buttons">
-                        <GuiButton label="正面" size="small" @click="setCameraPreset('front')" />
-                        <GuiButton label="背面" size="small" @click="setCameraPreset('back')" />
-                        <GuiButton label="左侧" size="small" @click="setCameraPreset('left')" />
-                        <GuiButton label="右侧" size="small" @click="setCameraPreset('right')" />
-                        <GuiButton label="顶部" size="small" @click="setCameraPreset('top')" />
-                        <GuiButton label="底部" size="small" @click="setCameraPreset('bottom')" />
+                        <GuiButton label="Front" size="small" @click="setCameraPreset('front')" />
+                        <GuiButton label="Back" size="small" @click="setCameraPreset('back')" />
+                        <GuiButton label="Left" size="small" @click="setCameraPreset('left')" />
+                        <GuiButton label="Right" size="small" @click="setCameraPreset('right')" />
+                        <GuiButton label="Top" size="small" @click="setCameraPreset('top')" />
+                        <GuiButton label="Bottom" size="small" @click="setCameraPreset('bottom')" />
                     </div>
-                    <GuiButton label="重置" variant="secondary" block @click="resetCamera" />
+                    <GuiButton label="Reset" variant="secondary" block @click="resetCamera" />
                 </GuiSection>
             </GuiPanel>
         </div>
@@ -152,7 +152,7 @@ import {
 import * as THREE from 'three';
 import { useSceneOnly } from '../../composables/useSceneOnly';
 
-// 检测是否为 sceneOnly 模式
+// Detect if in sceneOnly mode
 const isSceneOnly = useSceneOnly();
 
 const sceneContainer = ref(null);
@@ -160,21 +160,21 @@ const isLoading = ref(false);
 const loadingText = ref('');
 const loadingProgress = ref(0);
 
-// 相机位置状态
+// Camera position state
 const cameraPosition = reactive({
     x: 5,
     y: 5,
     z: 5
 });
 
-// 相机参数状态
+// Camera parameters state
 const cameraParams = reactive({
     fov: 45,
     near: 0.1,
     far: 1000
 });
 
-// 控制器设置状态
+// Controls settings state
 const controlsSettings = reactive({
     enableDamping: true,
     dampingFactor: 0.05,
@@ -188,12 +188,12 @@ let scene = null;
 let gridHelper = null;
 let cube = null;
 
-// 源代码展示
+// Source code display
 const sourceCode = `import { Scene } from '@w3d/core';
 import { GridHelper } from '@w3d/components';
 import * as THREE from 'three';
 
-// 创建场景
+// Create scene
 const scene = new Scene(container, {
   renderer: {
     antialias: true,
@@ -208,10 +208,10 @@ const scene = new Scene(container, {
   }
 });
 
-// 初始化场景
+// Initialize scene
 scene.init();
 
-// 添加基础灯光
+// Add basic lighting
 scene.light.addAmbient({
   color: '#ffffff',
   intensity: 0.6
@@ -224,14 +224,14 @@ scene.light.addDirectional({
   castShadow: true
 });
 
-// 启用阴影和自动调整大小
+// Enable shadows and auto resize
 scene.renderer.enableShadow(true);
 scene.renderer.enableResize();
 
-// 注册组件
+// Register component
 scene.registerComponent('GridHelper', GridHelper);
 
-// 添加网格辅助
+// Add grid helper
 scene.add('GridHelper', {
   name: 'grid',
   size: 20,
@@ -239,78 +239,78 @@ scene.add('GridHelper', {
   color: '#888888'
 });
 
-// ===== 相机控制配置 =====
+// ===== Camera Control Configuration =====
 
-// 1. 相机位置控制
+// 1. Camera position control
 scene.camera.setPosition(5, 5, 5);
 scene.camera.lookAt(0, 0, 0);
 
-// 2. 相机参数调整
+// 2. Camera parameter adjustment
 scene.camera.instance.fov = 45;
 scene.camera.instance.near = 0.1;
 scene.camera.instance.far = 1000;
 scene.camera.instance.updateProjectionMatrix();
 
-// 3. 轨道控制器配置
+// 3. Orbit controls configuration
 const controls = scene.controls.instance;
 
-// 启用阻尼（平滑移动）
+// Enable damping (smooth movement)
 controls.enableDamping = true;
 controls.dampingFactor = 0.05;
 
-// 自动旋转
+// Auto rotate
 controls.autoRotate = false;
 controls.autoRotateSpeed = 2.0;
 
-// 距离限制
+// Distance limits
 controls.minDistance = 5;
 controls.maxDistance = 500;
 
-// 启用/禁用控制
-controls.enableZoom = true;    // 缩放
-controls.enableRotate = true;  // 旋转
-controls.enablePan = true;     // 平移
+// Enable/disable controls
+controls.enableZoom = true;    // Zoom
+controls.enableRotate = true;  // Rotate
+controls.enablePan = true;     // Pan
 
-// ===== 预设相机位置 =====
+// ===== Preset Camera Positions =====
 
-// 正面视图
+// Front view
 function setFrontView() {
   scene.camera.setPosition(0, 0, 20);
   scene.camera.lookAt(0, 0, 0);
 }
 
-// 顶部视图
+// Top view
 function setTopView() {
   scene.camera.setPosition(0, 20, 0);
   scene.camera.lookAt(0, 0, 0);
 }
 
-// 侧面视图
+// Side view
 function setSideView() {
   scene.camera.setPosition(20, 0, 0);
   scene.camera.lookAt(0, 0, 0);
 }
 
-// 重置相机
+// Reset camera
 function resetCamera() {
   controls.reset();
 }
 
-// ===== 动态调整示例 =====
+// ===== Dynamic Adjustment Examples =====
 
-// 动态修改相机位置
+// Dynamically modify camera position
 // scene.camera.setPosition(x, y, z);
 
-// 动态修改控制器设置
+// Dynamically modify controls settings
 // controls.enableDamping = true;
 // controls.dampingFactor = 0.1;
 // controls.autoRotate = true;
 
-// 动态修改相机参数
+// Dynamically modify camera parameters
 // scene.camera.instance.fov = 60;
 // scene.camera.instance.updateProjectionMatrix();
 
-// 启动渲染
+// Start rendering
 scene.start();`;
 onMounted(() => {
     initScene();
@@ -320,16 +320,16 @@ onUnmounted(() => {
     cleanup();
 });
 
-// 初始化场景
+// Initialize scene
 const initScene = async () => {
     if (!sceneContainer.value) return;
 
     try {
         isLoading.value = true;
-        loadingText.value = '初始化场景...';
+        loadingText.value = 'Initializing scene...';
         loadingProgress.value = 10;
 
-        // 创建场景
+        // Create scene
         scene = new Scene(sceneContainer.value, {
             renderer: {
                 antialias: true,
@@ -345,15 +345,15 @@ const initScene = async () => {
         });
 
         loadingProgress.value = 30;
-        loadingText.value = '初始化渲染器...';
+        loadingText.value = 'Initializing renderer...';
 
-        // 初始化场景
+        // Initialize scene
         scene.init();
 
         loadingProgress.value = 50;
-        loadingText.value = '设置灯光...';
+        loadingText.value = 'Setting up lights...';
 
-        // 添加基础灯光
+        // Add basic lighting
         scene.light.addAmbient({
             color: '#ffffff',
             intensity: 0.6
@@ -367,22 +367,22 @@ const initScene = async () => {
         });
 
         loadingProgress.value = 70;
-        loadingText.value = '配置控制器...';
+        loadingText.value = 'Configuring controls...';
 
-        // 配置控制器
+        // Configure controls
         applyControlsSettings();
 
-        // 启用阴影和自动调整大小
+        // Enable shadows and auto resize
         scene.renderer.enableShadow(true);
         scene.renderer.enableResize();
 
         loadingProgress.value = 80;
-        loadingText.value = '添加场景对象...';
+        loadingText.value = 'Adding scene objects...';
 
-        // 注册组件
+        // Register component
         scene.registerComponent('GridHelper', GridHelper);
 
-        // 添加网格辅助
+        // Add grid helper
         gridHelper = await scene.add('GridHelper', {
             name: 'grid',
             size: 20,
@@ -390,7 +390,7 @@ const initScene = async () => {
             color: '#888888'
         });
 
-        // 添加一个立方体作为参考对象
+        // Add a cube as reference object
         const geometry = new THREE.BoxGeometry(2, 2, 2);
         const material = new THREE.MeshLambertMaterial({ color: '#00ff88' });
         cube = new THREE.Mesh(geometry, material);
@@ -400,28 +400,28 @@ const initScene = async () => {
         scene.scene.add(cube);
 
         loadingProgress.value = 100;
-        loadingText.value = '完成';
+        loadingText.value = 'Complete';
 
-        // 启动渲染
+        // Start rendering
         scene.start();
 
-        // 确保相机位置设置正确
+        // Ensure camera position is set correctly
         updateCameraPosition();
 
-        // 延迟隐藏加载状态
+        // Delay hiding loading state
         setTimeout(() => {
             isLoading.value = false;
         }, 500);
     } catch (error) {
         console.error('Scene initialization failed:', error);
-        loadingText.value = '初始化失败';
+        loadingText.value = 'Initialization failed';
         setTimeout(() => {
             isLoading.value = false;
         }, 1000);
     }
 };
 
-// 应用控制器设置
+// Apply controls settings
 const applyControlsSettings = () => {
     if (!scene || !scene.controls) return;
 
@@ -434,13 +434,13 @@ const applyControlsSettings = () => {
     controls.maxDistance = controlsSettings.maxDistance;
 };
 
-// 更新相机位置
+// Update camera position
 const updateCameraPosition = () => {
     if (!scene || !scene.camera) return;
     scene.camera.setPosition(cameraPosition.x, cameraPosition.y, cameraPosition.z);
 };
 
-// 更新相机参数
+// Update camera parameters
 const updateCameraParams = () => {
     if (!scene || !scene.camera) return;
 
@@ -451,12 +451,12 @@ const updateCameraParams = () => {
     camera.updateProjectionMatrix();
 };
 
-// 更新控制器设置
+// Update controls settings
 const updateControlsSettings = () => {
     applyControlsSettings();
 };
 
-// 设置预设相机位置
+// Set preset camera position
 const setCameraPreset = (preset) => {
     if (!scene || !scene.camera) return;
 
@@ -477,28 +477,28 @@ const setCameraPreset = (preset) => {
         scene.camera.setPosition(x, y, z);
         scene.camera.lookAt(lx, ly, lz);
 
-        // 更新响应式数据
+        // Update reactive data
         cameraPosition.x = x;
         cameraPosition.y = y;
         cameraPosition.z = z;
     }
 };
 
-// 重置相机
+// Reset camera
 const resetCamera = () => {
     if (!scene || !scene.controls) return;
     scene.controls.instance.reset();
 
-    // 重置响应式数据到默认位置
+    // Reset reactive data to default position
     cameraPosition.x = 5;
     cameraPosition.y = 5;
     cameraPosition.z = 5;
 
-    // 更新相机位置
+    // Update camera position
     updateCameraPosition();
 };
 
-// 清理资源
+// Cleanup resources
 const cleanup = () => {
     console.log('Cleaning up Camera Controls example');
 

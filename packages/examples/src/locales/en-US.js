@@ -119,6 +119,11 @@ export default {
                 title: '19 - Skeletal Animation',
                 description:
                     'Skeletal animation system - Load and control character animations with bones'
+            },
+            '20-post-processing': {
+                title: '20 - Post Processing',
+                description:
+                    'Post processing effects - Sobel edge detection, SSR reflection, Bloom glow, AO ambient occlusion'
             }
         }
     },

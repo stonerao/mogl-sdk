@@ -5,14 +5,14 @@
         title="01 - Hello World"
         :sceneOnly="isSceneOnly"
     >
-        <!-- 3D 场景容器 -->
+        <!-- 3D Scene Container -->
         <div ref="sceneContainer" class="scene-container"></div>
 
-        <!-- 控制面板 -->
-        <GuiPanel title="场景信息" width="narrow">
+        <!-- Control Panel -->
+        <GuiPanel title="Scene Info" width="narrow">
             <GuiInfoItem label="FPS:" :value="fps" />
-            <GuiInfoItem label="立方体旋转:" :value="`${cubeRotation.toFixed(2)} rad`" />
-            <GuiInfoItem label="相机位置:" :value="cameraPosition" />
+            <GuiInfoItem label="Cube Rotation:" :value="`${cubeRotation.toFixed(2)} rad`" />
+            <GuiInfoItem label="Camera Position:" :value="cameraPosition" />
         </GuiPanel>
     </SplitLayout>
 </template>
@@ -26,7 +26,7 @@ import SplitLayout from '../../components/SplitLayout.vue';
 import { GuiPanel, GuiInfoItem } from '../../components/Gui';
 import { useSceneOnly } from '../../composables/useSceneOnly';
 
-// 检测是否为 sceneOnly 模式
+// Detect if in sceneOnly mode
 const isSceneOnly = useSceneOnly();
 
 const sceneContainer = ref(null);
@@ -43,12 +43,12 @@ const cameraPosition = computed(() => {
 let scene = null;
 let cube = null;
 
-// 源代码
+// Source code
 const sourceCode = `import { Scene } from '@w3d/core';
 import { GridHelper } from '@w3d/components';
 import * as THREE from 'three';
 
-// 创建场景
+// Create scene
 const scene = new Scene(container, {
   renderer: {
     antialias: true
@@ -60,16 +60,16 @@ const scene = new Scene(container, {
   }
 });
 
-// 初始化场景
+// Initialize scene
 scene.init();
 
-// 添加环境光
+// Add ambient light
 scene.light.addAmbient({
   color: '#ffffff',
   intensity: 0.6
 });
 
-// 添加平行光
+// Add directional light
 scene.light.addDirectional({
   color: '#ffffff',
   intensity: 0.8,
@@ -77,23 +77,23 @@ scene.light.addDirectional({
   castShadow: true
 });
 
-// 启用阴影
+// Enable shadows
 scene.renderer.enableShadow(true);
 
-// 启用自动调整大小
+// Enable auto resize
 scene.renderer.enableResize();
 
-// 注册组件
+// Register component
 scene.registerComponent('GridHelper', GridHelper);
 
-// 添加网格辅助
+// Add grid helper
 scene.add('GridHelper', {
   name: 'grid',
   size: 20,
   divisions: 20
 });
 
-// 创建立方体
+// Create cube
 const geometry = new THREE.BoxGeometry(2, 2, 2);
 const material = new THREE.MeshStandardMaterial({
   color: '#00ff00',
@@ -106,7 +106,7 @@ cube.receiveShadow = true;
 cube.position.y = 1;
 scene.scene.add(cube);
 
-// 创建地面
+// Create ground
 const ground = new THREE.Mesh(
   new THREE.PlaneGeometry(20, 20),
   new THREE.MeshStandardMaterial({
@@ -119,17 +119,17 @@ ground.rotation.x = -Math.PI / 2;
 ground.receiveShadow = true;
 scene.scene.add(ground);
 
-// 动画循环
+// Animation loop
 const originalUpdate = scene.animate.bind(scene);
 scene.animate = function() {
   originalUpdate();
 
-  // 旋转立方体
+  // Rotate cube
   cube.rotation.x += 0.01;
   cube.rotation.y += 0.01;
 };
 
-// 启动渲染
+// Start rendering
 scene.start();
 
 console.log('🎉 Hello World Example');`;
@@ -145,7 +145,7 @@ onUnmounted(() => {
 const initScene = () => {
     if (!sceneContainer.value) return;
 
-    // 创建场景
+    // Create scene
     scene = new Scene(sceneContainer.value, {
         renderer: {
             antialias: true
@@ -157,16 +157,16 @@ const initScene = () => {
         }
     });
 
-    // 初始化场景
+    // Initialize scene
     scene.init();
 
-    // 添加环境光
+    // Add ambient light
     scene.light.addAmbient({
         color: '#ffffff',
         intensity: 0.6
     });
 
-    // 添加平行光
+    // Add directional light
     scene.light.addDirectional({
         color: '#ffffff',
         intensity: 0.8,
@@ -174,23 +174,23 @@ const initScene = () => {
         castShadow: true
     });
 
-    // 启用阴影
+    // Enable shadows
     scene.renderer.enableShadow(true);
 
-    // 启用自动调整大小
+    // Enable auto resize
     scene.renderer.enableResize();
 
-    // 注册组件
+    // Register component
     scene.registerComponent('GridHelper', GridHelper);
 
-    // 添加网格辅助
+    // Add grid helper
     scene.add('GridHelper', {
         name: 'grid',
         size: 20,
         divisions: 20
     });
 
-    // 创建立方体
+    // Create cube
     const geometry = new THREE.BoxGeometry(2, 2, 2);
     const material = new THREE.MeshStandardMaterial({
         color: '#00ff00',
@@ -203,7 +203,7 @@ const initScene = () => {
     cube.position.y = 1;
     scene.scene.add(cube);
 
-    // 创建地面
+    // Create ground
     const ground = new THREE.Mesh(
         new THREE.PlaneGeometry(20, 20),
         new THREE.MeshStandardMaterial({
@@ -216,29 +216,29 @@ const initScene = () => {
     ground.receiveShadow = true;
     scene.scene.add(ground);
 
-    // FPS 计算
+    // FPS calculation
     let lastTime = performance.now();
     let frames = 0;
 
-    // 动画循环
+    // Animation loop
     const originalUpdate = scene.animate.bind(scene);
     scene.animate = function () {
         originalUpdate();
 
-        // 旋转立方体
+        // Rotate cube
         if (cube) {
             cube.rotation.x += 0.01;
             cube.rotation.y += 0.01;
             cubeRotation.value = cube.rotation.y;
         }
 
-        // 更新相机位置
+        // Update camera position
         if (scene.camera && scene.camera.camera) {
             const pos = scene.camera.camera.position;
             cameraPos.value = { x: pos.x, y: pos.y, z: pos.z };
         }
 
-        // 计算 FPS
+        // Calculate FPS
         frames++;
         const currentTime = performance.now();
         if (currentTime >= lastTime + 1000) {
@@ -248,7 +248,7 @@ const initScene = () => {
         }
     };
 
-    // 启动渲染
+    // Start rendering
     scene.start();
 
     console.log('🎉 Hello World Example - Vue 3');

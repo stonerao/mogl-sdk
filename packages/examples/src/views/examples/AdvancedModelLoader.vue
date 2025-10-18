@@ -1,102 +1,102 @@
 <template>
     <SplitLayout
-        :code="sourceCode || '// 加载中...'"
+        :code="sourceCode || '// Loading...'"
         language="javascript"
         :title="'07 - Advanced Model Loader'"
         :sceneOnly="isSceneOnly"
     >
-        <!-- 3D 场景容器 -->
+        <!-- 3D Scene Container -->
         <div ref="sceneContainer" class="scene-container"></div>
 
-        <!-- 加载状态 -->
+        <!-- Loading State -->
         <GuiLoading v-if="isLoading" :progress="loadingProgress" :text="loadingText" />
 
-        <!-- 控制面板 -->
-        <GuiPanel title="模型控制" width="wide">
-            <!-- 模型信息 -->
-            <GuiSection title="模型信息">
-                <GuiInfoItem label="Mesh 数量" :value="meshCount || 0" />
-                <GuiInfoItem label="当前选中" :value="selectedMeshName || '无'" />
+        <!-- Control Panel -->
+        <GuiPanel title="Model Controls" width="wide">
+            <!-- Model Info -->
+            <GuiSection title="Model Info">
+                <GuiInfoItem label="Mesh Count" :value="meshCount || 0" />
+                <GuiInfoItem label="Currently Selected" :value="selectedMeshName || 'None'" />
             </GuiSection>
 
-            <!-- Mesh 选择 -->
-            <GuiSection title="选择 Mesh">
+            <!-- Mesh Selection -->
+            <GuiSection title="Select Mesh">
                 <GuiSelect
                     label="Mesh"
                     v-model="selectedMeshName"
                     :options="[
-                        { value: '', label: '请选择 Mesh' },
+                        { value: '', label: 'Select Mesh' },
                         ...(meshNames || []).map((name) => ({ value: name, label: name }))
                     ]"
                     @update:modelValue="onMeshSelect"
                 />
             </GuiSection>
 
-            <!-- 变换控制 -->
+            <!-- Transform Controls -->
             <template v-if="selectedMesh">
-                <GuiSection title="变换控制">
-                    <!-- 位置控制 -->
+                <GuiSection title="Transform Controls">
+                    <!-- Position Controls -->
                     <div class="transform-grid">
                         <GuiNumberInput
-                            label="位置 X"
+                            label="Position X"
                             v-model="meshTransform.position.x"
                             :step="0.1"
                             @update:modelValue="updateMeshTransform"
                         />
                         <GuiNumberInput
-                            label="位置 Y"
+                            label="Position Y"
                             v-model="meshTransform.position.y"
                             :step="0.1"
                             @update:modelValue="updateMeshTransform"
                         />
                         <GuiNumberInput
-                            label="位置 Z"
+                            label="Position Z"
                             v-model="meshTransform.position.z"
                             :step="0.1"
                             @update:modelValue="updateMeshTransform"
                         />
                     </div>
 
-                    <!-- 旋转控制 -->
+                    <!-- Rotation Controls -->
                     <div class="transform-grid">
                         <GuiNumberInput
-                            label="旋转 X"
+                            label="Rotation X"
                             v-model="meshTransform.rotation.x"
                             :step="0.1"
                             @update:modelValue="updateMeshTransform"
                         />
                         <GuiNumberInput
-                            label="旋转 Y"
+                            label="Rotation Y"
                             v-model="meshTransform.rotation.y"
                             :step="0.1"
                             @update:modelValue="updateMeshTransform"
                         />
                         <GuiNumberInput
-                            label="旋转 Z"
+                            label="Rotation Z"
                             v-model="meshTransform.rotation.z"
                             :step="0.1"
                             @update:modelValue="updateMeshTransform"
                         />
                     </div>
 
-                    <!-- 缩放控制 -->
+                    <!-- Scale Controls -->
                     <div class="transform-grid">
                         <GuiNumberInput
-                            label="缩放 X"
+                            label="Scale X"
                             v-model="meshTransform.scale.x"
                             :step="0.1"
                             :min="0.1"
                             @update:modelValue="updateMeshTransform"
                         />
                         <GuiNumberInput
-                            label="缩放 Y"
+                            label="Scale Y"
                             v-model="meshTransform.scale.y"
                             :step="0.1"
                             :min="0.1"
                             @update:modelValue="updateMeshTransform"
                         />
                         <GuiNumberInput
-                            label="缩放 Z"
+                            label="Scale Z"
                             v-model="meshTransform.scale.z"
                             :step="0.1"
                             :min="0.1"
@@ -104,19 +104,19 @@
                         />
                     </div>
 
-                    <GuiButton label="重置变换" @click="resetMeshTransform" />
+                    <GuiButton label="Reset Transform" @click="resetMeshTransform" />
                 </GuiSection>
             </template>
 
-            <!-- 交互配置 -->
-            <GuiSection title="交互配置">
+            <!-- Interactive Configuration -->
+            <GuiSection title="Interactive Configuration">
                 <GuiSelect
-                    label="事件监听模式"
+                    label="Event Listening Mode"
                     v-model="interactiveMode"
                     :options="[
-                        { value: 'disabled', label: '禁用所有事件' },
-                        { value: 'all', label: '启用所有 Mesh 事件' },
-                        { value: 'selected', label: '仅选中的 Mesh' }
+                        { value: 'disabled', label: 'Disable All Events' },
+                        { value: 'all', label: 'Enable All Mesh Events' },
+                        { value: 'selected', label: 'Selected Meshes Only' }
                     ]"
                     @update:modelValue="updateInteractiveMode"
                 />
@@ -145,14 +145,14 @@
                     </div>
                 </template>
 
-                <GuiInfoItem label="可交互对象数量" :value="currentInteractiveCount" />
+                <GuiInfoItem label="Interactive Object Count" :value="currentInteractiveCount" />
                 <template v-if="performanceWarning">
                     <div class="warning-text">⚠️ {{ performanceWarning }}</div>
                 </template>
             </GuiSection>
 
-            <!-- 事件日志 -->
-            <GuiSection title="事件日志">
+            <!-- Event Log -->
+            <GuiSection title="Event Log">
                 <div class="event-log">
                     <div
                         v-for="(event, index) in eventLog || []"
@@ -164,7 +164,7 @@
                         <span class="event-message">{{ event?.message || '' }}</span>
                     </div>
                 </div>
-                <GuiButton label="清空日志" @click="clearEventLog" />
+                <GuiButton label="Clear Log" @click="clearEventLog" />
             </GuiSection>
         </GuiPanel>
     </SplitLayout>
@@ -187,31 +187,31 @@ import {
 import SplitLayout from '../../components/SplitLayout.vue';
 import { useSceneOnly } from '../../composables/useSceneOnly';
 
-// 检测是否为 sceneOnly 模式
+// Detect if in sceneOnly mode
 const isSceneOnly = useSceneOnly();
 
 const sceneContainer = ref(null);
 const isLoading = ref(false);
-const loadingText = ref('初始化中...');
+const loadingText = ref('Initializing...');
 const loadingProgress = ref(0);
 
-// 模型相关状态
+// Model related state
 const meshNames = ref([]);
 const selectedMeshName = ref('');
 const selectedMesh = ref(null);
 const meshCount = computed(() => (meshNames.value || []).length);
 
-// Mesh 变换状态
+// Mesh transform state
 const meshTransform = reactive({
     position: { x: 0, y: 0, z: 0 },
     rotation: { x: 0, y: 0, z: 0 },
     scale: { x: 1, y: 1, z: 1 }
 });
 
-// 事件日志
+// Event log
 const eventLog = ref([]);
 
-// 交互配置状态
+// Interactive configuration state
 const interactiveMode = ref('all'); // 'disabled', 'all', 'selected'
 const availableMeshes = ref([]);
 const selectedInteractiveMeshes = ref([]);
@@ -222,11 +222,11 @@ let scene = null;
 let modelComponent = null;
 let hdrComponent = null;
 
-// 源代码展示
+// Source code display
 const sourceCode = `import { Scene } from '@w3d/core';
 import { ModelLoader, HDRLoader } from '@w3d/components';
 
-// 创建场景
+// Create scene
 const scene = new Scene(container, {
   renderer: {
     antialias: true,
@@ -239,14 +239,14 @@ const scene = new Scene(container, {
   }
 });
 
-// 初始化场景
+// Initialize scene
 scene.init();
 
-// 注册组件
+// Register components
 scene.registerComponent('ModelLoader', ModelLoader);
 scene.registerComponent('HDRLoader', HDRLoader);
 
-// 加载 HDR 环境贴图
+// Load HDR environment map
 const hdr = await scene.add('HDRLoader', {
   name: 'environment',
   url: '/textures/blouberg_sunrise_2_1k.hdr',
@@ -254,7 +254,7 @@ const hdr = await scene.add('HDRLoader', {
   asBackground: true
 });
 
-// 加载 GLB 模型（配置交互事件）
+// Load GLB model (configure interactive events)
 const model = await scene.add('ModelLoader', {
   name: 'overview',
   url: '/models/ShaderBall.glb',
@@ -263,112 +263,112 @@ const model = await scene.add('ModelLoader', {
   castShadow: true,
   receiveShadow: true,
 
-  // ===== 交互事件配置 (interactiveMeshes) =====
-  // 控制哪些 Mesh 可以响应鼠标事件（点击、移入、移出等）
+  // ===== Interactive Event Configuration (interactiveMeshes) =====
+  // Controls which Meshes can respond to mouse events (click, hover, etc.)
   //
-  // 配置选项：
-  // 1. false (默认) - 禁用所有事件，最佳性能
+  // Configuration options:
+  // 1. false (default) - Disable all events, best performance
   //    interactiveMeshes: false
   //
-  // 2. '*' - 启用所有 Mesh 事件，性能影响较大
-  //    当 Mesh 数量 > 50 时会显示性能警告
+  // 2. '*' - Enable all Mesh events, significant performance impact
+  //    Performance warning shown when Mesh count > 50
   //    interactiveMeshes: '*'
   //
-  // 3. 数组 - 仅对指定名称的 Mesh 启用事件（推荐）
-  //    interactiveMeshes: ['行政大楼', '办公楼A', '停车场']
+  // 3. Array - Enable events only for specified Mesh names (recommended)
+  //    interactiveMeshes: ['Building A', 'Building B', 'Parking Lot']
 
-  interactiveMeshes: '*'  // 演示用，实际项目建议使用数组指定
+  interactiveMeshes: '*'  // For demo, use array in production
 });
 
-// ===== 其他配置模式示例 =====
+// ===== Other Configuration Mode Examples =====
 //
-// 示例1: 禁用所有事件（默认，最佳性能）
+// Example 1: Disable all events (default, best performance)
 // const model1 = await scene.add('ModelLoader', {
 //   url: '/models/building.glb',
-//   interactiveMeshes: false  // 或者省略此配置项
+//   interactiveMeshes: false  // Or omit this config
 // });
 //
-// 示例2: 仅对指定 Mesh 启用事件（推荐）
+// Example 2: Enable events only for specified Meshes (recommended)
 // const model2 = await scene.add('ModelLoader', {
 //   url: '/models/building.glb',
-//   interactiveMeshes: ['行政大楼', '办公楼A', '停车场']
+//   interactiveMeshes: ['Building A', 'Building B', 'Parking Lot']
 // });
 //
-// 示例3: 对所有 Mesh 启用事件（谨慎使用）
+// Example 3: Enable events for all Meshes (use with caution)
 // const model3 = await scene.add('ModelLoader', {
 //   url: '/models/small-object.glb',
-//   interactiveMeshes: '*'  // 当 Mesh 数量 > 50 时会显示性能警告
+//   interactiveMeshes: '*'  // Performance warning when Mesh count > 50
 // });
 
-// 获取所有 Mesh 名称
+// Get all Mesh names
 const meshNames = model.getMeshNames();
 console.log('Available meshes:', meshNames);
 
-// 查找特定 Mesh
-const buildingMesh = model.getMeshByName('行政大楼');
+// Find specific Mesh
+const buildingMesh = model.getMeshByName('Building A');
 if (buildingMesh) {
-  // 设置 Mesh 属性
+  // Set Mesh properties
   buildingMesh.position.set(2, 0, 0);
   buildingMesh.rotation.set(0, Math.PI / 4, 0);
   buildingMesh.scale.set(1.2, 1.2, 1.2);
 }
 
-// ===== 动态修改交互配置 =====
-// 运行时可以随时调整哪些 Mesh 可以响应事件
+// ===== Dynamically Modify Interactive Configuration =====
+// Can adjust which Meshes respond to events at runtime
 
-// 方式1: 仅对指定 Mesh 启用事件（推荐，性能最优）
-// model.setInteractiveMeshes(['行政大楼', '办公楼A', '停车场']);
+// Method 1: Enable events only for specified Meshes (recommended, best performance)
+// model.setInteractiveMeshes(['Building A', 'Building B', 'Parking Lot']);
 
-// 方式2: 启用所有 Mesh 事件（谨慎使用）
+// Method 2: Enable all Mesh events (use with caution)
 // model.setInteractiveMeshes('*');
 
-// 方式3: 禁用所有事件（最佳性能）
+// Method 3: Disable all events (best performance)
 // model.setInteractiveMeshes(false);
 
-// 检查 Mesh 是否可交互
+// Check if Mesh is interactive
 // const isInteractive = model.isMeshInteractive(someMesh);
 
-// 获取当前可交互的对象列表
+// Get current interactive objects list
 // const interactiveObjects = model.getInteractiveObjects();
-// console.log('当前可交互对象数量:', interactiveObjects.length);
+// console.log('Current interactive object count:', interactiveObjects.length);
 
-// 监听模型事件
+// Listen to model events
 model.on('click', (event) => {
-  console.log('模型被点击:', event.object.name);
+  console.log('Model clicked:', event.object.name);
 });
 
 model.on('mouseenter', (event) => {
-  console.log('鼠标移入模型:', event.object.name);
-  // 高亮效果
+  console.log('Mouse entered model:', event.object.name);
+  // Highlight effect
   if (event.object.material) {
     event.object.material.emissive.setHex(0x444444);
   }
 });
 
 model.on('mouseleave', (event) => {
-  console.log('鼠标移出模型:', event.object.name);
-  // 移除高亮
+  console.log('Mouse left model:', event.object.name);
+  // Remove highlight
   if (event.object.material) {
     event.object.material.emissive.setHex(0x000000);
   }
 });
 
-// ===== 性能最佳实践 =====
-// 1. 默认禁用事件：对于纯展示的模型，使用 interactiveMeshes: false
-// 2. 精确指定：只对需要交互的关键 Mesh 启用事件
-// 3. 避免全量启用：当模型包含大量 Mesh (> 50) 时，避免使用 '*'
-// 4. 性能监控：启用全部事件时，控制台会显示性能警告
+// ===== Performance Best Practices =====
+// 1. Disable events by default: For display-only models, use interactiveMeshes: false
+// 2. Specify precisely: Enable events only for key Meshes that need interaction
+// 3. Avoid enabling all: When model contains many Meshes (> 50), avoid using '*'
+// 4. Performance monitoring: Console shows performance warning when all events enabled
 
-// 启动渲染
+// Start rendering
 scene.start();`;
 
 onMounted(async () => {
     try {
         await initScene();
     } catch (error) {
-        console.error('初始化场景失败:', error);
+        console.error('Scene initialization failed:', error);
         isLoading.value = false;
-        loadingText.value = '初始化失败: ' + error.message;
+        loadingText.value = 'Initialization failed: ' + error.message;
     }
 });
 
@@ -376,15 +376,15 @@ onUnmounted(() => {
     cleanup();
 });
 
-// 初始化场景
+// Initialize scene
 const initScene = async () => {
     if (!sceneContainer.value) return;
 
     try {
         isLoading.value = true;
-        loadingText.value = '初始化场景...';
+        loadingText.value = 'Initializing scene...';
         loadingProgress.value = 10;
-        // 创建场景
+        // Create scene
         scene = new Scene(sceneContainer.value, {
             renderer: {
                 antialias: true,
@@ -397,10 +397,10 @@ const initScene = async () => {
             }
         });
 
-        // 初始化场景
+        // Initialize scene
         scene.init();
 
-        // 添加基础灯光
+        // Add basic lighting
         scene.light.addAmbient({
             color: '#ffffff',
             intensity: 0.4
@@ -413,45 +413,44 @@ const initScene = async () => {
             castShadow: true
         });
 
-        // 启用阴影
+        // Enable shadows
         scene.renderer.enableShadow(true);
         scene.renderer.enableResize();
 
-        // 注册组件
+        // Register components
         scene.registerComponent('ModelLoader', ModelLoader);
         scene.registerComponent('HDRLoader', HDRLoader);
 
         loadingProgress.value = 30;
 
-        // 加载 HDR 环境贴图
+        // Load HDR environment map
         await loadHDREnvironment();
 
         loadingProgress.value = 60;
 
-        // 加载模型
+        // Load model
         await loadModel();
 
         loadingProgress.value = 100;
 
-        // 启动渲染
+        // Start rendering
         scene.start();
 
-        // 设置事件监听
+        // Setup event listeners
         setupEventListeners();
 
-        addEventLog('success', '场景初始化完成');
+        addEventLog('success', 'Scene initialization complete');
     } catch (error) {
-        console.error('Scene initialization failed:', error);
-        addEventLog('error', `场景初始化失败: ${error.message}`);
+        addEventLog('error', `Scene initialization failed: ${error.message}`);
     } finally {
         isLoading.value = false;
     }
 };
 
-// 加载 HDR 环境贴图
+// Load HDR environment map
 const loadHDREnvironment = async () => {
     try {
-        loadingText.value = '加载 HDR 环境贴图...';
+        loadingText.value = 'Loading HDR environment map...';
 
         hdrComponent = await scene.add('HDRLoader', {
             name: 'environment',
@@ -460,29 +459,29 @@ const loadHDREnvironment = async () => {
             asBackground: true
         });
 
-        // 监听加载进度
+        // Listen to loading progress
         hdrComponent.on('loadProgress', (event) => {
             const progress = 30 + event.progress * 30; // 30-60%
             loadingProgress.value = progress;
         });
 
         hdrComponent.on('loadComplete', () => {
-            addEventLog('success', 'HDR 环境贴图加载完成');
+            addEventLog('success', 'HDR environment map loaded');
         });
 
         hdrComponent.on('loadError', (event) => {
-            addEventLog('error', `HDR 加载失败: ${event.error.message}`);
+            addEventLog('error', `HDR loading failed: ${event.error.message}`);
         });
     } catch (error) {
         console.error('HDR loading failed:', error);
-        addEventLog('error', `HDR 加载失败: ${error.message}`);
+        addEventLog('error', `HDR loading failed: ${error.message}`);
     }
 };
 
-// 加载模型
+// Load model
 const loadModel = async () => {
     try {
-        loadingText.value = '加载 3D 模型...';
+        loadingText.value = 'Loading 3D model...';
 
         modelComponent = await scene.add('ModelLoader', {
             name: 'overview',
@@ -491,58 +490,56 @@ const loadModel = async () => {
             position: [0, 0, 0],
             castShadow: true,
             receiveShadow: true,
-            interactiveMeshes: '*' // 启用所有 Mesh 的事件监听（演示用）
+            interactiveMeshes: '*' // Enable all Mesh event listening (for demo)
         });
 
-        // 监听加载进度
+        // Listen to loading progress
         modelComponent.on('loadProgress', (event) => {
             const progress = 60 + event.progress * 40; // 60-100%
             loadingProgress.value = progress;
         });
 
         modelComponent.on('loadComplete', () => {
-            // 获取所有 Mesh 名称
+            // Get all Mesh names
             meshNames.value = modelComponent.getMeshNames();
             availableMeshes.value = [...meshNames.value];
 
-            // 初始化交互配置状态
+            // Initialize interactive configuration state
             updateInteractiveStatus();
 
-            addEventLog('success', `模型加载完成，包含 ${meshNames.value.length} 个 Mesh`);
-            console.log('Available meshes:', meshNames.value);
+            addEventLog('success', `Model loaded with ${meshNames.value.length} meshes`);
         });
 
         modelComponent.on('loadError', (event) => {
-            addEventLog('error', `模型加载失败: ${event.error.message}`);
+            addEventLog('error', `Model loading failed: ${event.error.message}`);
         });
     } catch (error) {
-        console.error('Model loading failed:', error);
-        addEventLog('error', `模型加载失败: ${error.message}`);
+        addEventLog('error', `Model loading failed: ${error.message}`);
     }
 };
 
-// 设置事件监听
+// Setup event listeners
 const setupEventListeners = () => {
     if (!modelComponent) return;
 
-    // 监听模型点击事件
+    // Listen to model click events
     modelComponent.on('click', (event) => {
-        const meshName = event.object.name || '未命名 Mesh';
-        addEventLog('click', `点击了 Mesh: ${meshName}`);
+        const meshName = event.object.name || 'Unnamed Mesh';
+        addEventLog('click', `Clicked Mesh: ${meshName}`);
 
-        // 自动选中被点击的 Mesh
+        // Auto-select clicked Mesh
         if (event.object.name && meshNames.value.includes(event.object.name)) {
             selectedMeshName.value = event.object.name;
             onMeshSelect();
         }
     });
 
-    // 监听鼠标移入事件
+    // Listen to mouse enter events
     modelComponent.on('mouseenter', (event) => {
-        const meshName = event.object.name || '未命名 Mesh';
-        addEventLog('hover', `鼠标移入 Mesh: ${meshName}`);
+        const meshName = event.object.name || 'Unnamed Mesh';
+        addEventLog('hover', `Mouse entered Mesh: ${meshName}`);
 
-        // 添加高亮效果
+        // Add highlight effect
         if (event.object.material) {
             if (Array.isArray(event.object.material)) {
                 event.object.material.forEach((material) => {
@@ -554,12 +551,12 @@ const setupEventListeners = () => {
         }
     });
 
-    // 监听鼠标移出事件
+    // Listen to mouse leave events
     modelComponent.on('mouseleave', (event) => {
-        const meshName = event.object.name || '未命名 Mesh';
-        addEventLog('hover', `鼠标移出 Mesh: ${meshName}`);
+        const meshName = event.object.name || 'Unnamed Mesh';
+        addEventLog('hover', `Mouse left Mesh: ${meshName}`);
 
-        // 移除高亮效果
+        // Remove highlight effect
         if (event.object.material) {
             if (Array.isArray(event.object.material)) {
                 event.object.material.forEach((material) => {
@@ -572,18 +569,18 @@ const setupEventListeners = () => {
     });
 };
 
-// Mesh 选择处理
+// Mesh selection handler
 const onMeshSelect = () => {
     if (!selectedMeshName.value || !modelComponent) {
         selectedMesh.value = null;
         return;
     }
 
-    // 获取选中的 Mesh
+    // Get selected Mesh
     selectedMesh.value = modelComponent.getMeshByName(selectedMeshName.value);
 
     if (selectedMesh.value) {
-        // 更新变换控制器的值
+        // Update transform controller values
         meshTransform.position.x = selectedMesh.value.position.x;
         meshTransform.position.y = selectedMesh.value.position.y;
         meshTransform.position.z = selectedMesh.value.position.z;
@@ -596,29 +593,29 @@ const onMeshSelect = () => {
         meshTransform.scale.y = selectedMesh.value.scale.y;
         meshTransform.scale.z = selectedMesh.value.scale.z;
 
-        addEventLog('info', `选中 Mesh: ${selectedMeshName.value}`);
+        addEventLog('info', `Selected Mesh: ${selectedMeshName.value}`);
     }
 };
 
-// 更新 Mesh 变换
+// Update Mesh transform
 const updateMeshTransform = () => {
     if (!selectedMesh.value) return;
 
-    // 应用位置变换
+    // Apply position transform
     selectedMesh.value.position.set(
         meshTransform.position.x,
         meshTransform.position.y,
         meshTransform.position.z
     );
 
-    // 应用旋转变换
+    // Apply rotation transform
     selectedMesh.value.rotation.set(
         meshTransform.rotation.x,
         meshTransform.rotation.y,
         meshTransform.rotation.z
     );
 
-    // 应用缩放变换
+    // Apply scale transform
     selectedMesh.value.scale.set(
         meshTransform.scale.x,
         meshTransform.scale.y,
@@ -626,11 +623,11 @@ const updateMeshTransform = () => {
     );
 };
 
-// 重置 Mesh 变换
+// Reset Mesh transform
 const resetMeshTransform = () => {
     if (!selectedMesh.value) return;
 
-    // 重置为默认值
+    // Reset to default values
     meshTransform.position.x = 0;
     meshTransform.position.y = 0;
     meshTransform.position.z = 0;
@@ -643,13 +640,13 @@ const resetMeshTransform = () => {
     meshTransform.scale.y = 1;
     meshTransform.scale.z = 1;
 
-    // 应用重置
+    // Apply reset
     updateMeshTransform();
 
-    addEventLog('info', `重置 Mesh 变换: ${selectedMeshName.value}`);
+    addEventLog('info', `Reset Mesh transform: ${selectedMeshName.value}`);
 };
 
-// 添加事件日志
+// Add event log
 const addEventLog = (type, message) => {
     try {
         const now = new Date();
@@ -665,22 +662,22 @@ const addEventLog = (type, message) => {
             time
         });
 
-        // 限制日志数量
+        // Limit log count
         if (eventLog.value.length > 50) {
             eventLog.value = eventLog.value.slice(0, 50);
         }
     } catch (error) {
-        console.error('添加事件日志失败:', error);
+        console.error('Failed to add event log:', error);
     }
 };
 
-// 清空事件日志
+// Clear event log
 const clearEventLog = () => {
     eventLog.value = [];
-    addEventLog('info', '事件日志已清空');
+    addEventLog('info', 'Event log cleared');
 };
 
-// 更新交互模式
+// Update interactive mode
 const updateInteractiveMode = () => {
     if (!modelComponent) return;
 
@@ -702,46 +699,46 @@ const updateInteractiveMode = () => {
             config = false;
     }
 
-    // 应用配置
+    // Apply configuration
     modelComponent.setInteractiveMeshes(config);
 
-    // 更新状态
+    // Update status
     updateInteractiveStatus();
 
-    // 记录日志
-    addEventLog('info', `交互模式已更新: ${getInteractiveModeDescription()}`);
+    // Log event
+    addEventLog('info', `Interactive mode updated: ${getInteractiveModeDescription()}`);
 };
 
-// 更新交互状态信息
+// Update interactive status information
 const updateInteractiveStatus = () => {
     if (!modelComponent) return;
 
     const interactiveObjects = modelComponent.getInteractiveObjects();
     currentInteractiveCount.value = interactiveObjects.length;
 
-    // 性能警告
+    // Performance warning
     if (interactiveMode.value === 'all' && availableMeshes.value.length > 50) {
-        performanceWarning.value = `启用所有 ${availableMeshes.value.length} 个 Mesh 的事件可能影响性能`;
+        performanceWarning.value = `Enabling events for all ${availableMeshes.value.length} Meshes may impact performance`;
     } else {
         performanceWarning.value = '';
     }
 };
 
-// 获取交互模式描述
+// Get interactive mode description
 const getInteractiveModeDescription = () => {
     switch (interactiveMode.value) {
         case 'disabled':
-            return '禁用所有事件';
+            return 'All events disabled';
         case 'all':
-            return `启用所有 ${availableMeshes.value.length} 个 Mesh 的事件`;
+            return `Events enabled for all ${availableMeshes.value.length} Meshes`;
         case 'selected':
-            return `启用 ${selectedInteractiveMeshes.value.length} 个指定 Mesh 的事件`;
+            return `Events enabled for ${selectedInteractiveMeshes.value.length} specified Meshes`;
         default:
-            return '未知模式';
+            return 'Unknown mode';
     }
 };
 
-// 清理资源
+// Cleanup resources
 const cleanup = () => {
     console.log('Cleaning up Advanced Model Loader example');
 

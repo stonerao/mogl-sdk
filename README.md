@@ -2,117 +2,104 @@
 
 <div align="center">
 
-**新一代 WebGL 3D 渲染引擎**
+**Next-Generation WebGL 3D Rendering Engine**
 
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![Node Version](https://img.shields.io/badge/node-%3E%3D16.0.0-brightgreen.svg)](https://nodejs.org)
 [![Three.js](https://img.shields.io/badge/three.js-0.180.0-orange.svg)](https://threejs.org)
 
-[English](./README.en.md) | 简体中文
+English | [简体中文](./README.zh.md)
 
 </div>
 
-## 📖 项目简介
+## 📖 Introduction
 
-W3D SDK 是一个基于 Three.js 的新一代 WebGL 3D 渲染引擎，提供了简洁易用的 API 和强大的功能，帮助开发者快速构建高性能的 3D Web 应用。
+W3D SDK is a next-generation WebGL 3D rendering engine based on Three.js, providing a simple and easy-to-use API and powerful features to help developers quickly build high-performance 3D web applications.
 
-### ✨ 主要特性
+### ✨ Key Features
 
-- 🚀 **简洁易用** - 链式调用 API，快速上手，5 分钟即可创建第一个 3D 场景
-- 🎨 **组件化架构** - 灵活的组件系统，易于扩展和复用
-- 🎯 **事件驱动** - 完善的事件系统，支持丰富的交互操作
-- 📦 **资源管理** - 智能的资源加载和缓存机制，优化性能
-- 🎬 **动画系统** - 内置动画管理器和补间动画，轻松实现复杂动画效果
-- 🔧 **开发友好** - 完整的中文文档，丰富的示例代码
-- 📱 **响应式设计** - 自动适配不同屏幕尺寸
+- 🚀 **Easy to Use** - Chainable API, quick to get started, create your first 3D scene in 5 minutes
+- 🎨 **Component Architecture** - Flexible component system, easy to extend and reuse
+- 🎯 **Event-Driven** - Comprehensive event system supporting rich interactions
+- 📦 **Resource Management** - Smart resource loading and caching for optimized performance
+- 🎬 **Animation System** - Built-in animation manager and tween animations for complex effects
+- 🔧 **Developer Friendly** - Complete documentation and rich examples
+- 📱 **Responsive Design** - Automatically adapts to different screen sizes
 
-### 🎯 适用场景
+### 🎯 Use Cases
 
-- 产品展示和 3D 可视化
-- 数字孪生和智慧城市
-- 在线 3D 编辑器
-- 游戏和互动体验
-- 建筑和室内设计可视化
-- 教育和培训应用
+- Product showcase and 3D visualization
+- Digital twins and smart cities
+- Online 3D editors
+- Games and interactive experiences
+- Architecture and interior design visualization
+- Education and training applications
 
-## 📦 项目结构
+## 📦 Project Structure
 
 ```
 sdk/
-├── packages/                 # 包目录
-│   ├── core/                # 核心渲染引擎
+├── packages/                 # Packages directory
+│   ├── core/                # Core rendering engine
 │   │   ├── src/
-│   │   │   ├── core/       # 核心模块（Scene, Renderer, Camera 等）
-│   │   │   ├── component/  # 组件系统
-│   │   │   ├── event/      # 事件系统
-│   │   │   ├── resource/   # 资源管理
-│   │   │   ├── animation/  # 动画系统
-│   │   │   └── config/     # 配置文件
+│   │   │   ├── core/       # Core modules (Scene, Renderer, Camera, etc.)
+│   │   │   ├── component/  # Component system
+│   │   │   ├── event/      # Event system
+│   │   │   ├── resource/   # Resource management
+│   │   │   ├── animation/  # Animation system
+│   │   │   └── config/     # Configuration
 │   │   └── package.json
-│   ├── utils/              # 工具函数库
-│   │   ├── src/
-│   │   │   ├── event/      # 事件工具
-│   │   │   ├── math/       # 数学工具
-│   │   │   ├── geometry/   # 几何工具
-│   │   │   ├── color/      # 颜色工具
-│   │   │   ├── loader/     # 加载工具
-│   │   │   ├── cache/      # 缓存工具
-│   │   │   └── performance/# 性能工具
-│   │   └── package.json
-│   ├── components/         # 组件库（规划中）
-│   └── examples/           # 示例项目
-├── document/               # 文档目录
-│   └── zh/                # 中文文档
-│       ├── sdk-guide.md   # SDK 使用指南
-│       ├── api-reference.md # API 参考文档
-│       └── component-guide.md # 组件开发指南
-├── docs/                   # 开发文档
-├── scripts/                # 构建脚本
-├── package.json           # 根配置文件
-├── pnpm-workspace.yaml    # pnpm 工作区配置
-└── README.md              # 项目说明文件
+│   ├── utils/              # Utility library
+│   ├── components/         # Component library (planned)
+│   └── examples/           # Example projects
+├── document/               # Documentation
+│   └── zh/                # Chinese documentation
+├── docs/                   # Development docs
+├── scripts/                # Build scripts
+├── package.json           # Root config
+└── README.md              # Project readme
 ```
 
-## 🚀 快速开始
+## 🚀 Quick Start
 
-### 环境要求
+### Requirements
 
 - **Node.js**: >= 16.0.0
-- **pnpm**: >= 8.0.0（推荐）或 npm/yarn
+- **pnpm**: >= 8.0.0 (recommended) or npm/yarn
 
-### 安装
+### Installation
 
-#### 1. 安装依赖
+#### 1. Install Dependencies
 
 ```bash
-# 使用 pnpm（推荐）
+# Using pnpm (recommended)
 pnpm install
 
-# 或使用 npm
+# Or using npm
 npm install
 
-# 或使用 yarn
+# Or using yarn
 yarn install
 ```
 
-#### 2. 在项目中使用
+#### 2. Use in Your Project
 
 ```bash
-# 安装 SDK
+# Install SDK
 pnpm add @w3d/core three
 
-# 或
+# Or
 npm install @w3d/core three
 ```
 
-### 基础示例
+### Basic Example
 
-创建一个简单的 3D 场景：
+Create a simple 3D scene:
 
 ```javascript
 import { Scene } from '@w3d/core';
 
-// 创建场景
+// Create scene
 const scene = new Scene('#app', {
     renderer: {
         antialias: true,
@@ -124,7 +111,7 @@ const scene = new Scene('#app', {
     }
 });
 
-// 添加灯光
+// Add lights
 scene.light.addAmbient({
     color: '#ffffff',
     intensity: 0.8
@@ -137,24 +124,24 @@ scene.light.addDirectional({
     castShadow: true
 });
 
-// 初始化场景
+// Initialize scene
 scene.init();
 ```
 
-### 加载 3D 模型
+### Load 3D Model
 
 ```javascript
 import { Scene, ModelLoader } from '@w3d/core';
 
 const scene = new Scene('#app');
 
-// 注册模型加载器组件
+// Register model loader component
 scene.registerComponent('ModelLoader', ModelLoader);
 
-// 初始化场景
+// Initialize scene
 scene.init();
 
-// 加载模型
+// Load model
 const model = await scene.add('ModelLoader', {
     name: 'robot',
     url: '/models/robot.glb',
@@ -162,208 +149,210 @@ const model = await scene.add('ModelLoader', {
     position: [0, 0, 0]
 });
 
-// 监听模型点击事件
+// Listen to click event
 model.on('click', (event) => {
-    console.log('模型被点击了', event.object);
+    console.log('Model clicked', event.object);
 });
 ```
 
-### 添加动画
+### Add Animation
 
 ```javascript
 import { Tween } from '@w3d/core';
 
-// 创建补间动画
+// Create tween animation
 Tween.to(model.position, { y: 10 }, 2000, {
     easing: 'easeInOutQuad',
     onComplete: () => {
-        console.log('动画完成');
+        console.log('Animation complete');
     }
 });
 ```
 
-## 🛠️ 开发
+## 🛠️ Development
 
-### 开发模式
+### Development Mode
 
 ```bash
-# 启动所有包的开发模式
+# Start all packages in dev mode
 pnpm dev
 
-# 启动特定包的开发模式
-pnpm dev:core        # 核心包
-pnpm dev:utils       # 工具包
-pnpm dev:examples    # 示例项目
+# Start specific package
+pnpm dev:core        # Core package
+pnpm dev:utils       # Utils package
+pnpm dev:examples    # Examples
 ```
 
-### 构建
+### Build
 
 ```bash
-# 构建所有包
+# Build all packages
 pnpm build
 
-# 构建特定包
-pnpm build:core      # 核心包
-pnpm build:utils     # 工具包
+# Build specific package
+pnpm build:core      # Core package
+pnpm build:utils     # Utils package
 ```
 
-### 测试
+### Testing
 
 ```bash
-# 运行测试
+# Run tests
 pnpm test
 
-# 监听模式
+# Watch mode
 pnpm test:watch
 
-# 测试覆盖率
+# Coverage
 pnpm test:coverage
 
-# 测试 UI
+# Test UI
 pnpm test:ui
 ```
 
-### 代码规范
+### Code Quality
 
 ```bash
-# 代码检查
+# Lint
 pnpm lint
 
-# 自动修复
+# Auto fix
 pnpm lint:fix
 
-# 代码格式化
+# Format
 pnpm format
 
-# 检查格式
+# Check format
 pnpm format:check
 ```
 
-## 📚 技术栈
+## 📚 Tech Stack
 
-### 核心依赖
+### Core Dependencies
 
-- **Three.js** (^0.180.0) - 3D 图形库
-- **Vite** (^5.1.4) - 构建工具
-- **pnpm** (>=8.0.0) - 包管理器
+- **Three.js** (^0.180.0) - 3D graphics library
+- **Vite** (^5.1.4) - Build tool
+- **pnpm** (>=8.0.0) - Package manager
 
-### 开发工具
+### Development Tools
 
-- **Vitest** - 单元测试框架
-- **ESLint** - 代码检查工具
-- **Prettier** - 代码格式化工具
-- **Lerna** - Monorepo 管理工具
-- **Changesets** - 版本管理和发布工具
+- **Vitest** - Unit testing framework
+- **ESLint** - Code linting
+- **Prettier** - Code formatting
+- **Lerna** - Monorepo management
+- **Changesets** - Version management and publishing
 
-### 架构特点
+### Architecture
 
-- **Monorepo 架构** - 使用 pnpm workspace 管理多包项目
-- **ES Module** - 使用现代 JavaScript 模块系统
-- **组件化设计** - 基于组件的可扩展架构
-- **事件驱动** - 完善的事件系统支持
+- **Monorepo Architecture** - Using pnpm workspace
+- **ES Module** - Modern JavaScript module system
+- **Component-Based Design** - Extensible component architecture
+- **Event-Driven** - Comprehensive event system
 
-## 📖 文档
+## 📖 Documentation
 
-### 中文文档
+### Chinese Documentation
 
-- [SDK 使用指南](./document/zh/sdk-guide.md) - 详细的使用说明和示例
-- [API 参考文档](./document/zh/api-reference.md) - 完整的 API 文档
-- [组件开发指南](./document/zh/component-guide.md) - 如何开发自定义组件
+- [SDK User Guide](./document/zh/sdk-guide.md) - Detailed usage and examples
+- [API Reference](./document/zh/api-reference.md) - Complete API documentation
+- [Component Development Guide](./document/zh/component-guide.md) - How to develop custom components
+- [Quick Reference](./document/zh/quick-reference.md) - Quick API lookup
+- [FAQ](./document/zh/faq.md) - Frequently asked questions
 
-### 开发文档
+### Development Documentation
 
-- [架构设计](./docs/architecture.md) - 系统架构说明
-- [API 设计](./docs/api-design.md) - API 设计文档
-- [组件系统](./docs/component-system.md) - 组件系统设计
-- [事件系统](./docs/event-system.md) - 事件系统设计
-- [构建配置](./docs/build-config.md) - 构建配置说明
+- [Architecture](./docs/architecture.md) - System architecture
+- [API Design](./docs/api-design.md) - API design documentation
+- [Component System](./docs/component-system.md) - Component system design
+- [Event System](./docs/event-system.md) - Event system design
+- [Build Configuration](./docs/build-config.md) - Build configuration
 
-## 🎯 核心功能
+## 🎯 Core Features
 
-### Scene（场景管理）
+### Scene Management
 
-- 场景创建和初始化
-- 渲染循环控制
-- 组件生命周期管理
-- 资源管理
+- Scene creation and initialization
+- Render loop control
+- Component lifecycle management
+- Resource management
 
-### Component（组件系统）
+### Component System
 
-- 组件基类和生命周期
-- 组件注册和管理
-- 事件系统集成
-- 配置管理
+- Component base class and lifecycle
+- Component registration and management
+- Event system integration
+- Configuration management
 
-### EventSystem（事件系统）
+### Event System
 
-- 鼠标事件（点击、移动、进入、离开等）
-- 触摸事件支持
-- 射线拾取
-- 自定义事件
+- Mouse events (click, move, enter, leave, etc.)
+- Touch event support
+- Raycasting
+- Custom events
 
-### ResourceManager（资源管理）
+### Resource Management
 
-- 资源加载和缓存
-- 加载进度跟踪
-- 资源释放管理
-- 错误处理
+- Resource loading and caching
+- Loading progress tracking
+- Resource disposal
+- Error handling
 
-### AnimationManager（动画系统）
+### Animation System
 
-- GLTF 模型动画支持
-- 补间动画
-- 动画混合器
-- 动画控制
+- GLTF model animation support
+- Tween animations
+- Animation mixer
+- Animation control
 
-## 🤝 贡献指南
+## 🤝 Contributing
 
-我们欢迎所有形式的贡献！
+We welcome all forms of contributions!
 
-### 如何贡献
+### How to Contribute
 
-1. Fork 本仓库
-2. 创建您的特性分支 (`git checkout -b feature/AmazingFeature`)
-3. 提交您的更改 (`git commit -m 'Add some AmazingFeature'`)
-4. 推送到分支 (`git push origin feature/AmazingFeature`)
-5. 开启一个 Pull Request
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
 
-### 开发规范
+### Development Guidelines
 
-- 遵循项目的代码风格
-- 编写清晰的提交信息
-- 添加必要的测试
-- 更新相关文档
+- Follow the project's code style
+- Write clear commit messages
+- Add necessary tests
+- Update relevant documentation
 
-## 📄 许可证
+## 📄 License
 
-本项目采用 [MIT](LICENSE) 许可证。
+This project is licensed under the [MIT](LICENSE) License.
 
-## 👥 团队
+## 👥 Team
 
 W3D Team
 
-## 🔗 相关链接
+## 🔗 Links
 
-- [Three.js 官网](https://threejs.org/)
-- [Three.js 文档](https://threejs.org/docs/)
-- [WebGL 规范](https://www.khronos.org/webgl/)
+- [Three.js Official Site](https://threejs.org/)
+- [Three.js Documentation](https://threejs.org/docs/)
+- [WebGL Specification](https://www.khronos.org/webgl/)
 
-## 📮 联系我们
+## 📮 Contact Us
 
-如有问题或建议，请通过以下方式联系我们：
+For questions or suggestions:
 
-- 提交 [Issue](https://github.com/yourusername/w3d-sdk/issues)
-- 发送邮件至：674656681@qq.com
+- Submit an [Issue](https://github.com/yourusername/w3d-sdk/issues)
+- Email: 674656681@qq.com
 
-## 🙏 致谢
+## 🙏 Acknowledgments
 
-感谢所有为本项目做出贡献的开发者！
+Thanks to all developers who contributed to this project!
 
 ---
 
 <div align="center">
 
-**[⬆ 回到顶部](#w3d-sdk-v20)**
+**[⬆ Back to Top](#w3d-sdk-v20)**
 
 Made with ❤️ by W3D Team
 

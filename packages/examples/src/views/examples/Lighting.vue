@@ -6,24 +6,24 @@
         :sceneOnly="isSceneOnly"
     >
         <div class="scene-container" ref="sceneContainer">
-            <!-- 加载状态 -->
+            <!-- Loading State -->
             <template v-if="isLoading">
                 <GuiLoading :progress="loadingProgress" :text="loadingText" />
             </template>
 
-            <!-- 控制面板 -->
+            <!-- Control Panel -->
             <template v-if="!isLoading">
-                <GuiPanel title="灯光控制" width="wide">
-                    <!-- 环境光控制 -->
-                    <GuiSection title="环境光 (Ambient Light)">
+                <GuiPanel title="Lighting Controls" width="wide">
+                    <!-- Ambient Light Control -->
+                    <GuiSection title="Ambient Light">
                         <GuiCheckbox
-                            label="启用环境光"
+                            label="Enable Ambient Light"
                             v-model="ambientLight.enabled"
                             @update:modelValue="updateAmbientLight"
                         />
                         <template v-if="ambientLight.enabled">
                             <GuiSlider
-                                label="强度"
+                                label="Intensity"
                                 v-model="ambientLight.intensity"
                                 :min="0"
                                 :max="2"
@@ -31,23 +31,23 @@
                                 @update:modelValue="updateAmbientLight"
                             />
                             <GuiColorPicker
-                                label="颜色"
+                                label="Color"
                                 v-model="ambientLight.color"
                                 @update:modelValue="updateAmbientLight"
                             />
                         </template>
                     </GuiSection>
 
-                    <!-- 平行光控制 -->
-                    <GuiSection title="平行光 (Directional Light)">
+                    <!-- Directional Light Control -->
+                    <GuiSection title="Directional Light">
                         <GuiCheckbox
-                            label="启用平行光"
+                            label="Enable Directional Light"
                             v-model="directionalLight.enabled"
                             @update:modelValue="updateDirectionalLight"
                         />
                         <template v-if="directionalLight.enabled">
                             <GuiSlider
-                                label="强度"
+                                label="Intensity"
                                 v-model="directionalLight.intensity"
                                 :min="0"
                                 :max="3"
@@ -55,48 +55,48 @@
                                 @update:modelValue="updateDirectionalLight"
                             />
                             <GuiColorPicker
-                                label="颜色"
+                                label="Color"
                                 v-model="directionalLight.color"
                                 @update:modelValue="updateDirectionalLight"
                             />
                             <div class="position-grid">
                                 <GuiNumberInput
-                                    label="位置 X"
+                                    label="Position X"
                                     v-model="directionalLight.position.x"
                                     :step="1"
                                     @update:modelValue="updateDirectionalLight"
                                 />
                                 <GuiNumberInput
-                                    label="位置 Y"
+                                    label="Position Y"
                                     v-model="directionalLight.position.y"
                                     :step="1"
                                     @update:modelValue="updateDirectionalLight"
                                 />
                                 <GuiNumberInput
-                                    label="位置 Z"
+                                    label="Position Z"
                                     v-model="directionalLight.position.z"
                                     :step="1"
                                     @update:modelValue="updateDirectionalLight"
                                 />
                             </div>
                             <GuiCheckbox
-                                label="投射阴影"
+                                label="Cast Shadow"
                                 v-model="directionalLight.castShadow"
                                 @update:modelValue="updateDirectionalLight"
                             />
                         </template>
                     </GuiSection>
 
-                    <!-- 点光源控制 -->
-                    <GuiSection title="点光源 (Point Light)">
+                    <!-- Point Light Control -->
+                    <GuiSection title="Point Light">
                         <GuiCheckbox
-                            label="启用点光源"
+                            label="Enable Point Light"
                             v-model="pointLight.enabled"
                             @update:modelValue="updatePointLight"
                         />
                         <template v-if="pointLight.enabled">
                             <GuiSlider
-                                label="强度"
+                                label="Intensity"
                                 v-model="pointLight.intensity"
                                 :min="0"
                                 :max="5"
@@ -104,32 +104,32 @@
                                 @update:modelValue="updatePointLight"
                             />
                             <GuiColorPicker
-                                label="颜色"
+                                label="Color"
                                 v-model="pointLight.color"
                                 @update:modelValue="updatePointLight"
                             />
                             <div class="position-grid">
                                 <GuiNumberInput
-                                    label="位置 X"
+                                    label="Position X"
                                     v-model="pointLight.position.x"
                                     :step="1"
                                     @update:modelValue="updatePointLight"
                                 />
                                 <GuiNumberInput
-                                    label="位置 Y"
+                                    label="Position Y"
                                     v-model="pointLight.position.y"
                                     :step="1"
                                     @update:modelValue="updatePointLight"
                                 />
                                 <GuiNumberInput
-                                    label="位置 Z"
+                                    label="Position Z"
                                     v-model="pointLight.position.z"
                                     :step="1"
                                     @update:modelValue="updatePointLight"
                                 />
                             </div>
                             <GuiSlider
-                                label="距离"
+                                label="Distance"
                                 v-model="pointLight.distance"
                                 :min="0"
                                 :max="100"
@@ -137,7 +137,7 @@
                                 @update:modelValue="updatePointLight"
                             />
                             <GuiSlider
-                                label="衰减"
+                                label="Decay"
                                 v-model="pointLight.decay"
                                 :min="0"
                                 :max="5"
@@ -147,16 +147,16 @@
                         </template>
                     </GuiSection>
 
-                    <!-- 聚光灯控制 -->
-                    <GuiSection title="聚光灯 (Spot Light)">
+                    <!-- Spot Light Control -->
+                    <GuiSection title="Spot Light">
                         <GuiCheckbox
-                            label="启用聚光灯"
+                            label="Enable Spot Light"
                             v-model="spotLight.enabled"
                             @update:modelValue="updateSpotLight"
                         />
                         <template v-if="spotLight.enabled">
                             <GuiSlider
-                                label="强度"
+                                label="Intensity"
                                 v-model="spotLight.intensity"
                                 :min="0"
                                 :max="5"
@@ -164,32 +164,32 @@
                                 @update:modelValue="updateSpotLight"
                             />
                             <GuiColorPicker
-                                label="颜色"
+                                label="Color"
                                 v-model="spotLight.color"
                                 @update:modelValue="updateSpotLight"
                             />
                             <div class="position-grid">
                                 <GuiNumberInput
-                                    label="位置 X"
+                                    label="Position X"
                                     v-model="spotLight.position.x"
                                     :step="1"
                                     @update:modelValue="updateSpotLight"
                                 />
                                 <GuiNumberInput
-                                    label="位置 Y"
+                                    label="Position Y"
                                     v-model="spotLight.position.y"
                                     :step="1"
                                     @update:modelValue="updateSpotLight"
                                 />
                                 <GuiNumberInput
-                                    label="位置 Z"
+                                    label="Position Z"
                                     v-model="spotLight.position.z"
                                     :step="1"
                                     @update:modelValue="updateSpotLight"
                                 />
                             </div>
                             <GuiSlider
-                                label="角度"
+                                label="Angle"
                                 v-model="spotLight.angle"
                                 :min="0.1"
                                 :max="1.57"
@@ -198,7 +198,7 @@
                                 @update:modelValue="updateSpotLight"
                             />
                             <GuiSlider
-                                label="边缘模糊"
+                                label="Edge Blur"
                                 v-model="spotLight.penumbra"
                                 :min="0"
                                 :max="1"
@@ -209,14 +209,14 @@
                         </template>
                     </GuiSection>
 
-                    <!-- 预设配置 -->
-                    <GuiSection title="预设配置">
+                    <!-- Preset Configuration -->
+                    <GuiSection title="Preset Configuration">
                         <div class="preset-buttons">
-                            <GuiButton label="日光" @click="setLightingPreset('daylight')" />
-                            <GuiButton label="夕阳" @click="setLightingPreset('sunset')" />
-                            <GuiButton label="夜晚" @click="setLightingPreset('night')" />
-                            <GuiButton label="工作室" @click="setLightingPreset('studio')" />
-                            <GuiButton label="重置" variant="secondary" @click="resetLighting" />
+                            <GuiButton label="Daylight" @click="setLightingPreset('daylight')" />
+                            <GuiButton label="Sunset" @click="setLightingPreset('sunset')" />
+                            <GuiButton label="Night" @click="setLightingPreset('night')" />
+                            <GuiButton label="Studio" @click="setLightingPreset('studio')" />
+                            <GuiButton label="Reset" variant="secondary" @click="resetLighting" />
                         </div>
                     </GuiSection>
                 </GuiPanel>
@@ -243,7 +243,7 @@ import SplitLayout from '../../components/SplitLayout.vue';
 import * as THREE from 'three';
 import { useSceneOnly } from '../../composables/useSceneOnly';
 
-// 检测是否为 sceneOnly 模式
+// Detect if in sceneOnly mode
 const isSceneOnly = useSceneOnly();
 
 const sceneContainer = ref(null);
@@ -251,14 +251,14 @@ const isLoading = ref(false);
 const loadingText = ref('');
 const loadingProgress = ref(0);
 
-// 环境光状态
+// Ambient light state
 const ambientLight = reactive({
     enabled: true,
     intensity: 0.4,
     color: '#ffffff'
 });
 
-// 平行光状态
+// Directional light state
 const directionalLight = reactive({
     enabled: true,
     intensity: 1.0,
@@ -267,7 +267,7 @@ const directionalLight = reactive({
     castShadow: true
 });
 
-// 点光源状态
+// Point light state
 const pointLight = reactive({
     enabled: false,
     intensity: 1.0,
@@ -277,7 +277,7 @@ const pointLight = reactive({
     decay: 2
 });
 
-// 聚光灯状态
+// Spot light state
 const spotLight = reactive({
     enabled: false,
     intensity: 1.0,
@@ -293,18 +293,18 @@ let sphere = null;
 let plane = null;
 let cube = null;
 
-// 灯光实例引用
+// Light instance references
 let ambientLightInstance = null;
 let directionalLightInstance = null;
 let pointLightInstance = null;
 let spotLightInstance = null;
 
-// 源代码展示
+// Source code display
 const sourceCode = `import { Scene } from '@w3d/core';
 import { GridHelper } from '@w3d/components';
 import * as THREE from 'three';
 
-// 创建场景
+// Create scene
 const scene = new Scene(container, {
   renderer: {
     antialias: true,
@@ -317,17 +317,17 @@ const scene = new Scene(container, {
   }
 });
 
-// 初始化场景
+// Initialize scene
 scene.init();
 
-// 启用阴影和自动调整大小
+// Enable shadow and auto-resize
 scene.renderer.enableShadow(true);
 scene.renderer.enableResize();
 
-// 注册组件
+// Register components
 scene.registerComponent('GridHelper', GridHelper);
 
-// 添加网格辅助
+// Add grid helper
 scene.add('GridHelper', {
   name: 'grid',
   size: 20,
@@ -335,17 +335,17 @@ scene.add('GridHelper', {
   color: '#888888'
 });
 
-// ===== 灯光系统配置 =====
+// ===== Lighting System Configuration =====
 
-// 1. 环境光 (Ambient Light)
-// 提供场景的基础照明，无方向性
+// 1. Ambient Light
+// Provides basic scene illumination, no directionality
 const ambientLight = scene.light.addAmbient({
   color: '#ffffff',
   intensity: 0.4
 });
 
-// 2. 平行光 (Directional Light)
-// 模拟太阳光，有方向但无位置衰减
+// 2. Directional Light
+// Simulates sunlight, has direction but no position decay
 const directionalLight = scene.light.addDirectional({
   color: '#ffffff',
   intensity: 1.0,
@@ -354,50 +354,50 @@ const directionalLight = scene.light.addDirectional({
   shadowMapSize: 2048
 });
 
-// 3. 点光源 (Point Light)
-// 从一个点向四周发射光线，有位置和距离衰减
+// 3. Point Light
+// Emits light from a point in all directions, has position and distance decay
 const pointLight = scene.light.addPoint({
   color: '#ff6b6b',
   intensity: 1.0,
   position: [5, 8, 5],
-  distance: 20,  // 光照距离
-  decay: 2       // 衰减系数
+  distance: 20,  // Light distance
+  decay: 2       // Decay coefficient
 });
 
-// 4. 聚光灯 (Spot Light)
-// 锥形光束，有位置、方向和角度
+// 4. Spot Light
+// Cone-shaped light beam, has position, direction and angle
 const spotLight = scene.light.addSpot({
   color: '#4ecdc4',
   intensity: 1.0,
   position: [-5, 10, 5],
   target: [0, 0, 0],
-  angle: Math.PI / 6,    // 光锥角度
-  penumbra: 0.1,         // 边缘模糊度
+  angle: Math.PI / 6,    // Light cone angle
+  penumbra: 0.1,         // Edge blur
   distance: 30,
   decay: 2
 });
 
-// ===== 动态控制灯光 =====
+// ===== Dynamic Light Control =====
 
-// 启用/禁用灯光
+// Enable/Disable lights
 // ambientLight.visible = true/false;
 // directionalLight.visible = true/false;
 
-// 调整灯光属性
+// Adjust light properties
 // ambientLight.intensity = 0.5;
 // directionalLight.color.setHex(0xffffff);
 // pointLight.position.set(x, y, z);
 
-// 动画灯光（例如：点光源移动）
+// Animate lights (e.g.: point light movement)
 // function animatePointLight() {
 //   const time = Date.now() * 0.001;
 //   pointLight.position.x = Math.cos(time) * 10;
 //   pointLight.position.z = Math.sin(time) * 10;
 // }
 
-// ===== 预设灯光配置 =====
+// ===== Preset Lighting Configuration =====
 
-// 日光模式
+// Daylight mode
 function setDaylightMode() {
   scene.light.removeAll();
   scene.light.addAmbient({ color: '#87CEEB', intensity: 0.6 });
@@ -409,7 +409,7 @@ function setDaylightMode() {
   });
 }
 
-// 夜晚模式
+// Night mode
 function setNightMode() {
   scene.light.removeAll();
   scene.light.addAmbient({ color: '#191970', intensity: 0.2 });
@@ -421,12 +421,12 @@ function setNightMode() {
   });
 }
 
-// 工作室模式
+// Studio mode
 function setStudioMode() {
   scene.light.removeAll();
   scene.light.addAmbient({ color: '#ffffff', intensity: 0.3 });
 
-  // 主光源
+  // Main light source
   scene.light.addDirectional({
     color: '#ffffff',
     intensity: 1.0,
@@ -434,7 +434,7 @@ function setStudioMode() {
     castShadow: true
   });
 
-  // 补光
+  // Fill light
   scene.light.addDirectional({
     color: '#ffffff',
     intensity: 0.5,
@@ -442,7 +442,7 @@ function setStudioMode() {
   });
 }
 
-// 启动渲染
+// Start rendering
 scene.start();`;
 onMounted(() => {
     initScene();
@@ -452,16 +452,16 @@ onUnmounted(() => {
     cleanup();
 });
 
-// 初始化场景
+// Initialize scene
 const initScene = async () => {
     if (!sceneContainer.value) return;
 
     try {
         isLoading.value = true;
-        loadingText.value = '初始化场景...';
+        loadingText.value = 'Initializing scene...';
         loadingProgress.value = 10;
 
-        // 创建场景
+        // Create scene
         scene = new Scene(sceneContainer.value, {
             renderer: {
                 antialias: true,
@@ -475,28 +475,28 @@ const initScene = async () => {
         });
 
         loadingProgress.value = 30;
-        loadingText.value = '初始化渲染器...';
+        loadingText.value = 'Initializing renderer...';
 
-        // 初始化场景
+        // Initialize scene
         scene.init();
 
-        // 启用阴影和自动调整大小
+        // Enable shadow and auto-resize
         scene.renderer.enableShadow(true);
         scene.renderer.enableResize();
 
         loadingProgress.value = 50;
-        loadingText.value = '设置灯光...';
+        loadingText.value = 'Setting up lights...';
 
-        // 初始化灯光
+        // Initialize lights
         initLights();
 
         loadingProgress.value = 70;
-        loadingText.value = '添加场景对象...';
+        loadingText.value = 'Adding scene objects...';
 
-        // 注册组件
+        // Register components
         scene.registerComponent('GridHelper', GridHelper);
 
-        // 添加网格辅助
+        // Add grid helper
         gridHelper = await scene.add('GridHelper', {
             name: 'grid',
             size: 20,
@@ -504,31 +504,31 @@ const initScene = async () => {
             color: '#888888'
         });
 
-        // 添加演示对象
+        // Add demo objects
         createDemoObjects();
 
         loadingProgress.value = 100;
-        loadingText.value = '完成';
+        loadingText.value = 'Complete';
 
-        // 启动渲染
+        // Start rendering
         scene.start();
 
-        // 延迟隐藏加载状态
+        // Delay hiding loading state
         setTimeout(() => {
             isLoading.value = false;
         }, 500);
     } catch (error) {
         console.error('Scene initialization failed:', error);
-        loadingText.value = '初始化失败';
+        loadingText.value = 'Initialization failed';
         setTimeout(() => {
             isLoading.value = false;
         }, 1000);
     }
 };
 
-// 初始化灯光
+// Initialize lights
 const initLights = () => {
-    // 环境光
+    // Ambient light
     if (ambientLight.enabled) {
         ambientLightInstance = scene.light.addAmbient({
             color: ambientLight.color,
@@ -536,7 +536,7 @@ const initLights = () => {
         });
     }
 
-    // 平行光
+    // Directional light
     if (directionalLight.enabled) {
         directionalLightInstance = scene.light.addDirectional({
             color: directionalLight.color,
@@ -551,7 +551,7 @@ const initLights = () => {
         });
     }
 
-    // 点光源
+    // Point light
     if (pointLight.enabled) {
         pointLightInstance = scene.light.addPoint({
             color: pointLight.color,
@@ -562,7 +562,7 @@ const initLights = () => {
         });
     }
 
-    // 聚光灯
+    // Spot light
     if (spotLight.enabled) {
         spotLightInstance = scene.light.addSpot({
             color: spotLight.color,
@@ -577,9 +577,9 @@ const initLights = () => {
     }
 };
 
-// 创建演示对象
+// Create demo objects
 const createDemoObjects = () => {
-    // 地面平面
+    // Ground plane
     const planeGeometry = new THREE.PlaneGeometry(20, 20);
     const planeMaterial = new THREE.MeshLambertMaterial({ color: '#cccccc' });
     plane = new THREE.Mesh(planeGeometry, planeMaterial);
@@ -587,7 +587,7 @@ const createDemoObjects = () => {
     plane.receiveShadow = true;
     scene.scene.add(plane);
 
-    // 球体
+    // Sphere
     const sphereGeometry = new THREE.SphereGeometry(1.5, 32, 32);
     const sphereMaterial = new THREE.MeshPhongMaterial({ color: '#ff6b6b' });
     sphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
@@ -596,7 +596,7 @@ const createDemoObjects = () => {
     sphere.receiveShadow = true;
     scene.scene.add(sphere);
 
-    // 立方体
+    // Cube
     const cubeGeometry = new THREE.BoxGeometry(2, 2, 2);
     const cubeMaterial = new THREE.MeshPhongMaterial({ color: '#4ecdc4' });
     cube = new THREE.Mesh(cubeGeometry, cubeMaterial);
@@ -605,7 +605,7 @@ const createDemoObjects = () => {
     cube.receiveShadow = true;
     scene.scene.add(cube);
 };
-// 更新环境光
+// Update ambient light
 const updateAmbientLight = () => {
     if (!scene) return;
 
@@ -627,7 +627,7 @@ const updateAmbientLight = () => {
     }
 };
 
-// 更新平行光
+// Update directional light
 const updateDirectionalLight = () => {
     if (!scene) return;
 
@@ -662,7 +662,7 @@ const updateDirectionalLight = () => {
     }
 };
 
-// 更新点光源
+// Update point light
 const updatePointLight = () => {
     if (!scene) return;
 
@@ -694,7 +694,7 @@ const updatePointLight = () => {
     }
 };
 
-// 更新聚光灯
+// Update spot light
 const updateSpotLight = () => {
     if (!scene) return;
 
@@ -729,11 +729,11 @@ const updateSpotLight = () => {
     }
 };
 
-// 设置预设灯光配置
+// Set preset lighting configuration
 const setLightingPreset = (preset) => {
     if (!scene) return;
 
-    // 清除所有灯光
+    // Remove all lights
     scene.light.removeAll();
     ambientLightInstance = null;
     directionalLightInstance = null;
@@ -801,18 +801,18 @@ const setLightingPreset = (preset) => {
 
     const config = presets[preset];
     if (config) {
-        // 应用预设配置
+        // Apply preset configuration
         Object.assign(ambientLight, config.ambient);
         Object.assign(directionalLight, config.directional);
         Object.assign(pointLight, config.point);
         Object.assign(spotLight, config.spot);
 
-        // 重新初始化灯光
+        // Re-initialize lights
         initLights();
     }
 };
 
-// 重置灯光
+// Reset lighting
 const resetLighting = () => {
     ambientLight.enabled = true;
     ambientLight.intensity = 0.4;
@@ -838,7 +838,7 @@ const resetLighting = () => {
     spotLight.angle = Math.PI / 6;
     spotLight.penumbra = 0.1;
 
-    // 重新初始化灯光
+    // Re-initialize lights
     if (scene) {
         scene.light.removeAll();
         ambientLightInstance = null;
@@ -849,7 +849,7 @@ const resetLighting = () => {
     }
 };
 
-// 清理资源
+// Clean up resources
 const cleanup = () => {
     console.log('Cleaning up Lighting example');
 

@@ -2,50 +2,50 @@
     <SplitLayout
         :code="sourceCode"
         language="javascript"
-        title="09 - 三维地图 (3D Map)"
+        title="09 - 3D Map"
         :sceneOnly="isSceneOnly"
     >
-        <!-- 3D 场景容器 -->
+        <!-- 3D Scene Container -->
         <div ref="sceneContainer" class="scene-container"></div>
 
-        <!-- 控制面板 -->
-        <GuiPanel title="地图控制" width="wide">
-            <!-- 地图选择 -->
-            <GuiSection title="地图选择">
+        <!-- Control Panel -->
+        <GuiPanel title="Map Controls" width="wide">
+            <!-- Map Selection -->
+            <GuiSection title="Map Selection">
                 <GuiSelect
-                    label="选择地图"
+                    label="Select Map"
                     v-model="selectedMap"
                     :options="[
-                        { value: 'world', label: '世界地图' },
-                        { value: 'china', label: '中国地图' },
-                        { value: 'sichuan', label: '四川省' }
+                        { value: 'world', label: 'World Map' },
+                        { value: 'china', label: 'China Map' },
+                        { value: 'sichuan', label: 'Sichuan Province' }
                     ]"
                     @update:modelValue="changeMap"
                 />
 
                 <GuiSelect
-                    label="入场动画"
+                    label="Entry Animation"
                     v-model="entryType"
                     :options="[
-                        { value: 0, label: '无' },
-                        { value: 1, label: '缩放' },
-                        { value: 2, label: '翻滚' },
-                        { value: 3, label: '拉伸' }
+                        { value: 0, label: 'None' },
+                        { value: 1, label: 'Scale' },
+                        { value: 2, label: 'Roll' },
+                        { value: 3, label: 'Stretch' }
                     ]"
                     @update:modelValue="updateEntryType"
                 />
             </GuiSection>
 
-            <!-- 配置选项 -->
-            <GuiSection title="配置选项">
+            <!-- Configuration Options -->
+            <GuiSection title="Configuration Options">
                 <GuiCheckbox
-                    label="启用轮播"
+                    label="Enable Carousel"
                     v-model="carouselEnabled"
                     @update:modelValue="toggleCarousel"
                 />
 
                 <GuiSlider
-                    label="侧面高度"
+                    label="Side Height"
                     v-model="sideHeight"
                     :min="0"
                     :max="20"
@@ -54,25 +54,25 @@
                 />
 
                 <GuiColorPicker
-                    label="区块颜色"
+                    label="Block Color"
                     v-model="blockColor"
                     @update:modelValue="updateBlockColor"
                 />
             </GuiSection>
 
-            <!-- 信息显示 -->
-            <GuiSection title="地图信息">
-                <GuiInfoItem label="区域数量" :value="areaCount" />
+            <!-- Information Display -->
+            <GuiSection title="Map Information">
+                <GuiInfoItem label="Area Count" :value="areaCount" />
                 <template v-if="currentArea">
-                    <GuiInfoItem label="当前区域" :value="currentArea" />
+                    <GuiInfoItem label="Current Area" :value="currentArea" />
                 </template>
             </GuiSection>
 
-            <!-- 操作按钮 -->
-            <GuiSection title="操作">
+            <!-- Operation Buttons -->
+            <GuiSection title="Operations">
                 <div class="button-group">
-                    <GuiButton label="重置相机" @click="resetCamera" />
-                    <GuiButton :label="mapVisible ? '隐藏地图' : '显示地图'" @click="toggleMap" />
+                    <GuiButton label="Reset Camera" @click="resetCamera" />
+                    <GuiButton :label="mapVisible ? 'Hide Map' : 'Show Map'" @click="toggleMap" />
                 </div>
             </GuiSection>
         </GuiPanel>
@@ -96,7 +96,7 @@ import {
 import SplitLayout from '../../components/SplitLayout.vue';
 import { useSceneOnly } from '../../composables/useSceneOnly';
 
-// 检测是否为 sceneOnly 模式
+// Detect if in sceneOnly mode
 const isSceneOnly = useSceneOnly();
 
 const sceneContainer = ref(null);
@@ -112,30 +112,30 @@ const mapVisible = ref(true);
 let scene = null;
 let mapComponent = null;
 
-// 地图数据配置
+// Map data configuration
 const mapConfigs = {
     world: {
         url: '/svg/map/world.json',
-        name: '世界地图',
+        name: 'World Map',
         camera: { x: 0, y: 100, z: 100 }
     },
     china: {
         url: '/svg/map/990001.json',
-        name: '中国地图',
+        name: 'China Map',
         camera: { x: 0, y: 100, z: 100 }
     },
     sichuan: {
-        url: '/svg/map/四川省.json',
-        name: '四川省',
+        url: '/svg/map/sichuan.json',
+        name: 'Sichuan Province',
         camera: { x: 0, y: 100, z: 100 }
     }
 };
 
-// 源代码
+// Source code
 const sourceCode = `import { Scene } from '@w3d/core';
 import { SvgMap3D } from '@w3d/components';
 
-// 创建场景
+// Create scene
 const scene = new Scene(container, {
   renderer: {
     antialias: true,
@@ -150,7 +150,7 @@ const scene = new Scene(container, {
 
 scene.init();
 
-// 添加灯光
+// Add lighting
 scene.light.addAmbient({
   color: '#ffffff',
   intensity: 0.8
@@ -162,10 +162,10 @@ scene.light.addDirectional({
   position: [100, 200, 100]
 });
 
-// 注册地图组件
+// Register map component
 scene.registerComponent('SvgMap3D', SvgMap3D);
 
-// 添加地图
+// Add map
 const map = await scene.add('SvgMap3D', {
   name: 'worldMap',
   camera: {
@@ -200,22 +200,22 @@ const map = await scene.add('SvgMap3D', {
   }
 });
 
-// 监听事件
+// Listen for events
 map.on('dataLoaded', (data) => {
-  console.log('地图加载完成', data);
+  console.log('Map loading complete', data);
 });
 
 map.on('carousel', (area) => {
-  console.log('轮播到:', area.name);
+  console.log('Carousel to:', area.name);
 });
 
-// 加载地图数据
+// Load map data
 await map.setMapData('/svg/map/990001.json');
 
-// 启动渲染
+// Start rendering
 scene.start();
 
-console.log('🗺️ 三维地图示例');`;
+console.log('🗺️ 3D Map Example - Vue 3');`;
 
 onMounted(() => {
     initScene();
@@ -228,7 +228,7 @@ onUnmounted(() => {
 const initScene = async () => {
     if (!sceneContainer.value) return;
 
-    // 创建场景
+    // Create scene
     scene = new Scene(sceneContainer.value, {
         renderer: {
             antialias: true,
@@ -243,7 +243,7 @@ const initScene = async () => {
 
     scene.init();
 
-    // 添加灯光
+    // Add lighting
     scene.light.addAmbient({
         color: '#ffffff',
         intensity: 0.8
@@ -255,37 +255,37 @@ const initScene = async () => {
         position: [100, 200, 100]
     });
 
-    // 启用自动调整大小
+    // Enable auto-resize
     scene.renderer.enableResize();
 
-    // 注册地图组件
+    // Register map component
     scene.registerComponent('SvgMap3D', SvgMap3D);
 
-    // 加载地图
+    // Load map
     await loadMap(selectedMap.value);
 
-    // 启动渲染
+    // Start rendering
     scene.start();
 
-    console.log('🗺️ 三维地图示例 - Vue 3');
+    console.log('🗺️ 3D Map Example - Vue 3');
 };
 
 const loadMap = async (mapKey) => {
     const config = mapConfigs[mapKey];
 
     if (!config) {
-        console.error('地图配置不存在:', mapKey);
+        console.error('Map configuration does not exist:', mapKey);
         return;
     }
 
-    // 移除旧地图
+    // Remove old map
     if (mapComponent) {
         scene.remove(mapComponent);
         mapComponent = null;
     }
 
     try {
-        // 添加新地图
+        // Add new map
         mapComponent = await scene.add('SvgMap3D', {
             name: config.name,
             camera: {
@@ -333,46 +333,46 @@ const loadMap = async (mapKey) => {
             }
         });
 
-        // 监听事件
+        // Listen for events
         mapComponent.on('dataLoaded', (data) => {
-            console.log('地图加载完成', data);
+            console.log('Map loading complete', data);
             if (data && data.series) {
                 areaCount.value = data.series.length;
             }
         });
 
         mapComponent.on('carousel', (area) => {
-            console.log('轮播到:', area.name);
+            console.log('Carousel to:', area.name);
             currentArea.value = area.name;
         });
 
-        // 监听交互事件
+        // Listen for interaction events
         mapComponent.on('click', (data) => {
-            console.log('✅ 点击了区域:', data.area.name);
+            console.log('✅ Area clicked:', data.area.name);
             currentArea.value = data.area.name;
         });
 
         mapComponent.on('mouseenter', (data) => {
-            console.log('🖱️ 鼠标移入:', data.area.name);
+            console.log('🖱️ Mouse enter:', data.area.name);
             currentArea.value = data.area.name;
-            // 改变鼠标样式
+            // Change cursor style
             if (sceneContainer.value) {
                 sceneContainer.value.style.cursor = 'pointer';
             }
         });
 
         mapComponent.on('mouseleave', (data) => {
-            console.log('👋 鼠标移出:', data.area.name);
-            // 恢复鼠标样式
+            console.log('👋 Mouse leave:', data.area.name);
+            // Restore cursor style
             if (sceneContainer.value) {
                 sceneContainer.value.style.cursor = 'default';
             }
         });
 
-        // 加载地图数据
+        // Load map data
         await mapComponent.setMapData(config.url);
     } catch (error) {
-        console.error('加载地图失败:', error);
+        console.error('Map loading failed:', error);
     }
 };
 
@@ -393,13 +393,13 @@ const toggleCarousel = () => {
 };
 
 const updateSideHeight = () => {
-    // 需要重新加载地图以应用新的侧面高度
-    // 这里简化处理，实际应该提供动态更新方法
+    // Need to reload map to apply new side height
+    // Simplified here, should provide dynamic update method in practice
 };
 
 const updateBlockColor = () => {
-    // 需要重新加载地图以应用新的颜色
-    // 这里简化处理，实际应该提供动态更新方法
+    // Need to reload map to apply new color
+    // Simplified here, should provide dynamic update method in practice
 };
 
 const resetCamera = () => {

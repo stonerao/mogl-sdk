@@ -8,41 +8,41 @@
         <div class="scene-container" ref="sceneContainer">
             <GuiLoading
                 :visible="isLoading"
-                :text="loadingText || '加载中...'"
+                :text="loadingText || 'Loading...'"
                 :showProgress="true"
                 :progress="loadingProgress || 0"
             />
 
-            <GuiPanel title="路径动画">
-                <GuiSection title="播放控制">
+            <GuiPanel title="Path Animation">
+                <GuiSection title="Playback Control">
                     <div class="playback-controls">
                         <GuiButton
-                            :label="animationStatus.isPlaying ? '暂停' : '播放'"
+                            :label="animationStatus.isPlaying ? 'Pause' : 'Play'"
                             @click="playAnimation"
                         />
-                        <GuiButton label="停止" variant="secondary" @click="stopAnimation" />
-                        <GuiButton label="重置" variant="secondary" @click="resetAnimation" />
+                        <GuiButton label="Stop" variant="secondary" @click="stopAnimation" />
+                        <GuiButton label="Reset" variant="secondary" @click="resetAnimation" />
                     </div>
 
                     <div class="status-display">
                         <GuiInfoItem
-                            label="状态:"
+                            label="Status:"
                             :value="
                                 animationStatus.isPlaying
-                                    ? '播放中'
+                                    ? 'Playing'
                                     : animationStatus.isPaused
-                                    ? '已暂停'
-                                    : '已停止'
+                                    ? 'Paused'
+                                    : 'Stopped'
                             "
                         />
                         <GuiInfoItem
-                            label="进度:"
+                            label="Progress:"
                             :value="`${(animationStatus.progress * 100).toFixed(1)}%`"
                         />
                     </div>
 
                     <GuiSlider
-                        label="动画进度"
+                        label="Animation Progress"
                         :modelValue="animationStatus.progress"
                         @update:modelValue="seekToProgress"
                         :min="0"
@@ -52,47 +52,47 @@
                         suffix="%"
                     />
                     <GuiSlider
-                        label="移动速度"
+                        label="Movement Speed"
                         v-model="pathSettings.speed"
                         @change="updateSpeed"
                         :min="0.1"
                         :max="10"
                         :step="0.1"
                         :precision="1"
-                        suffix=" 单位/秒"
+                        suffix=" units/sec"
                     />
                 </GuiSection>
 
-                <GuiSection title="循环模式">
+                <GuiSection title="Loop Mode">
                     <GuiRadio
                         v-model="pathSettings.loopMode"
                         @change="updateLoopMode"
                         :options="[
-                            { value: 'none', label: '单次播放' },
-                            { value: 'loop', label: '循环播放' },
-                            { value: 'pingPong', label: '往返播放' }
+                            { value: 'none', label: 'Play Once' },
+                            { value: 'loop', label: 'Loop' },
+                            { value: 'pingPong', label: 'Ping Pong' }
                         ]"
                     />
                 </GuiSection>
 
-                <GuiSection title="对象朝向">
+                <GuiSection title="Object Orientation">
                     <GuiSelect
-                        label="朝向模式"
+                        label="Orientation Mode"
                         v-model="pathSettings.lookAtDirection"
                         @change="updateLookAtDirection"
                         :options="[
-                            { value: 'forward', label: '朝向运动方向' },
-                            { value: 'backward', label: '朝向运动反方向' },
-                            { value: 'up', label: '朝向上方 (+Y)' },
-                            { value: 'down', label: '朝向下方 (-Y)' },
-                            { value: 'fixed', label: '固定朝向' },
-                            { value: 'custom', label: '自定义朝向' }
+                            { value: 'forward', label: 'Face Movement Direction' },
+                            { value: 'backward', label: 'Face Opposite Direction' },
+                            { value: 'up', label: 'Face Up (+Y)' },
+                            { value: 'down', label: 'Face Down (-Y)' },
+                            { value: 'fixed', label: 'Fixed Orientation' },
+                            { value: 'custom', label: 'Custom Orientation' }
                         ]"
                     />
 
                     <div v-if="pathSettings.lookAtDirection === 'custom'" class="custom-rotation">
                         <GuiSlider
-                            label="X 旋转"
+                            label="X Rotation"
                             v-model="customRotation.x"
                             @change="updateCustomRotation"
                             :min="-180"
@@ -101,7 +101,7 @@
                             suffix="°"
                         />
                         <GuiSlider
-                            label="Y 旋转"
+                            label="Y Rotation"
                             v-model="customRotation.y"
                             @change="updateCustomRotation"
                             :min="-180"
@@ -110,7 +110,7 @@
                             suffix="°"
                         />
                         <GuiSlider
-                            label="Z 旋转"
+                            label="Z Rotation"
                             v-model="customRotation.z"
                             @change="updateCustomRotation"
                             :min="-180"
@@ -121,59 +121,59 @@
                     </div>
                 </GuiSection>
 
-                <GuiSection title="缓动效果">
+                <GuiSection title="Easing Effect">
                     <GuiSelect
-                        label="缓动函数"
+                        label="Easing Function"
                         v-model="pathSettings.easing"
                         @change="updateEasing"
                         :options="[
-                            { value: 'linear', label: '线性 (Linear)' },
-                            { value: 'easeIn', label: '加速 (Ease In)' },
-                            { value: 'easeOut', label: '减速 (Ease Out)' },
-                            { value: 'easeInOut', label: '平滑 (Ease In Out)' }
+                            { value: 'linear', label: 'Linear' },
+                            { value: 'easeIn', label: 'Ease In' },
+                            { value: 'easeOut', label: 'Ease Out' },
+                            { value: 'easeInOut', label: 'Ease In Out' }
                         ]"
                     />
                 </GuiSection>
 
-                <GuiSection title="预设路径">
+                <GuiSection title="Preset Paths">
                     <div class="preset-buttons">
                         <GuiButton
-                            label="直线路径"
+                            label="Line Path"
                             variant="secondary"
                             @click="loadPresetPath('line')"
                         />
                         <GuiButton
-                            label="三角形路径"
+                            label="Triangle Path"
                             variant="secondary"
                             @click="loadPresetPath('triangle')"
                         />
                         <GuiButton
-                            label="矩形路径"
+                            label="Rectangle Path"
                             variant="secondary"
                             @click="loadPresetPath('rectangle')"
                         />
                         <GuiButton
-                            label="圆形路径"
+                            label="Circle Path"
                             variant="secondary"
                             @click="loadPresetPath('circle')"
                         />
                         <GuiButton
-                            label="螺旋路径"
+                            label="Spiral Path"
                             variant="secondary"
                             @click="loadPresetPath('spiral')"
                         />
                     </div>
                 </GuiSection>
 
-                <GuiSection title="路径信息">
-                    <GuiInfoItem label="路径点数:" :value="currentPath.length" />
+                <GuiSection title="Path Information">
+                    <GuiInfoItem label="Path Points:" :value="currentPath.length" />
                     <GuiInfoItem
-                        label="总距离:"
-                        :value="`${animationStatus.totalDistance.toFixed(2)} 单位`"
+                        label="Total Distance:"
+                        :value="`${animationStatus.totalDistance.toFixed(2)} units`"
                     />
                     <GuiInfoItem
-                        label="当前距离:"
-                        :value="`${animationStatus.currentDistance.toFixed(2)} 单位`"
+                        label="Current Distance:"
+                        :value="`${animationStatus.currentDistance.toFixed(2)} units`"
                     />
                 </GuiSection>
             </GuiPanel>
@@ -199,21 +199,21 @@ import {
 import * as THREE from 'three';
 import { useSceneOnly } from '../../composables/useSceneOnly';
 
-// 检测是否为 sceneOnly 模式
+// Detect if in sceneOnly mode
 const isSceneOnly = useSceneOnly();
 
-// 基础状态
+// Basic state
 const sceneContainer = ref(null);
 const isLoading = ref(false);
-const loadingText = ref('初始化场景...');
+const loadingText = ref('Initializing scene...');
 const loadingProgress = ref(0);
 
-// 场景和组件引用
+// Scene and component references
 let scene = null;
 let pathAnimation = null;
 let animatedObject = null;
 
-// 动画状态
+// Animation status
 const animationStatus = reactive({
     isPlaying: false,
     isPaused: false,
@@ -222,7 +222,7 @@ const animationStatus = reactive({
     totalDistance: 0
 });
 
-// 路径设置
+// Path settings
 const pathSettings = reactive({
     speed: 2.0,
     loopMode: 'loop', // 'none', 'loop', 'pingPong'
@@ -231,14 +231,14 @@ const pathSettings = reactive({
     showPath: true
 });
 
-// 自定义旋转角度
+// Custom rotation angles
 const customRotation = reactive({
     x: 0,
     y: 0,
     z: 0
 });
 
-// 预设路径
+// Preset paths
 const presetPaths = {
     line: [
         [0, 0, 0],
@@ -259,7 +259,7 @@ const presetPaths = {
     spiral: []
 };
 
-// 生成圆形路径
+// Generate circle path
 const generateCirclePath = () => {
     const points = [];
     const radius = 8;
@@ -272,7 +272,7 @@ const generateCirclePath = () => {
     return points;
 };
 
-// 生成螺旋路径
+// Generate spiral path
 const generateSpiralPath = () => {
     const points = [];
     const turns = 2;
@@ -287,18 +287,18 @@ const generateSpiralPath = () => {
     return points;
 };
 
-// 初始化预设路径
+// Initialize preset paths
 presetPaths.circle = generateCirclePath();
 presetPaths.spiral = generateSpiralPath();
 
-// 当前使用的路径
+// Current path in use
 const currentPath = ref([...presetPaths.rectangle]);
 
-// 源代码展示
+// Source code display
 const sourceCode = `import { Scene } from '@w3d/core';
 import { PathAnimation, GridHelper } from '@w3d/components';
 
-// 创建场景
+// Create scene
 const scene = new Scene(container, {
   renderer: {
     antialias: true,
@@ -311,16 +311,16 @@ const scene = new Scene(container, {
   }
 });
 
-// 初始化场景
+// Initialize scene
 scene.init();
 scene.renderer.enableShadow(true);
 scene.renderer.enableResize();
 
-// 注册组件
+// Register components
 scene.registerComponent('PathAnimation', PathAnimation);
 scene.registerComponent('GridHelper', GridHelper);
 
-// 添加网格辅助
+// Add grid helper
 await scene.add('GridHelper', {
   name: 'grid',
   size: 30,
@@ -328,57 +328,57 @@ await scene.add('GridHelper', {
   color: '#444444'
 });
 
-// ===== 基础路径动画 =====
+// ===== Basic Path Animation =====
 
-// 创建运动对象（立方体）
+// Create moving object (cube)
 const geometry = new THREE.BoxGeometry(1, 1, 1);
 const material = new THREE.MeshBasicMaterial({ color: '#00ff88' });
 const cube = new THREE.Mesh(geometry, material);
 scene.scene.add(cube);
 
-// 创建路径动画
+// Create path animation
 const pathAnim = await scene.add('PathAnimation', {
   name: 'cubeAnimation',
   path: [
-    [-10, 0, -5],  // 起始点
-    [10, 0, -5],   // 右上角
-    [10, 0, 5],    // 右下角
-    [-10, 0, 5]    // 左下角
+    [-10, 0, -5],  // Start point
+    [10, 0, -5],   // Top right
+    [10, 0, 5],    // Bottom right
+    [-10, 0, 5]    // Bottom left
   ],
-  speed: 2.0,              // 移动速度
-  loop: true,              // 循环播放
-  pingPong: false,         // 往返模式
-  lookAtDirection: 'forward', // 朝向运动方向
-  easing: 'linear',        // 缓动函数
-  showPath: true,          // 显示路径
-  pathColor: '#00ff88'     // 路径颜色
+  speed: 2.0,              // Movement speed
+  loop: true,              // Loop playback
+  pingPong: false,         // Ping pong mode
+  lookAtDirection: 'forward', // Face movement direction
+  easing: 'linear',        // Easing function
+  showPath: true,          // Show path
+  pathColor: '#00ff88'     // Path color
 });
 
-// 将立方体添加到路径动画
+// Add cube to path animation
 pathAnim.add(cube);
 
-// ===== 路径动画控制 =====
+// ===== Path Animation Control =====
 
-// 播放控制
-pathAnim.play();         // 播放
-pathAnim.pause();        // 暂停
-pathAnim.stop();         // 停止
-pathAnim.reset();        // 重置
+// Playback control
+pathAnim.play();         // Play
+pathAnim.pause();        // Pause
+pathAnim.stop();         // Stop
+pathAnim.reset();        // Reset
 
-// 跳转控制
-pathAnim.jumpToProgress(0.5);  // 跳转到50%进度
-pathAnim.jumpToPoint(2);       // 跳转到第3个路径点
+// Jump control
+pathAnim.jumpToProgress(0.5);  // Jump to 50% progress
+pathAnim.jumpToPoint(2);       // Jump to 3rd path point
 
-// 配置更新
+// Config update
 pathAnim.updateConfig({
   speed: 3.0,
   lookAtDirection: 'up',
   easing: 'easeInOut'
 });
 
-// ===== 预设路径示例 =====
+// ===== Preset Path Examples =====
 
-// 圆形路径
+// Circle path
 const circlePoints = [];
 const radius = 8;
 for (let i = 0; i < 12; i++) {
@@ -398,7 +398,7 @@ const circleAnim = await scene.add('PathAnimation', {
   lookAtDirection: 'forward'
 });
 
-// 螺旋上升路径
+// Spiral ascending path
 const spiralPoints = [];
 const turns = 2;
 const height = 15;
@@ -421,61 +421,61 @@ const spiralAnim = await scene.add('PathAnimation', {
   easing: 'easeInOut'
 });
 
-// ===== 事件监听 =====
+// ===== Event Listeners =====
 
-// 监听动画更新
+// Listen to animation update
 pathAnim.on('update', (data) => {
-  console.log('进度:', data.progress);
-  console.log('当前位置:', data.point);
+  console.log('Progress:', data.progress);
+  console.log('Current position:', data.point);
 });
 
-// 监听动画完成
+// Listen to animation complete
 pathAnim.on('complete', () => {
-  console.log('动画播放完成');
+  console.log('Animation playback complete');
 });
 
-// 监听往返模式事件
+// Listen to ping pong mode events
 pathAnim.on('reachEnd', () => {
-  console.log('到达终点，开始返回');
+  console.log('Reached end, starting return');
 });
 
 pathAnim.on('reachStart', () => {
-  console.log('返回起点，重新出发');
+  console.log('Returned to start, restarting');
 });
 
-// ===== 高级功能 =====
+// ===== Advanced Features =====
 
-// 动态添加路径点
+// Dynamically add path point
 pathAnim.addPathPoint([15, 5, 0]);
 
-// 删除路径点
+// Remove path point
 pathAnim.removePathPoint(1);
 
-// 更新整个路径
+// Update entire path
 pathAnim.updatePath([
   [0, 0, 0],
   [20, 10, 0],
   [0, 20, 0]
 ]);
 
-// 获取动画状态
+// Get animation status
 const status = pathAnim.getStatus();
-console.log('播放状态:', status.isPlaying);
-console.log('当前进度:', status.progress);
+console.log('Playback status:', status.isPlaying);
+console.log('Current progress:', status.progress);
 
-// 启动渲染循环
+// Start render loop
 scene.start();`;
 
-// 初始化场景
+// Initialize scene
 const initScene = async () => {
     if (!sceneContainer.value) return;
 
     try {
         isLoading.value = true;
-        loadingText.value = '初始化场景...';
+        loadingText.value = 'Initializing scene...';
         loadingProgress.value = 20;
 
-        // 创建场景
+        // Create scene
         scene = new Scene(sceneContainer.value, {
             renderer: {
                 antialias: true,
@@ -494,13 +494,13 @@ const initScene = async () => {
 
         loadingProgress.value = 40;
 
-        // 注册组件
+        // Register components
         scene.registerComponent('PathAnimation', PathAnimation);
         scene.registerComponent('GridHelper', GridHelper);
 
         loadingProgress.value = 60;
 
-        // 添加网格辅助
+        // Add grid helper
         await scene.add('GridHelper', {
             name: 'grid',
             size: 30,
@@ -510,21 +510,21 @@ const initScene = async () => {
 
         loadingProgress.value = 80;
 
-        // 创建运动对象
+        // Create moving object
         await createAnimatedObject();
 
-        // 创建路径动画
+        // Create path animation
         await createPathAnimation();
 
         loadingProgress.value = 100;
 
-        // 启动渲染
+        // Start rendering
         scene.start();
 
-        loadingText.value = '场景初始化完成';
+        loadingText.value = 'Scene initialization complete';
     } catch (error) {
-        console.error('场景初始化失败:', error);
-        loadingText.value = '初始化失败: ' + error.message;
+        console.error('Scene initialization failed:', error);
+        loadingText.value = 'Initialization failed: ' + error.message;
     } finally {
         setTimeout(() => {
             isLoading.value = false;
@@ -532,10 +532,10 @@ const initScene = async () => {
     }
 };
 
-// 创建运动对象
+// Create moving object
 const createAnimatedObject = async () => {
-    // 这里我们使用 Three.js 创建一个简单的立方体
-    // 在实际应用中，你可以使用 ModelLoader 加载 3D 模型
+    // Here we use Three.js to create a simple cube
+    // In real applications, you can use ModelLoader to load 3D models
     const geometry = new THREE.BoxGeometry(1, 1, 1);
     const material = new THREE.MeshBasicMaterial({
         color: '#00ff88',
@@ -550,7 +550,7 @@ const createAnimatedObject = async () => {
     scene.scene.add(animatedObject);
 };
 
-// 创建路径动画
+// Create path animation
 const createPathAnimation = async () => {
     pathAnimation = await scene.add('PathAnimation', {
         name: 'mainPathAnimation',
@@ -570,16 +570,16 @@ const createPathAnimation = async () => {
         pathWidth: 3
     });
 
-    // 将运动对象添加到路径动画
+    // Add moving object to path animation
     if (animatedObject) {
         pathAnimation.add(animatedObject);
     }
 
-    // 监听动画事件
+    // Listen to animation events
     setupAnimationEvents();
 };
 
-// 设置动画事件监听
+// Setup animation event listeners
 const setupAnimationEvents = () => {
     if (!pathAnimation) return;
 
@@ -612,19 +612,19 @@ const setupAnimationEvents = () => {
     });
 
     pathAnimation.on('complete', () => {
-        console.log('路径动画播放完成');
+        console.log('Path animation playback complete');
     });
 
     pathAnimation.on('reachEnd', () => {
-        console.log('到达路径终点');
+        console.log('Reached path end');
     });
 
     pathAnimation.on('reachStart', () => {
-        console.log('返回路径起点');
+        console.log('Returned to path start');
     });
 };
 
-// 播放控制方法
+// Playback control methods
 const playAnimation = () => {
     if (!pathAnimation) return;
 
@@ -645,20 +645,20 @@ const resetAnimation = () => {
     pathAnimation.reset();
 };
 
-// 进度控制
+// Progress control
 const seekToProgress = (event) => {
     if (!pathAnimation) return;
     const progress = parseFloat(event.target.value);
     pathAnimation.jumpToProgress(progress);
 };
 
-// 速度控制
+// Speed control
 const updateSpeed = () => {
     if (!pathAnimation) return;
     pathAnimation.updateConfig({ speed: pathSettings.speed });
 };
 
-// 循环模式控制
+// Loop mode control
 const updateLoopMode = () => {
     if (!pathAnimation) return;
 
@@ -668,7 +668,7 @@ const updateLoopMode = () => {
     });
 };
 
-// 朝向控制
+// Orientation control
 const updateLookAtDirection = () => {
     if (!pathAnimation) return;
 
@@ -677,7 +677,7 @@ const updateLookAtDirection = () => {
     });
 };
 
-// 自定义旋转控制
+// Custom rotation control
 const updateCustomRotation = () => {
     if (!pathAnimation) return;
 
@@ -690,7 +690,7 @@ const updateCustomRotation = () => {
     });
 };
 
-// 缓动函数控制
+// Easing function control
 const updateEasing = () => {
     if (!pathAnimation) return;
 
@@ -699,26 +699,26 @@ const updateEasing = () => {
     });
 };
 
-// 加载预设路径
+// Load preset path
 const loadPresetPath = async (pathType) => {
     if (!presetPaths[pathType]) return;
 
     try {
-        // 更新当前路径
+        // Update current path
         currentPath.value = [...presetPaths[pathType]];
 
-        // 如果路径动画已存在，更新路径
+        // If path animation exists, update path
         if (pathAnimation) {
             pathAnimation.updatePath(currentPath.value);
         }
 
-        console.log(`已加载 ${pathType} 路径，包含 ${currentPath.value.length} 个点`);
+        console.log(`Loaded ${pathType} path with ${currentPath.value.length} points`);
     } catch (error) {
-        console.error('加载预设路径失败:', error);
+        console.error('Failed to load preset path:', error);
     }
 };
 
-// 清理资源
+// Clean up resources
 const cleanup = () => {
     if (pathAnimation) {
         pathAnimation.stop();
@@ -733,14 +733,14 @@ const cleanup = () => {
     animatedObject = null;
 };
 
-// 生命周期钩子
+// Lifecycle hooks
 onMounted(async () => {
     try {
         await initScene();
     } catch (error) {
-        console.error('初始化失败:', error);
+        console.error('Initialization failed:', error);
         isLoading.value = false;
-        loadingText.value = '初始化失败: ' + error.message;
+        loadingText.value = 'Initialization failed: ' + error.message;
     }
 });
 

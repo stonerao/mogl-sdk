@@ -5,17 +5,17 @@
         :title="t('home.examples.17-shader-material.title')"
         :sceneOnly="isSceneOnly"
     >
-        <!-- 3D 场景容器 -->
+        <!-- 3D Scene Container -->
         <div ref="sceneContainer" class="scene-container"></div>
 
-        <!-- 控制面板 -->
+        <!-- Control Panel -->
         <template v-if="isLoading">
             <GuiLoading :progress="loadProgress" :text="t('shaderMaterial.loading')" />
         </template>
 
         <template v-if="!isLoading">
             <GuiPanel :title="t('shaderMaterial.title')" width="wide">
-                <!-- 材质选择 -->
+                <!-- Material Selection -->
                 <GuiSection :title="t('shaderMaterial.materialSelection')">
                     <GuiSelect
                         :label="t('shaderMaterial.currentMaterial')"
@@ -37,7 +37,7 @@
                     />
                 </GuiSection>
 
-                <!-- 基础颜色材质参数 -->
+                <!-- Basic Color Material Parameters -->
                 <template v-if="currentMaterialName === 'basicColor'">
                     <GuiSection :title="t('shaderMaterial.materialParams')">
                         <GuiColorPicker
@@ -704,7 +704,7 @@ scene.start();
     height: 100%;
 }
 
-/* 材质列表 */
+/* Material list */
 .material-list {
     display: flex;
     flex-direction: column;
@@ -735,7 +735,7 @@ scene.start();
     font-weight: 600;
 }
 
-/* 事件日志 */
+/* Event log */
 .event-log {
     max-height: 200px;
     overflow-y: auto;

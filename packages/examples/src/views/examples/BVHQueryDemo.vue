@@ -1,11 +1,11 @@
 <template>
     <div class="bvh-query-demo">
-        <!-- 3D 场景容器 -->
+        <!-- 3D Scene Container -->
         <div ref="containerRef" class="scene-container"></div>
 
-        <!-- 控制面板 -->
+        <!-- Control Panel -->
         <GuiPanel :title="t('bvhQuery.title')" width="wide">
-            <!-- 模式选择 -->
+            <!-- Mode Selection -->
             <GuiSelect
                 :label="t('bvhQuery.mode')"
                 v-model="currentMode"
@@ -18,7 +18,7 @@
                 @update:modelValue="onModeChange"
             />
 
-            <!-- BVH 配置 -->
+            <!-- BVH Configuration -->
             <GuiSection :title="t('bvhQuery.bvhConfig')">
                 <GuiSelect
                     :label="t('bvhQuery.strategy')"
@@ -66,7 +66,7 @@
                 />
             </GuiSection>
 
-            <!-- 射线投射模式配置 -->
+            <!-- Raycast Mode Configuration -->
             <template v-if="currentMode === 'raycast'">
                 <GuiSection :title="t('bvhQuery.raycastConfig')">
                     <GuiCheckbox
@@ -80,7 +80,7 @@
                 </GuiSection>
             </template>
 
-            <!-- 最近点模式配置 -->
+            <!-- Nearest Point Mode Configuration -->
             <template v-if="currentMode === 'nearest'">
                 <GuiSection :title="t('bvhQuery.nearestConfig')">
                     <GuiCheckbox :label="t('bvhQuery.showLine')" v-model="nearestConfig.showLine" />
@@ -91,7 +91,7 @@
                 </GuiSection>
             </template>
 
-            <!-- 碰撞检测模式配置 -->
+            <!-- Collision Detection Mode Configuration -->
             <template v-if="currentMode === 'collision'">
                 <GuiSection :title="t('bvhQuery.collisionConfig')">
                     <GuiSelect
@@ -112,7 +112,7 @@
                 </GuiSection>
             </template>
 
-            <!-- 统计信息 -->
+            <!-- Statistics Information -->
             <GuiSection :title="t('stats.title')">
                 <GuiInfoItem :label="`${t('stats.fps')}`" :value="fps" />
                 <template v-if="bvhStats">
@@ -139,7 +139,7 @@
                 </template>
             </GuiSection>
 
-            <!-- 事件日志 -->
+            <!-- Event Log -->
             <GuiSection :title="t('bvhQuery.eventLog')">
                 <div class="log-container">
                     <div v-for="(log, index) in eventLogs" :key="index" class="log-item">
@@ -150,7 +150,7 @@
             </GuiSection>
         </GuiPanel>
 
-        <!-- 提示信息 -->
+        <!-- Hint Information -->
         <div class="info-panel">
             <div v-if="currentMode === 'raycast'">
                 {{ t('bvhQuery.raycastHint') }}
@@ -185,15 +185,15 @@ import * as THREE from 'three';
 
 const { t } = useLanguage();
 
-// DOM 引用
+// DOM References
 const containerRef = ref(null);
 
-// 场景实例
+// Scene Instance
 let scene = null;
 let bvhQuery = null;
 let targetMesh = null;
 
-// 辅助对象
+// Helper Objects
 let raycaster = null;
 let mouse = new THREE.Vector2();
 let hitMarker = null;
@@ -202,7 +202,7 @@ let nearestMarker = null;
 let nearestLine = null;
 let collisionObject = null;
 
-// 状态
+// State
 const currentMode = ref('raycast');
 const showHelper = ref(false);
 const helperDepth = ref(10);
@@ -210,32 +210,32 @@ const fps = ref(0);
 const bvhStats = ref(null);
 const eventLogs = ref([]);
 
-// BVH 配置
+// BVH Configuration
 const bvhConfig = reactive({
     strategy: 'SAH',
     maxDepth: 40,
     maxLeafTris: 10
 });
 
-// 射线投射配置
+// Raycast Configuration
 const raycastConfig = reactive({
     firstHitOnly: true,
     showNormal: true
 });
 
-// 最近点配置
+// Nearest Point Configuration
 const nearestConfig = reactive({
     showLine: true,
     showPoint: true
 });
 
-// 碰撞检测配置
+// Collision Detection Configuration
 const collisionConfig = reactive({
     type: 'sphere',
     size: 2
 });
 
-// 初始化场景
+// Initialize Scene
 const initScene = async () => {
     scene = new Scene(containerRef.value, {
         renderer: {
@@ -249,10 +249,10 @@ const initScene = async () => {
         }
     });
 
-    // 初始化场景
+    // Initialize scene
     scene.init();
 
-    // 添加光源
+    // Add lights
     scene.light.addAmbient({
         color: '#ffffff',
         intensity: 0.5
@@ -265,32 +265,32 @@ const initScene = async () => {
         castShadow: false
     });
 
-    // 启用自动调整大小
+    // Enable auto resize
     scene.renderer.enableResize();
 
-    // 注册组件
+    // Register components
     scene.registerComponent('ModelLoader', ModelLoader);
     scene.registerComponent('BVHQuery', BVHQuery);
 
-    // 加载模型
+    // Load model
     await loadModel();
 
-    // 创建辅助对象
+    // Create helper objects
     createHelpers();
 
-    // 添加事件监听
+    // Add event listeners
     addEventListeners();
 
-    // 启动渲染循环
+    // Start render loop
     scene.start();
 
-    // 更新 FPS
+    // Update FPS
     setInterval(() => {
         fps.value = Math.round(scene.stats?.fps || 0);
     }, 100);
 };
 
-// 加载模型
+// Load Model
 const loadModel = async () => {
     try {
         addLog('Loading model...');
@@ -303,17 +303,17 @@ const loadModel = async () => {
             receiveShadow: false
         });
 
-        // 监听加载进度
+        // Listen to load progress
         modelLoader.on('loadProgress', (event) => {
             addLog(`Loading: ${Math.round(event.progress * 100)}%`);
         });
 
-        // 监听加载完成
+        // Listen to load complete
         modelLoader.on('loadComplete', async (event) => {
             const modelGroup = modelLoader.model;
             addLog('Model loaded successfully');
 
-            // 从模型组中查找第一个 Mesh 对象
+            // Find first Mesh object from model group
             let foundMesh = null;
             modelGroup.traverse((child) => {
                 if (child.isMesh && !foundMesh) {
@@ -334,7 +334,7 @@ const loadModel = async () => {
             console.log('Geometry type:', targetMesh.geometry.type);
             console.log('Vertices:', targetMesh.geometry.attributes.position?.count);
 
-            // 创建 BVHQuery 组件
+            // Create BVHQuery component
             try {
                 bvhQuery = await scene.add('BVHQuery', {
                     mesh: targetMesh,
@@ -352,7 +352,7 @@ const loadModel = async () => {
                     }
                 });
 
-                // 监听 BVH 事件
+                // Listen to BVH events
                 bvhQuery.on('bvhGenerated', (data) => {
                     addLog(`BVH generated in ${data.buildTime.toFixed(2)}ms`);
                     bvhStats.value = data.stats;
@@ -375,7 +375,7 @@ const loadModel = async () => {
             }
         });
 
-        // 监听加载错误
+        // Listen to load errors
         modelLoader.on('loadError', (event) => {
             console.error('Failed to load model:', event.error);
             addLog(`Error: ${event.error.message}`);
@@ -386,19 +386,19 @@ const loadModel = async () => {
     }
 };
 
-// 创建辅助对象
+// Create helper objects
 const createHelpers = () => {
-    // 射线投射器
+    // Raycaster
     raycaster = new THREE.Raycaster();
 
-    // 交点标记
+    // Hit marker
     const markerGeometry = new THREE.SphereGeometry(0.1, 16, 16);
     const markerMaterial = new THREE.MeshBasicMaterial({ color: 0xff0000 });
     hitMarker = new THREE.Mesh(markerGeometry, markerMaterial);
     hitMarker.visible = false;
     scene.scene.add(hitMarker);
 
-    // 法线辅助器
+    // Normal helper
     normalHelper = new THREE.ArrowHelper(
         new THREE.Vector3(0, 1, 0),
         new THREE.Vector3(0, 0, 0),
@@ -410,14 +410,14 @@ const createHelpers = () => {
     normalHelper.visible = false;
     scene.scene.add(normalHelper);
 
-    // 最近点标记
+    // Nearest point marker
     const nearestGeometry = new THREE.SphereGeometry(0.1, 16, 16);
     const nearestMaterial = new THREE.MeshBasicMaterial({ color: 0x0000ff });
     nearestMarker = new THREE.Mesh(nearestGeometry, nearestMaterial);
     nearestMarker.visible = false;
     scene.scene.add(nearestMarker);
 
-    // 最近点连线
+    // Nearest point line
     const lineMaterial = new THREE.LineBasicMaterial({ color: 0x0000ff });
     const lineGeometry = new THREE.BufferGeometry();
     lineGeometry.setAttribute('position', new THREE.Float32BufferAttribute([0, 0, 0, 0, 0, 0], 3));
@@ -425,11 +425,11 @@ const createHelpers = () => {
     nearestLine.visible = false;
     scene.scene.add(nearestLine);
 
-    // 碰撞检测对象
+    // Collision detection object
     createCollisionObject();
 };
 
-// 创建碰撞检测对象
+// Create collision detection object
 const createCollisionObject = () => {
     if (collisionObject) {
         scene.scene.remove(collisionObject);
@@ -458,13 +458,13 @@ const createCollisionObject = () => {
     scene.scene.add(collisionObject);
 };
 
-// 添加事件监听
+// Add event listeners
 const addEventListeners = () => {
     containerRef.value.addEventListener('mousemove', onMouseMove);
     containerRef.value.addEventListener('click', onClick);
 };
 
-// 移除事件监听
+// Remove event listeners
 const removeEventListeners = () => {
     if (containerRef.value) {
         containerRef.value.removeEventListener('mousemove', onMouseMove);
@@ -472,7 +472,7 @@ const removeEventListeners = () => {
     }
 };
 
-// 鼠标移动事件
+// Mouse move event
 const onMouseMove = (event) => {
     if (!bvhQuery) return;
 
@@ -489,7 +489,7 @@ const onMouseMove = (event) => {
     }
 };
 
-// 鼠标点击事件
+// Mouse click event
 const onClick = (event) => {
     if (currentMode.value === 'raycast') {
         addLog(
@@ -500,7 +500,7 @@ const onClick = (event) => {
     }
 };
 
-// 处理射线投射
+// Handle raycast
 const handleRaycast = () => {
     raycaster.setFromCamera(mouse, scene.camera.instance);
 
@@ -526,11 +526,11 @@ const handleRaycast = () => {
     }
 };
 
-// 处理最近点查询
+// Handle nearest point query
 const handleNearest = () => {
     raycaster.setFromCamera(mouse, scene.camera.instance);
 
-    // 获取射线上的一个点作为查询点
+    // Get a point on the ray as the query point
     const queryPoint = raycaster.ray.origin
         .clone()
         .add(raycaster.ray.direction.clone().multiplyScalar(10));
@@ -564,11 +564,11 @@ const handleNearest = () => {
     }
 };
 
-// 处理碰撞检测
+// Handle collision detection
 const handleCollision = () => {
     raycaster.setFromCamera(mouse, scene.camera.instance);
 
-    // 获取射线上的一个点作为碰撞对象位置
+    // Get a point on the ray as the collision object position
     const position = raycaster.ray.origin
         .clone()
         .add(raycaster.ray.direction.clone().multiplyScalar(10));
@@ -589,13 +589,13 @@ const handleCollision = () => {
         intersects = bvhQuery.intersectsBox(box);
     }
 
-    // 根据碰撞结果改变颜色
+    // Change color based on collision result
     collisionObject.material.color.setHex(intersects ? 0xff0000 : 0x00ff00);
 };
 
-// 模式切换
+// Mode change
 const onModeChange = () => {
-    // 隐藏所有辅助对象
+    // Hide all helper objects
     hitMarker.visible = false;
     normalHelper.visible = false;
     nearestMarker.visible = false;
@@ -605,7 +605,7 @@ const onModeChange = () => {
     addLog(`Mode changed to: ${currentMode.value}`);
 };
 
-// 重建 BVH
+// Rebuild BVH
 const rebuildBVH = async () => {
     if (!bvhQuery) return;
 
@@ -618,32 +618,32 @@ const rebuildBVH = async () => {
     });
 };
 
-// 切换 BVH 辅助器
+// Toggle BVH helper
 const toggleBVHHelper = () => {
     if (!bvhQuery) return;
 
     bvhQuery.toggleHelper(showHelper.value);
 };
 
-// 更新辅助器深度
+// Update helper depth
 const updateHelperDepth = () => {
     if (!bvhQuery) return;
 
     bvhQuery.updateHelper({ depth: helperDepth.value });
 };
 
-// 添加日志
+// Add log
 const addLog = (message) => {
     const time = new Date().toLocaleTimeString();
     eventLogs.value.unshift({ time, message });
 
-    // 限制日志数量
+    // Limit log count
     if (eventLogs.value.length > 50) {
         eventLogs.value.pop();
     }
 };
 
-// 生命周期钩子
+// Lifecycle hooks
 onMounted(() => {
     initScene();
 });
@@ -704,7 +704,7 @@ onUnmounted(() => {
     border-left: 4px solid #00ff88;
 }
 
-/* 滚动条样式 */
+/* Scrollbar style */
 .control-panel::-webkit-scrollbar,
 .log-container::-webkit-scrollbar {
     width: 6px;
