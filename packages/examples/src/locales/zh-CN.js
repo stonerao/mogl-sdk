@@ -106,6 +106,10 @@ export default {
             '18-path-tracer': {
                 title: '18 - Path Tracer',
                 description: 'GPU 路径追踪渲染 - 照片级真实感渲染效果'
+            },
+            '19-skeletal-animation': {
+                title: '19 - Skeletal Animation',
+                description: '骨骼动画系统 - 加载和控制带骨骼的角色动画'
             }
         }
     },

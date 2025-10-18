@@ -65,8 +65,8 @@ export class ComponentManager {
         // 标记为已挂载
         component.isMounted = true;
 
-        // 调用挂载完成钩子
-        component.onMounted();
+        // 调用挂载完成钩子（等待异步完成）
+        await component.onMounted();
 
         // 保存组件实例
         const name = config.name || component.name;

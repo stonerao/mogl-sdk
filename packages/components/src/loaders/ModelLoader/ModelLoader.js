@@ -38,6 +38,7 @@ export class ModelLoader extends Component {
         castShadow: false,
         receiveShadow: false,
         animations: true,
+        autoPlayAnimation: false, // 是否自动播放第一个动画
         interactiveMeshes: false, // false: 禁用事件, '*': 全部启用, ['name1', 'name2']: 指定 Mesh
 
         // 烘焙光照配置
@@ -193,9 +194,18 @@ export class ModelLoader extends Component {
     setupAnimations(animations) {
         this.animations = animations;
         this.mixer = this.scene.animationManager.createMixer(this.model);
+        this.currentAction = null;
+        this.animationSpeed = 1.0;
+        this.isAnimationPlaying = false;
 
-        // 播放第一个动画
-        if (animations.length > 0) {
+        // 触发动画加载完成事件
+        this.emit('animationLoaded', {
+            animations: this.getAnimationNames(),
+            count: animations.length
+        });
+
+        // 播放第一个动画（如果配置了自动播放）
+        if (this.config.autoPlayAnimation && animations.length > 0) {
             this.playAnimation(0);
         }
     }
@@ -204,8 +214,12 @@ export class ModelLoader extends Component {
      * 播放动画
      *
      * @param {number|string} index - 动画索引或名称
+     * @param {Object} options - 播放选项
+     * @param {boolean} options.loop - 是否循环播放
+     * @param {number} options.fadeIn - 淡入时间（秒）
+     * @param {number} options.fadeOut - 淡出时间（秒）
      */
-    playAnimation(index) {
+    playAnimation(index, options = {}) {
         if (!this.animations || !this.mixer) return;
 
         const clip =
@@ -213,10 +227,75 @@ export class ModelLoader extends Component {
                 ? this.animations[index]
                 : this.animations.find((a) => a.name === index);
 
-        if (clip) {
-            const action = this.mixer.clipAction(clip);
-            action.play();
-            this.currentAction = action;
+        if (!clip) {
+            // eslint-disable-next-line no-console
+            console.warn(`ModelLoader: Animation "${index}" not found`);
+            return;
+        }
+
+        // 停止当前动画（带淡出效果）
+        if (this.currentAction) {
+            const fadeOutTime = options.fadeOut || 0.5;
+            this.currentAction.fadeOut(fadeOutTime);
+        }
+
+        // 创建新动画动作
+        const action = this.mixer.clipAction(clip);
+
+        // 设置循环模式
+        if (options.loop !== undefined) {
+            action.setLoop(
+                options.loop ? THREE.LoopRepeat : THREE.LoopOnce,
+                options.loop ? Infinity : 1
+            );
+        } else {
+            action.setLoop(THREE.LoopRepeat, Infinity);
+        }
+
+        // 设置播放速度
+        action.setEffectiveTimeScale(this.animationSpeed);
+
+        // 淡入效果
+        const fadeInTime = options.fadeIn || 0.5;
+        action.reset().fadeIn(fadeInTime).play();
+
+        this.currentAction = action;
+        this.currentAnimationName = clip.name;
+        this.isAnimationPlaying = true;
+
+        // 触发动画开始事件
+        this.emit('animationStarted', {
+            name: clip.name,
+            duration: clip.duration
+        });
+
+        // 监听动画完成事件
+        const onFinished = () => {
+            this.emit('animationFinished', { name: clip.name });
+            this.mixer.removeEventListener('finished', onFinished);
+        };
+        this.mixer.addEventListener('finished', onFinished);
+    }
+
+    /**
+     * 暂停动画
+     */
+    pauseAnimation() {
+        if (this.currentAction && this.isAnimationPlaying) {
+            this.currentAction.paused = true;
+            this.isAnimationPlaying = false;
+            this.emit('animationPaused', { name: this.currentAnimationName });
+        }
+    }
+
+    /**
+     * 恢复动画
+     */
+    resumeAnimation() {
+        if (this.currentAction && !this.isAnimationPlaying) {
+            this.currentAction.paused = false;
+            this.isAnimationPlaying = true;
+            this.emit('animationResumed', { name: this.currentAnimationName });
         }
     }
 
@@ -226,7 +305,51 @@ export class ModelLoader extends Component {
     stopAnimation() {
         if (this.currentAction) {
             this.currentAction.stop();
+            this.isAnimationPlaying = false;
+            this.emit('animationStopped', { name: this.currentAnimationName });
         }
+    }
+
+    /**
+     * 设置动画播放速度
+     *
+     * @param {number} speed - 播放速度（1.0 为正常速度）
+     */
+    setAnimationSpeed(speed) {
+        this.animationSpeed = speed;
+        if (this.currentAction) {
+            this.currentAction.setEffectiveTimeScale(speed);
+        }
+    }
+
+    /**
+     * 获取所有动画名称
+     *
+     * @returns {Array<string>} 动画名称数组
+     */
+    getAnimationNames() {
+        if (!this.animations) return [];
+        return this.animations.map(
+            (clip) => clip.name || `Animation ${this.animations.indexOf(clip)}`
+        );
+    }
+
+    /**
+     * 获取当前播放的动画名称
+     *
+     * @returns {string|null} 当前动画名称
+     */
+    getCurrentAnimationName() {
+        return this.currentAnimationName || null;
+    }
+
+    /**
+     * 获取动画播放状态
+     *
+     * @returns {boolean} 是否正在播放
+     */
+    isPlaying() {
+        return this.isAnimationPlaying;
     }
 
     /**

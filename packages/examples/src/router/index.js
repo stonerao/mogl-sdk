@@ -188,6 +188,15 @@ const routes = [
             category: 'expert'
         }
     },
+    {
+        path: '/examples/19-skeletal-animation',
+        name: 'SkeletalAnimationDemo',
+        component: () => import('../views/examples/SkeletalAnimationDemo.vue'),
+        meta: {
+            title: '19 - Skeletal Animation',
+            category: 'advanced'
+        }
+    },
 
     {
         path: '/:pathMatch(.*)*',

@@ -67,6 +67,7 @@ model.playAnimation(0);
 | castShadow        | boolean                | false     | 投射阴影                           |
 | receiveShadow     | boolean                | false     | 接收阴影                           |
 | animations        | boolean                | true      | 启用动画                           |
+| autoPlayAnimation | boolean                | false     | 自动播放第一个动画                 |
 | interactiveMeshes | boolean\|string\|Array | false     | 交互事件配置                       |
 | dracoDecoderPath  | string                 | '/draco/' | Draco 解码器路径                   |
 
@@ -115,12 +116,88 @@ model.on('error', (data) => {
 });
 ```
 
+## 骨骼动画
+
+ModelLoader 组件完全支持 GLTF/GLB/FBX 模型中的骨骼动画，提供了丰富的动画控制 API。
+
+### 动画事件
+
+| 事件名称            | 说明         | 事件数据                |
+| ------------------- | ------------ | ----------------------- |
+| `animationLoaded`   | 动画加载完成 | `{ animations, count }` |
+| `animationStarted`  | 动画开始播放 | `{ name, duration }`    |
+| `animationPaused`   | 动画暂停     | `{ name }`              |
+| `animationResumed`  | 动画恢复播放 | `{ name }`              |
+| `animationStopped`  | 动画停止     | `{ name }`              |
+| `animationFinished` | 动画播放完成 | `{ name }`              |
+
+### 动画控制方法
+
+- `playAnimation(name, options)` - 播放指定动画
+    - `name` - 动画名称或索引
+    - `options.loop` - 是否循环播放（默认 true）
+    - `options.fadeIn` - 淡入时间（秒，默认 0.5）
+    - `options.fadeOut` - 淡出时间（秒，默认 0.5）
+- `pauseAnimation()` - 暂停当前动画
+- `resumeAnimation()` - 恢复播放
+- `stopAnimation()` - 停止动画
+- `setAnimationSpeed(speed)` - 设置播放速度（1.0 为正常速度）
+- `getAnimationNames()` - 获取所有动画名称
+- `getCurrentAnimationName()` - 获取当前播放的动画名称
+- `isPlaying()` - 获取播放状态
+
+### 骨骼动画示例
+
+```javascript
+// 加载带骨骼动画的模型
+const character = await scene.add('ModelLoader', {
+    name: 'character',
+    url: '/models/character.glb',
+    animations: true,
+    autoPlayAnimation: false // 不自动播放
+});
+
+// 监听动画加载完成
+character.on('animationLoaded', (data) => {
+    console.log('可用动画:', data.animations);
+    console.log('动画数量:', data.count);
+});
+
+// 监听动画播放事件
+character.on('animationStarted', (data) => {
+    console.log('开始播放:', data.name);
+    console.log('动画时长:', data.duration);
+});
+
+character.on('animationFinished', (data) => {
+    console.log('播放完成:', data.name);
+});
+
+// 播放指定动画（带淡入淡出效果）
+character.playAnimation('Walk', {
+    loop: true, // 循环播放
+    fadeIn: 0.5, // 0.5秒淡入
+    fadeOut: 0.5 // 0.5秒淡出
+});
+
+// 控制动画播放
+character.pauseAnimation(); // 暂停
+character.resumeAnimation(); // 恢复
+character.stopAnimation(); // 停止
+
+// 设置播放速度
+character.setAnimationSpeed(1.5); // 1.5倍速
+
+// 获取动画信息
+const animations = character.getAnimationNames();
+const current = character.getCurrentAnimationName();
+const playing = character.isPlaying();
+```
+
 ## 方法
 
-### 动画控制
+### 模型控制
 
-- `playAnimation(index)` - 播放动画
-- `stopAnimation()` - 停止动画
 - `getModel()` - 获取模型对象
 
 ### Mesh 查询和操作 (新增)

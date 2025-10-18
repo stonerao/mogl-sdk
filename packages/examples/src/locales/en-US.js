@@ -113,6 +113,11 @@ export default {
             '18-path-tracer': {
                 title: '18 - Path Tracer',
                 description: 'GPU path tracing renderer - Photorealistic rendering effects'
+            },
+            '19-skeletal-animation': {
+                title: '19 - Skeletal Animation',
+                description:
+                    'Skeletal animation system - Load and control character animations with bones'
             }
         }
     },

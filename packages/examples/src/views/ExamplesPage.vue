@@ -185,6 +185,12 @@ const examples = ref([
         key: '18-path-tracer',
         category: 'expert',
         route: '/examples/18-path-tracer'
+    },
+    {
+        id: 19,
+        key: '19-skeletal-animation',
+        category: 'advanced',
+        route: '/examples/19-skeletal-animation'
     }
 ]);
 
