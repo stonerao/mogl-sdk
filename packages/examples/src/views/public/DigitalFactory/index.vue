@@ -83,7 +83,7 @@ const initScene = async () => {
                     build02: '/bake/DigitalFactory/build02.jpg',
                     Land01: '/bake/DigitalFactory/Land01.jpg'
                 },
-                mode: 'bake',
+                mode: 'lightMap',
                 intensity: 1,
                 autoApply: true,
                 channel: 0,

@@ -345,7 +345,6 @@ export class ModelLoader extends Component {
      */
     getAnimationNames() {
         if (!this.animations) return [];
-        console.log(this.animations);
         return this.animations.map(
             (clip) => clip.name || `Animation ${this.animations.indexOf(clip)}`
         );
@@ -394,6 +393,14 @@ export class ModelLoader extends Component {
         let foundMesh = null;
         this.model.traverse((child) => {
             if (child.isMesh && child.name === name) {
+                // child.material.map.colorSpace = THREE.SRGBColorSpace;
+                if (Array.isArray(child.material)) {
+                    child.material.forEach((mat) => {
+                        mat.map.colorSpace = THREE.SRGBColorSpace;
+                    });
+                } else {
+                    child.material.map.colorSpace = THREE.SRGBColorSpace;
+                }
                 foundMesh = child;
             }
         });

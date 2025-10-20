@@ -53,6 +53,7 @@ export { BVHQuery } from './spatial/BVHQuery/index.js';
 // 几何体组件
 export { ExtrudedPolygon } from './geometry/ExtrudedPolygon/index.js';
 export { InstancedModel } from './geometry/InstancedModel/index.js';
+export { Mesh } from './geometry/Mesh/index.js';
 
 // 材质组件
 export { ShaderMaterial } from './material/ShaderMaterial/index.js';

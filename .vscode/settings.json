@@ -1,5 +1,5 @@
 {
-    "editor.formatOnSave": true,
+    "editor.formatOnSave": false,
     "editor.defaultFormatter": "esbenp.prettier-vscode",
     "editor.codeActionsOnSave": {
         "source.fixAll.eslint": "explicit"
@@ -11,10 +11,7 @@
     "files.insertFinalNewline": true,
     "javascript.preferences.quoteStyle": "single",
     "typescript.preferences.quoteStyle": "single",
-    "eslint.validate": [
-        "javascript",
-        "javascriptreact"
-    ],
+    "eslint.validate": ["javascript", "javascriptreact"],
     "search.exclude": {
         "**/node_modules": true,
         "**/dist": true,
@@ -28,4 +25,3 @@
         "**/build/**": true
     }
 }
-

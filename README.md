@@ -42,15 +42,29 @@ sdk/
 ├── packages/                 # Packages directory
 │   ├── core/                # Core rendering engine
 │   │   ├── src/
-│   │   │   ├── core/       # Core modules (Scene, Renderer, Camera, etc.)
-│   │   │   ├── component/  # Component system
-│   │   │   ├── event/      # Event system
-│   │   │   ├── resource/   # Resource management
-│   │   │   ├── animation/  # Animation system
-│   │   │   └── config/     # Configuration
+│   │   │   ├── core/       # Scene, Renderer, Camera, Controls, Light
+│   │   │   ├── component/  # Component, ComponentManager, LifecycleManager
+│   │   │   ├── event/      # EventSystem, EventTypes, Raycaster
+│   │   │   ├── resource/   # ResourceManager, ModelLoader, TextureLoader, CacheManager
+│   │   │   ├── animation/  # AnimationManager, Tween
+│   │   │   └── config/     # constants, defaultConfig
+│   │   └── package.json
+│   ├── components/         # Component library
+│   │   ├── src/
+│   │   │   ├── animation/  # CameraAnimation, ModelAnimation, PathAnimation, MigrationLine
+│   │   │   ├── area/       # AreaBlock
+│   │   │   ├── controls/   # FirstPersonControls, FlyControls, TransformControls
+│   │   │   ├── effects/    # ParticleSystem, PostProcessing, PathTracer, FireEffect, WaterEffect, Pipeline
+│   │   │   ├── geometry/   # Mesh, ExtrudedPolygon, InstancedModel
+│   │   │   ├── helpers/    # AxesHelper, GridHelper, BoundingBoxHelper
+│   │   │   ├── loaders/    # ModelLoader, TextureLoader, HDRLoader
+│   │   │   ├── maps/       # SvgMap3D
+│   │   │   ├── marker/     # ImageMarker
+│   │   │   ├── markers/    # Label3D, MarkPoint, MarkLine, MarkArea
+│   │   │   ├── material/   # ShaderMaterial
+│   │   │   └── spatial/    # BVHQuery
 │   │   └── package.json
 │   ├── utils/              # Utility library
-│   ├── components/         # Component library (planned)
 │   └── examples/           # Example projects
 ├── document/               # Documentation
 │   └── zh/                # Chinese documentation
