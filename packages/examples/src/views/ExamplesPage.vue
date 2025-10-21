@@ -241,6 +241,12 @@ const examples = ref([
         key: '20-post-processing',
         category: 'effects',
         route: '/examples/20-post-processing'
+    },
+    {
+        id: 21,
+        key: '21-transform-controls',
+        category: 'basic',
+        route: '/examples/21-transform-controls'
     }
 ]);
 
