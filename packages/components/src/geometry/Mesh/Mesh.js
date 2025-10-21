@@ -239,92 +239,92 @@ export class Mesh extends Component {
         const { type } = this.config;
 
         switch (type) {
-            case 'Plane':
-                return new THREE.PlaneGeometry(
-                    this.config.width,
-                    this.config.height,
-                    this.config.widthSegments,
-                    this.config.heightSegments
-                );
+        case 'Plane':
+            return new THREE.PlaneGeometry(
+                this.config.width,
+                this.config.height,
+                this.config.widthSegments,
+                this.config.heightSegments
+            );
 
-            case 'Box':
-                return new THREE.BoxGeometry(
-                    this.config.width,
-                    this.config.height,
-                    this.config.depth,
-                    this.config.widthSegments,
-                    this.config.heightSegments,
-                    this.config.depthSegments
-                );
+        case 'Box':
+            return new THREE.BoxGeometry(
+                this.config.width,
+                this.config.height,
+                this.config.depth,
+                this.config.widthSegments,
+                this.config.heightSegments,
+                this.config.depthSegments
+            );
 
-            case 'Sphere':
-                return new THREE.SphereGeometry(
-                    this.config.radius,
-                    this.config.widthSegments || 32,
-                    this.config.heightSegments || 32,
-                    this.config.phiStart,
-                    this.config.phiLength,
-                    this.config.thetaStart,
-                    this.config.thetaLength
-                );
+        case 'Sphere':
+            return new THREE.SphereGeometry(
+                this.config.radius,
+                this.config.widthSegments || 32,
+                this.config.heightSegments || 32,
+                this.config.phiStart,
+                this.config.phiLength,
+                this.config.thetaStart,
+                this.config.thetaLength
+            );
 
-            case 'Cylinder':
-                return new THREE.CylinderGeometry(
-                    this.config.radiusTop,
-                    this.config.radiusBottom,
-                    this.config.height,
-                    this.config.radialSegments,
-                    this.config.heightSegments,
-                    this.config.openEnded,
-                    this.config.thetaStart,
-                    this.config.thetaLength
-                );
+        case 'Cylinder':
+            return new THREE.CylinderGeometry(
+                this.config.radiusTop,
+                this.config.radiusBottom,
+                this.config.height,
+                this.config.radialSegments,
+                this.config.heightSegments,
+                this.config.openEnded,
+                this.config.thetaStart,
+                this.config.thetaLength
+            );
 
-            case 'Cone':
-                return new THREE.ConeGeometry(
-                    this.config.radius,
-                    this.config.height,
-                    this.config.radialSegments || 32,
-                    this.config.heightSegments || 1,
-                    this.config.openEnded,
-                    this.config.thetaStart,
-                    this.config.thetaLength
-                );
+        case 'Cone':
+            return new THREE.ConeGeometry(
+                this.config.radius,
+                this.config.height,
+                this.config.radialSegments || 32,
+                this.config.heightSegments || 1,
+                this.config.openEnded,
+                this.config.thetaStart,
+                this.config.thetaLength
+            );
 
-            case 'Torus':
-                return new THREE.TorusGeometry(
-                    this.config.radius,
-                    this.config.tube,
-                    this.config.radialSegments || 16,
-                    this.config.tubularSegments,
-                    this.config.arc
-                );
+        case 'Torus':
+            return new THREE.TorusGeometry(
+                this.config.radius,
+                this.config.tube,
+                this.config.radialSegments || 16,
+                this.config.tubularSegments,
+                this.config.arc
+            );
 
-            case 'TorusKnot':
-                return new THREE.TorusKnotGeometry(
-                    this.config.radius,
-                    this.config.tube,
-                    this.config.tubularSegments || 64,
-                    this.config.radialSegments || 8,
-                    this.config.p,
-                    this.config.q
-                );
+        case 'TorusKnot':
+            return new THREE.TorusKnotGeometry(
+                this.config.radius,
+                this.config.tube,
+                this.config.tubularSegments || 64,
+                this.config.radialSegments || 8,
+                this.config.p,
+                this.config.q
+            );
 
-            case 'Dodecahedron':
-                return new THREE.DodecahedronGeometry(this.config.radius, this.config.detail);
+        case 'Dodecahedron':
+            return new THREE.DodecahedronGeometry(this.config.radius, this.config.detail);
 
-            case 'Icosahedron':
-                return new THREE.IcosahedronGeometry(this.config.radius, this.config.detail);
+        case 'Icosahedron':
+            return new THREE.IcosahedronGeometry(this.config.radius, this.config.detail);
 
-            case 'Octahedron':
-                return new THREE.OctahedronGeometry(this.config.radius, this.config.detail);
+        case 'Octahedron':
+            return new THREE.OctahedronGeometry(this.config.radius, this.config.detail);
 
-            case 'Tetrahedron':
-                return new THREE.TetrahedronGeometry(this.config.radius, this.config.detail);
+        case 'Tetrahedron':
+            return new THREE.TetrahedronGeometry(this.config.radius, this.config.detail);
 
-            default:
-                console.warn(`[Mesh] 未知的几何体类型: ${type}，使用默认 Box`);
-                return new THREE.BoxGeometry(1, 1, 1);
+        default:
+            console.warn(`[Mesh] 未知的几何体类型: ${type}，使用默认 Box`);
+            return new THREE.BoxGeometry(1, 1, 1);
         }
     }
 
@@ -440,9 +440,22 @@ export class Mesh extends Component {
      * @param {Object} params - 新的材质参数
      */
     updateStandardMaterial(params) {
+        // 检查材质是否存在
+        if (!this.material) {
+            console.warn('[Mesh] 材质未初始化,无法更新');
+            return;
+        }
+
+        // 检查材质类型
+        if (!(this.material instanceof THREE.MeshStandardMaterial)) {
+            console.warn('[Mesh] 当前材质不是 MeshStandardMaterial,无法更新标准材质参数');
+            return;
+        }
+
+        // 更新配置对象
         Object.assign(this.config.material, params);
 
-        // 更新材质属性
+        // 逐个更新材质属性 (不使用 Object.assign,因为 Three.js Material 对象可能被冻结)
         if (params.color !== undefined) {
             this.material.color.set(params.color);
         }
@@ -467,8 +480,14 @@ export class Mesh extends Component {
         if (params.emissiveIntensity !== undefined) {
             this.material.emissiveIntensity = params.emissiveIntensity;
         }
+        if (params.side !== undefined) {
+            this.material.side = params.side;
+        }
 
+        // 标记材质需要更新
         this.material.needsUpdate = true;
+
+        console.log('[Mesh] 标准材质参数已更新:', params);
     }
 
     /**
