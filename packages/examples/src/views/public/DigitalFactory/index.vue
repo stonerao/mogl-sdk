@@ -1,11 +1,18 @@
 <template>
     <div>
-        <div ref="sceneContainer" class="scene-container"></div>
+        <div ref="sceneContainer" class="scene-container">
+            <div class="top-right-toolbar">
+                <button class="btn btn-primary" @click="navigateToExamples">{{ t('intro.viewExamples') }}</button>
+                <button class="btn btn-success">{{ t('common.projects') }}</button>
+            </div>
+        </div>
     </div>
 </template>
 
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue';
+import { useI18n } from 'vue-i18n';
+import { useRouter } from 'vue-router';
 import { Scene } from '@w3d/core';
 import { ModelLoader, HDRLoader } from '@w3d/components';
 
@@ -14,6 +21,13 @@ const sceneContainer = ref(null);
 let scene = null;
 let modelComponent = null;
 let hdrComponent = null;
+
+const { t } = useI18n();
+const router = useRouter();
+const navigateToExamples = () => {
+    router.push('/examples');
+};
+
 
 onMounted(async () => {
     try {
@@ -83,8 +97,8 @@ const initScene = async () => {
                     build02: '/bake/DigitalFactory/build02.jpg',
                     Land01: '/bake/DigitalFactory/Land01.jpg'
                 },
-                mode: 'lightMap',
-                intensity: 1,
+                mode: 'bake',
+                intensity: 0.4,
                 autoApply: true,
                 channel: 0,
                 flipY: false,
@@ -117,5 +131,13 @@ const cleanup = () => {
     background: #1a1a1a;
     position: relative;
     overflow: hidden;
+}
+.top-right-toolbar {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    display: flex;
+    gap: 8px;
+    z-index: 2;
 }
 </style>

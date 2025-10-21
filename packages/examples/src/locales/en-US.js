@@ -5,7 +5,14 @@ export default {
         backToHome: 'Back to Home',
         language: 'Language',
         chinese: '中文',
-        english: 'English'
+        english: 'English',
+        projects: 'Projects'
+    },
+    public: {
+        title: 'Projects',
+        subtitle: 'Select a project to open',
+        empty: 'No projects found',
+        open: 'Open'
     },
     intro: {
         title: 'mogl.js',

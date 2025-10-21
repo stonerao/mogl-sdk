@@ -246,6 +246,16 @@ const routes = [
     },
 
     {
+        path: '/public',
+        name: 'Public',
+        component: () => import('../views/PublicPage.vue'),
+        meta: {
+            titleKey: 'public.title',
+            category: 'public'
+        }
+    },
+
+    {
         path: '/public/DigitalFactory',
         name: 'DigitalFactory',
         component: () => import('../views/public/DigitalFactory/index.vue'),
@@ -270,9 +280,12 @@ const router = createRouter({
     routes
 });
 
-// 路由守卫 - 更新页面标题
+import i18n from '../locales';
+// 路由守卫 - 更新页面标题（支持 i18n）
 router.beforeEach((to, from, next) => {
-    document.title = to.meta.title || 'Mogl SDK Examples';
+    const { t } = i18n.global;
+    const title = to.meta.titleKey ? t(to.meta.titleKey) : (to.meta.title || 'Mogl SDK Examples');
+    document.title = title;
     next();
 });
 

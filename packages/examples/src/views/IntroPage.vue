@@ -60,6 +60,10 @@
                         {{ t('intro.viewExamples') }}
                         <span class="btn-arrow">→</span>
                     </button>
+                    <!-- <button class="btn btn-primary" @click="navigateToPublic">
+                        {{ t('common.projects') }}
+                        <span class="btn-arrow">→</span>
+                    </button> -->
                 </div>
             </div>
         </div>
@@ -100,6 +104,12 @@ const languages = [
 const switchLanguage = (lang) => {
     locale.value = lang;
     localStorage.setItem('w3d-locale', lang);
+};
+
+
+// 导航到项目列表
+const navigateToPublic = () => {
+    router.push('/public');
 };
 
 // 导航到案例列表

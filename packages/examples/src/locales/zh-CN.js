@@ -5,7 +5,14 @@ export default {
         backToHome: '返回首页',
         language: '语言',
         chinese: '中文',
-        english: 'English'
+        english: 'English',
+        projects: '项目'
+    },
+    public: {
+        title: '项目列表',
+        subtitle: '选择一个项目进入',
+        empty: '未找到项目',
+        open: '打开'
     },
     intro: {
         title: 'mogl.js',

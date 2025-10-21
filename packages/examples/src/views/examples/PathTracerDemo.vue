@@ -368,7 +368,7 @@ onMounted(async () => {
 
         model = await scene.add('ModelLoader', {
             name: 'christmas',
-            url: '/models/christmas.glb',
+            url: '/models/DigitalFactory.glb',
             scale: 1.0,
             position: [0, 0, 0]
         });

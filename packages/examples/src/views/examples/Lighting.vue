@@ -228,7 +228,7 @@
 <script setup>
 import { ref, reactive, onMounted, onUnmounted } from 'vue';
 import { Scene } from '@w3d/core';
-import { GridHelper } from '@w3d/components';
+import { GridHelper, HDRLoader } from '@w3d/components';
 import {
     GuiPanel,
     GuiSection,
@@ -301,7 +301,7 @@ let spotLightInstance = null;
 
 // Source code display
 const sourceCode = `import { Scene } from '@w3d/core';
-import { GridHelper } from '@w3d/components';
+import { GridHelper, HDRLoader } from '@w3d/components';
 import * as THREE from 'three';
 
 // Create scene
@@ -326,6 +326,14 @@ scene.renderer.enableResize();
 
 // Register components
 scene.registerComponent('GridHelper', GridHelper);
+scene.registerComponent('HDRLoader', HDRLoader);
+
+// Load HDR environment map
+const hdr = await scene.add('HDRLoader', {
+  name: 'environment',
+  url: '/textures/blouberg_sunrise_2_1k.hdr',
+  intensity: 1.0
+});
 
 // Add grid helper
 scene.add('GridHelper', {
@@ -451,7 +459,7 @@ onMounted(() => {
 onUnmounted(() => {
     cleanup();
 });
-
+let hdrComponent = null;
 // Initialize scene
 const initScene = async () => {
     if (!sceneContainer.value) return;
@@ -495,6 +503,7 @@ const initScene = async () => {
 
         // Register components
         scene.registerComponent('GridHelper', GridHelper);
+        scene.registerComponent('HDRLoader', HDRLoader);
 
         // Add grid helper
         gridHelper = await scene.add('GridHelper', {
@@ -503,6 +512,15 @@ const initScene = async () => {
             divisions: 20,
             color: '#888888'
         });
+
+        hdrComponent = await scene.add('HDRLoader', {
+            name: 'environment',
+            url: '/textures/blouberg_sunrise_2_1k.hdr',
+            intensity: 1.0,
+            asEnvironment: true,
+            asBackground: true
+        });
+
 
         // Add demo objects
         createDemoObjects();
