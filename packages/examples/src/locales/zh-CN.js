@@ -115,6 +115,10 @@ export default {
             '20-post-processing': {
                 title: '20 - Post Processing',
                 description: '后期处理效果 - Sobel边缘检测、SSR反射、Bloom泛光、AO环境光遮蔽'
+            },
+            '21-transform-controls': {
+                title: '21 - Transform Controls',
+                description: '变换控制器 - 用于模型的平移、旋转和缩放'
             }
         }
     },

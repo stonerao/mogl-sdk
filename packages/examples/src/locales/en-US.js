@@ -124,6 +124,10 @@ export default {
                 title: '20 - Post Processing',
                 description:
                     'Post processing effects - Sobel edge detection, SSR reflection, Bloom glow, AO ambient occlusion'
+            },
+            '21-transform-controls': {
+                title: '21 - Transform Controls',
+                description: 'Transform controls - Translate, rotate, and scale models'
             }
         }
     },
