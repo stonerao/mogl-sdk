@@ -35,6 +35,9 @@ export default {
             geometry: '几何体',
             expert: '进阶'
         },
+        selectExample: '请从左侧选择一个案例',
+        selectExampleDesc: '点击左侧列表中的任何案例查看',
+        openInNewTab: '在新标签页打开',
         examples: {
             '01-hello-world': {
                 title: '01 - Hello World',
@@ -119,6 +122,14 @@ export default {
             '21-transform-controls': {
                 title: '21 - Transform Controls',
                 description: '变换控制器 - 用于模型的平移、旋转和缩放'
+            },
+            '22-dxf-viewer': {
+                title: '22 - DXF Viewer',
+                description: 'DXF 查看器 - 加载和显示 AutoCAD DXF 格式的 2D CAD 图纸'
+            },
+            '23-ifc-viewer': {
+                title: '23 - IFC Viewer',
+                description: 'IFC 查看器 - 加载和显示 IFC 格式的 BIM 建筑信息模型'
             }
         }
     },
@@ -354,5 +365,24 @@ export default {
             animated: '动画材质',
             diffusion: '扩散材质'
         }
+    },
+    dxfViewer: {
+        title: 'DXF 查看器控制',
+        loading: '加载 DXF 文件中...',
+        fileLoading: 'DXF 文件加载',
+        fileUrl: 'DXF 文件 URL',
+        loadDxf: '加载 DXF',
+        clearDxf: '清除 DXF',
+        transform: 'DXF 变换',
+        layerManagement: '图层管理',
+        totalLayers: '总图层数',
+        showAllLayers: '显示所有图层',
+        hideAllLayers: '隐藏所有图层',
+        dxfInfo: 'DXF 信息',
+        fileName: '文件名',
+        layerCount: '图层数量',
+        entityCount: '实体数量',
+        operations: '操作',
+        resetTransform: '重置变换'
     }
 };

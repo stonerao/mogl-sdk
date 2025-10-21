@@ -532,7 +532,7 @@ const initLights = () => {
     if (ambientLight.enabled) {
         ambientLightInstance = scene.light.addAmbient({
             color: ambientLight.color,
-            intensity: ambientLight.intensity
+            intensity: ambientLight.intensitdirectionalLighty
         });
     }
 

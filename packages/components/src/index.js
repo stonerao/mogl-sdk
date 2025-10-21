@@ -10,6 +10,8 @@
 export { ModelLoader } from './loaders/ModelLoader/index.js';
 export { TextureLoader } from './loaders/TextureLoader/index.js';
 export { HDRLoader } from './loaders/HDRLoader/index.js';
+export { DXFLoader } from './loaders/DXFLoader/index.js';
+export { IFCLoader } from './loaders/IFCLoader/index.js';
 
 // 动画组件
 export { PathAnimation } from './animation/PathAnimation/index.js';

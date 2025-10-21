@@ -223,6 +223,24 @@ const routes = [
                     title: '21 - Transform Controls',
                     category: 'basic'
                 }
+            },
+            {
+                path: '/examples/22-dxf-viewer',
+                name: 'DXFViewer',
+                component: () => import('../views/examples/DXFViewer.vue'),
+                meta: {
+                    title: '22 - DXF Viewer',
+                    category: 'advanced'
+                }
+            },
+            {
+                path: '/examples/23-ifc-viewer',
+                name: 'IFCViewer',
+                component: () => import('../views/examples/IFCViewer.vue'),
+                meta: {
+                    title: '23 - IFC Viewer',
+                    description: 'IFC 查看器'
+                }
             }
         ]
     },

@@ -64,8 +64,8 @@
             <div class="content-area">
                 <div v-if="!selectedExample" class="empty-state">
                     <div class="empty-icon">📋</div>
-                    <h3 class="empty-title">请从左侧选择一个案例</h3>
-                    <p class="empty-desc">点击左侧列表中的任意案例，在此处查看效果</p>
+                    <h3 class="empty-title">{{ t('home.selectExample') }}</h3>
+                    <p class="empty-desc">{{ t('home.selectExampleDesc') }}</p>
                 </div>
                 <div v-else class="iframe-container">
                     <div class="iframe-header">
@@ -73,7 +73,6 @@
                         <button
                             class="open-new-tab-btn"
                             @click="openInNewTab"
-                            title="在新标签页打开"
                         >
                             <svg
                                 width="16"
@@ -90,7 +89,7 @@
                                     stroke-linejoin="round"
                                 />
                             </svg>
-                            <span>在新窗口打开</span>
+                            <span>{{ t('home.openInNewTab') }}</span>
                         </button>
                     </div>
                     <iframe
@@ -247,7 +246,19 @@ const examples = ref([
         key: '21-transform-controls',
         category: 'basic',
         route: '/examples/21-transform-controls'
-    }
+    },
+    {
+        id: 22,
+        key: '22-dxf-viewer',
+        category: 'advanced',
+        route: '/examples/22-dxf-viewer'
+    },
+    // {
+    //     id: 23,
+    //     key: '23-ifc-viewer',
+    //     category: 'advanced',
+    //     route: '/examples/23-ifc-viewer'
+    // }
 ]);
 
 // 过滤示例

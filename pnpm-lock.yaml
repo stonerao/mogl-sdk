@@ -56,12 +56,21 @@ importers:
       '@w3d/utils':
         specifier: workspace:*
         version: link:../utils
+      dxf-parser:
+        specifier: ^1.1.2
+        version: 1.1.2
       three-gpu-pathtracer:
         specifier: ^0.0.22
         version: 0.0.22(three-mesh-bvh@0.9.1(three@0.180.0))(three@0.180.0)(xatlas-web@0.1.0)
       three-mesh-bvh:
         specifier: ^0.9.1
         version: 0.9.1(three@0.180.0)
+      web-ifc:
+        specifier: ^0.0.72
+        version: 0.0.72
+      web-ifc-three:
+        specifier: ^0.0.126
+        version: 0.0.126(three@0.180.0)
     devDependencies:
       three:
         specifier: ^0.180.0
@@ -1568,6 +1577,9 @@ packages:
     resolution: {integrity: sha512-KIN/nDJBQRcXw0MLVhZE9iQHmG68qAVIBg9CqmUYjmQIhgij9U5MFvrqkUL5FbtyyzZuOeOt0zdeRe4UY7ct+A==, tarball: https://registry.npmmirror.com/dunder-proto/-/dunder-proto-1.0.1.tgz}
     engines: {node: '>= 0.4'}
 
+  dxf-parser@1.1.2:
+    resolution: {integrity: sha512-GPTumUvRkounlIazLIyJMmTWt+nlg+ksS0Hdm8jWvejmZKBTz6gvHTam76wRm4PQMma5sgKLThblQyeIJcH79Q==, tarball: https://registry.npmmirror.com/dxf-parser/-/dxf-parser-1.1.2.tgz}
+
   eastasianwidth@0.2.0:
     resolution: {integrity: sha512-I88TYZWc9XiYHRQ4/3c5rjjfgkjhLyW2luGIheGERbNQ6OY7yTybanSpDXZa8y7VUP9YmDcYa+eyq4ca7iLqWA==, tarball: https://registry.npmmirror.com/eastasianwidth/-/eastasianwidth-0.2.0.tgz}
 
@@ -2390,6 +2402,10 @@ packages:
   log-symbols@4.1.0:
     resolution: {integrity: sha512-8XPvpAA8uyhfteu8pIvQxpJZ7SYYdpUivZpGy6sFsBuKRY/7rQGavedeB8aK+Zkyq6upMFVL/9AW6vOYzfRyLg==, tarball: https://registry.npmmirror.com/log-symbols/-/log-symbols-4.1.0.tgz}
     engines: {node: '>=10'}
+
+  loglevel@1.9.2:
+    resolution: {integrity: sha512-HgMmCqIJSAKqo68l0rS2AanEWfkxaZ5wNiEFb5ggm08lDs9Xl2KxBlX3PTcaD2chBM1gXAYf491/M2Rv8Jwayg==, tarball: https://registry.npmmirror.com/loglevel/-/loglevel-1.9.2.tgz}
+    engines: {node: '>= 0.6.0'}
 
   loose-envify@1.4.0:
     resolution: {integrity: sha512-lyuxPGr/Wfhrlem2CL/UcnUc1zcqKAImBDzukY7Y5F/yQiNdko6+fRLevlw1HgMySw7f611UIY408EtxRSoK3Q==, tarball: https://registry.npmmirror.com/loose-envify/-/loose-envify-1.4.0.tgz}
@@ -3411,6 +3427,11 @@ packages:
       three-mesh-bvh: '>=0.7.4'
       xatlas-web: ^0.1.0
 
+  three-mesh-bvh@0.5.21:
+    resolution: {integrity: sha512-TGXPk7YwtlU5rgQJYA25OT6yAdBMeekfC4BTkGNtTWA5glb2rmEpjxvhZncRQSl73QZir2LFOQT0FjfzgG55xw==, tarball: https://registry.npmmirror.com/three-mesh-bvh/-/three-mesh-bvh-0.5.21.tgz}
+    peerDependencies:
+      three: '>= 0.123.0'
+
   three-mesh-bvh@0.9.1:
     resolution: {integrity: sha512-WNT+m9jGQgtp4YdtwEnl4oFylNVifRf7iphlwWdJ4bJu7oNkY0xHIyntep9OzHuR1hpe/pyAP840gB/EsYDJfg==, tarball: https://registry.npmmirror.com/three-mesh-bvh/-/three-mesh-bvh-0.9.1.tgz}
     peerDependencies:
@@ -3677,6 +3698,17 @@ packages:
 
   wcwidth@1.0.1:
     resolution: {integrity: sha512-XHPEwS0q6TaxcvG85+8EYkbiCux2XtWG2mkc47Ng2A77BQu9+DqIOJldST4HgPkuea7dvKSj5VgX3P1d4rW8Tg==, tarball: https://registry.npmmirror.com/wcwidth/-/wcwidth-1.0.1.tgz}
+
+  web-ifc-three@0.0.126:
+    resolution: {integrity: sha512-P2/jcuSZvpLnGiLcd1H+8N01oWuyIjmU5zUy/rzx8HTrbJn7FCE6uC4SFJyYvmxwN6+uFCRmEvzHkfHrdJzpcQ==, tarball: https://registry.npmmirror.com/web-ifc-three/-/web-ifc-three-0.0.126.tgz}
+    peerDependencies:
+      three: ^0.149.0
+
+  web-ifc@0.0.39:
+    resolution: {integrity: sha512-sg+DyxDiyXBqlXXbz+uSqw8IGX+mVvHmn2+hg6UXDvAcrzJJw8EI2H4ZzlxWxCqqdpGVeK0wCpdeQm43UCDbrA==, tarball: https://registry.npmmirror.com/web-ifc/-/web-ifc-0.0.39.tgz}
+
+  web-ifc@0.0.72:
+    resolution: {integrity: sha512-tedfOr6X9wMnOtYCRyqnxauVGqMWsNKnfqwLtfLXZBfzN3CrpRlAc+vQyAE3HR4M/UN4+kGeIkjkjMl0epgxmw==, tarball: https://registry.npmmirror.com/web-ifc/-/web-ifc-0.0.72.tgz}
 
   webidl-conversions@3.0.1:
     resolution: {integrity: sha512-2JAn3z8AR6rjK8Sm8orRC0h/bcl/DqL7tRPdGZ4I1CjdF+EaMLmYxBHyXuKL849eucPFhvBoxMsflfOb8kxaeQ==, tarball: https://registry.npmmirror.com/webidl-conversions/-/webidl-conversions-3.0.1.tgz}
@@ -5403,6 +5435,10 @@ snapshots:
       es-errors: 1.3.0
       gopd: 1.2.0
 
+  dxf-parser@1.1.2:
+    dependencies:
+      loglevel: 1.9.2
+
   eastasianwidth@0.2.0: {}
 
   ejs@3.1.10:
@@ -6376,6 +6412,8 @@ snapshots:
     dependencies:
       chalk: 4.1.2
       is-unicode-supported: 0.1.0
+
+  loglevel@1.9.2: {}
 
   loose-envify@1.4.0:
     dependencies:
@@ -7459,6 +7497,10 @@ snapshots:
       three-mesh-bvh: 0.9.1(three@0.180.0)
       xatlas-web: 0.1.0
 
+  three-mesh-bvh@0.5.21(three@0.180.0):
+    dependencies:
+      three: 0.180.0
+
   three-mesh-bvh@0.9.1(three@0.180.0):
     dependencies:
       three: 0.180.0
@@ -7693,6 +7735,16 @@ snapshots:
   wcwidth@1.0.1:
     dependencies:
       defaults: 1.0.4
+
+  web-ifc-three@0.0.126(three@0.180.0):
+    dependencies:
+      three: 0.180.0
+      three-mesh-bvh: 0.5.21(three@0.180.0)
+      web-ifc: 0.0.39
+
+  web-ifc@0.0.39: {}
+
+  web-ifc@0.0.72: {}
 
   webidl-conversions@3.0.1: {}
 

@@ -36,6 +36,9 @@ export default {
             geometry: 'Geometry',
             expert: 'Expert'
         },
+        selectExample: 'Please select an example from the left',
+        selectExampleDesc: 'Click on any example in the left list to view it here',
+        openInNewTab: 'Open in New Tab',
         examples: {
             '01-hello-world': {
                 title: '01 - Hello World',
@@ -128,6 +131,14 @@ export default {
             '21-transform-controls': {
                 title: '21 - Transform Controls',
                 description: 'Transform controls - Translate, rotate, and scale models'
+            },
+            '22-dxf-viewer': {
+                title: '22 - DXF Viewer',
+                description: 'DXF viewer - Load and display AutoCAD DXF format 2D CAD drawings'
+            },
+            '23-ifc-viewer': {
+                title: '23 - IFC Viewer',
+                description: 'IFC viewer - Load and display IFC format BIM (Building Information Modeling) models'
             }
         }
     },
@@ -363,5 +374,24 @@ export default {
             animated: 'Animated',
             diffusion: 'Diffusion'
         }
+    },
+    dxfViewer: {
+        title: 'DXF Viewer Controls',
+        loading: 'Loading DXF file...',
+        fileLoading: 'DXF File Loading',
+        fileUrl: 'DXF File URL',
+        loadDxf: 'Load DXF',
+        clearDxf: 'Clear DXF',
+        transform: 'DXF Transform',
+        layerManagement: 'Layer Management',
+        totalLayers: 'Total Layers',
+        showAllLayers: 'Show All Layers',
+        hideAllLayers: 'Hide All Layers',
+        dxfInfo: 'DXF Information',
+        fileName: 'File Name',
+        layerCount: 'Layer Count',
+        entityCount: 'Entity Count',
+        operations: 'Operations',
+        resetTransform: 'Reset Transform'
     }
 };

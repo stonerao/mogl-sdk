@@ -46,6 +46,12 @@ export default defineConfig({
     // 优化配置
     optimizeDeps: {
         include: ['three', 'vue', 'vue-router', 'prismjs'],
-        exclude: ['@w3d/core', '@w3d/components', '@w3d/utils']
+        exclude: [
+            '@w3d/core',
+            '@w3d/components',
+            '@w3d/utils',
+            'troika-three-text',
+            'troika-three-utils'
+        ]
     }
 });
