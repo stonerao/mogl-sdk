@@ -7,6 +7,7 @@ import { ComponentManager } from '../component/ComponentManager.js';
 import { EventSystem } from '../event/EventSystem.js';
 import { ResourceManager } from '../resource/ResourceManager.js';
 import { AnimationManager } from '../animation/AnimationManager.js';
+import { IndexedDBCache } from '../resource/IndexedDBCache.js';
 
 /**
  * Scene 场景类
@@ -59,6 +60,12 @@ export class Scene {
         this.resourceManager = new ResourceManager(this);
         this.animationManager = new AnimationManager(this);
 
+        // IndexedDB 缓存管理器
+        this.indexedDBCache = null;
+        if (this.options.indexedDB) {
+            this.indexedDBCache = new IndexedDBCache(this.options.indexedDB);
+        }
+
         // 状态
         this.isInitialized = false;
         this.isRunning = false;
@@ -72,10 +79,15 @@ export class Scene {
      *
      * @returns {Scene} 返回自身，支持链式调用
      */
-    init() {
+    async init() {
         if (this.isInitialized) {
             console.warn('Scene already initialized');
             return this;
+        }
+
+        // 初始化 IndexedDB 缓存（如果启用）
+        if (this.indexedDBCache) {
+            await this.indexedDBCache.init();
         }
 
         // 初始化渲染器
@@ -241,6 +253,11 @@ export class Scene {
 
         // 销毁动画管理器
         this.animationManager.dispose();
+
+        // 关闭 IndexedDB 连接
+        if (this.indexedDBCache) {
+            this.indexedDBCache.close();
+        }
 
         // 销毁渲染器
         if (this.renderer) {

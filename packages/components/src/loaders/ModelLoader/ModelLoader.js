@@ -66,7 +66,9 @@ export class ModelLoader extends Component {
         this.originalMaterials = new Map(); // 保存原始材质用于恢复
 
         // 使用 Core 版本的 ModelLoader（支持 GLTF/GLB/FBX）
-        this.coreLoader = new CoreModelLoader();
+        // 传递 IndexedDB 缓存实例（如果存在）
+        const indexedDBCache = this.scene.indexedDBCache;
+        this.coreLoader = new CoreModelLoader(indexedDBCache);
 
         // 配置 Draco 解码器路径
         this.coreLoader.setDracoDecoderPath(this.config.dracoDecoderPath);

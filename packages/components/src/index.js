@@ -34,6 +34,7 @@ export { AreaBlock } from './area/AreaBlock/index.js';
 // 特效组件
 export { ParticleSystem } from './effects/ParticleSystem/index.js';
 export { WaterEffect } from './effects/WaterEffect/index.js';
+export { Ocean } from './effects/Ocean/index.js';
 export { FireEffect } from './effects/FireEffect/index.js';
 export { Pipeline } from './effects/Pipeline/index.js';
 export { PathTracer } from './effects/PathTracer/index.js';

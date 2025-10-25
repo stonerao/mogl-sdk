@@ -46,6 +46,42 @@ model.on('click', (event) => {
 });
 ```
 
+## ✨ 新功能：IndexedDB 缓存
+
+W3D SDK 现在支持 IndexedDB 持久化缓存，可以显著减少模型和纹理的重复加载时间！
+
+```javascript
+const scene = new Scene('#app', {
+    indexedDB: {
+        enabled: true,           // 启用 IndexedDB 缓存
+        dbName: 'W3DCache',      // 数据库名称
+        storeName: 'resources',  // 对象存储名称
+        debug: true,             // 启用调试日志
+        version: 1               // 缓存版本号
+    }
+});
+
+await scene.init();
+
+// 首次加载：从网络加载并缓存
+const model1 = await scene.add('ModelLoader', {
+    url: '/models/robot.glb'
+});
+
+// 再次加载：从 IndexedDB 缓存读取，速度更快！
+const model2 = await scene.add('ModelLoader', {
+    url: '/models/robot.glb'
+});
+```
+
+**特性：**
+- ✅ 自动缓存模型和纹理
+- ✅ 版本管理：版本号变化时自动清空缓存
+- ✅ 调试模式：详细的日志输出
+- ✅ 透明集成：无需修改现有代码
+
+详细文档：[IndexedDB 缓存指南](./docs/IndexedDB-Cache.md)
+
 ## 📚 核心模块
 
 ### Scene - 场景管理
@@ -72,12 +108,16 @@ WebGL 渲染器的封装和管理
 ### ResourceManager - 资源管理
 资源加载、缓存和管理
 
+### IndexedDBCache - IndexedDB 缓存
+持久化缓存模型和纹理资源
+
 ### AnimationManager - 动画系统
 动画的创建和管理
 
 ## 📖 文档
 
-详细文档请查看 [API 文档](../../docs/api-design.md)
+- [API 文档](../../docs/api-design.md)
+- [IndexedDB 缓存指南](./docs/IndexedDB-Cache.md)
 
 ## 📄 许可证
 

@@ -61,6 +61,15 @@ export const defaultConfig = {
     performance: {
         maxFPS: 60,
         enableStats: false
+    },
+
+    // IndexedDB 缓存配置
+    indexedDB: {
+        enabled: false,
+        dbName: 'W3DCache',
+        storeName: 'resources',
+        debug: false,
+        version: 1
     }
 };
 

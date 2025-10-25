@@ -394,6 +394,13 @@ const initScene = async () => {
                 fov: 45,
                 position: [10, 8, 15],
                 lookAt: [0, 0, 0]
+            },
+            indexedDB: {
+                enabled: true,
+                dbName: 'W3DCache',
+                storeName: 'resources',
+                debug: true,
+                version: 1
             }
         });
 

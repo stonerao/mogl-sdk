@@ -28,6 +28,7 @@ export { ResourceManager } from './resource/ResourceManager.js';
 export { TextureLoader } from './resource/TextureLoader.js';
 export { ModelLoader } from './resource/ModelLoader.js';
 export { CacheManager } from './resource/CacheManager.js';
+export { IndexedDBCache } from './resource/IndexedDBCache.js';
 
 // 动画系统
 export { AnimationManager } from './animation/AnimationManager.js';

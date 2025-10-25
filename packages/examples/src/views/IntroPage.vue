@@ -69,21 +69,21 @@
         </div>
 
         <!-- 页脚 - 移到最底部 -->
-        <div class="intro-footer">
-            <div class="footer-content">
-                <p class="footer-contact">
-                    Contact:
-                    <a href="mailto:stoneraoy@gmail.com" class="contact-link"
-                        >stoneraoy@gmail.com</a
-                    >
-                </p>
-                <div class="footer-info">
-                    <span class="footer-item">备案号</span>
-                    <span class="footer-separator">|</span>
-                    <span class="footer-item">正在申请中...</span>
-                </div>
-            </div>
-        </div>
+        <footer style="text-align: center; padding: 20px 0; font-size: 14px; color: #666; border-top: 1px solid #eee; margin-top: 50px;">
+            <!-- 工信部ICP备案号：替换为你的实际备案号（如京ICP备12345678号） -->
+            <p>
+                <a href="https://beian.miit.gov.cn/" target="_blank" rel="noopener noreferrer" style="color: #666; text-decoration: none;">
+                    蜀ICP备2025167677号-1
+                </a>
+                <!-- 若有公安备案，可添加下方公安备案信息（非必需，根据实际情况选择） -->
+                <!-- |
+                <a href="http://www.beian.gov.cn/" target="_blank" rel="noopener noreferrer" style="color: #666; text-decoration: none;">
+                    蜀公网安备440106XXXX号
+                </a> -->
+            </p>
+            <!-- 可选：添加版权信息，与备案号组合展示 -->
+            <p style="margin-top: 5px;">© 2025 个人作品展示 版权所有</p>
+        </footer>
     </div>
 </template>
 

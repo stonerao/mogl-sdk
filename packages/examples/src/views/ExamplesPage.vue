@@ -253,6 +253,13 @@ const examples = ref([
         category: 'advanced',
         route: '/examples/22-dxf-viewer'
     },
+    {
+        id: 23,
+        key: '23-ocean-demo',
+        category: 'effects',
+        route: '/examples/23-ocean-demo'
+    }
+
     // {
     //     id: 23,
     //     key: '23-ifc-viewer',

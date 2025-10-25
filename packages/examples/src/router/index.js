@@ -234,12 +234,12 @@ const routes = [
                 }
             },
             {
-                path: '/examples/23-ifc-viewer',
-                name: 'IFCViewer',
-                component: () => import('../views/examples/IFCViewer.vue'),
+                path: '/examples/23-ocean-demo',
+                name: 'OceanDemo',
+                component: () => import('../views/examples/OceanDemo.vue'),
                 meta: {
-                    title: '23 - IFC Viewer',
-                    description: 'IFC 查看器'
+                    title: '23 - OceanDemo',
+                    description: 'OceanDemo'
                 }
             }
         ]

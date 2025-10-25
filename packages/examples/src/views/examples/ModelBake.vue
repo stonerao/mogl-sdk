@@ -15,79 +15,7 @@
 
         <!-- Control Panel -->
         <template v-if="!isLoading">
-            <GuiPanel title="Model Baking Lighting Controls" width="wide">
-                <!-- Model Information -->
-                <GuiSection title="Model Information">
-                    <GuiInfoItem label="Mesh Count" :value="meshCount || 0" />
-                </GuiSection>
 
-                <!-- Baked Lighting Control -->
-                <GuiSection title="Baked Lighting Settings">
-                    <GuiCheckbox
-                        label="Enable Baked Lighting"
-                        v-model="bakedLightingSettings.enabled"
-                        @update:modelValue="toggleBakedLighting"
-                    />
-
-                    <template v-if="bakedLightingSettings.enabled">
-                        <GuiSlider
-                            label="Bake Intensity"
-                            v-model="bakedLightingSettings.intensity"
-                            :min="0"
-                            :max="2"
-                            :step="0.1"
-                            :precision="1"
-                            @update:modelValue="updateBakedIntensity"
-                        />
-
-                        <GuiSelect
-                            label="Apply Mode"
-                            v-model="bakedLightingSettings.mode"
-                            :options="[
-                                { value: 'map', label: 'Replace Texture (map)' },
-                                { value: 'lightMap', label: 'Light Map (lightMap)' }
-                            ]"
-                            @update:modelValue="updateBakedMode"
-                        />
-
-                        <GuiSelect
-                            label="UV Channel"
-                            v-model="bakedLightingSettings.channel"
-                            :options="[
-                                { value: '0', label: 'UV1 (channel 0)' },
-                                { value: '1', label: 'UV2 (channel 1) - Recommended' }
-                            ]"
-                            @update:modelValue="updateBakedChannel"
-                        />
-
-                        <GuiInfoItem
-                            label="Applied Objects"
-                            :value="bakedLightingSettings.appliedCount || 0"
-                        />
-                        <GuiInfoItem
-                            label="Load Status"
-                            :value="bakedLightingSettings.statusText || 'Not Started'"
-                        />
-                    </template>
-                </GuiSection>
-
-                <!-- Debug Tools -->
-                <GuiSection title="Debug Tools">
-                    <div class="button-group">
-                        <GuiButton label="Print Model Info" @click="printModelInfo" />
-                        <GuiButton label="Test Baked Lighting" @click="testBakedLighting" />
-                        <GuiButton label="Test Material Cloning" @click="testMaterialCloning" />
-                    </div>
-                </GuiSection>
-
-                <!-- Camera Control -->
-                <GuiSection title="Camera Control">
-                    <div class="button-group">
-                        <GuiButton label="Reset View" @click="resetCamera" />
-                        <GuiButton label="Focus Model" @click="focusModel" />
-                    </div>
-                </GuiSection>
-            </GuiPanel>
         </template>
     </SplitLayout>
 </template>
