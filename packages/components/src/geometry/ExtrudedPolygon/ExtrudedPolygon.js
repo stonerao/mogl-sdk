@@ -98,6 +98,12 @@ export class ExtrudedPolygon extends Component {
         // 纹理对象
         this.sideTexture = null; // 侧面纹理
         this.faceTexture = null; // 正面纹理
+
+        // 缓存标准化后的点位数据和几何体元数据
+        this.normalizedPoints = null;
+        this.sideVertexCount = 0; // 侧面顶点数量
+        this.bottomVertexOffset = 0; // 底面顶点偏移
+        this.topVertexOffset = 0; // 顶面顶点偏移
     }
 
     /**
@@ -121,11 +127,8 @@ export class ExtrudedPolygon extends Component {
      * 创建拉伸多边形
      */
     async createExtrudedPolygon() {
-        // 创建形状
-        const shape = this.createShape();
-
         // 创建几何体
-        this.geometry = this.createGeometry(shape);
+        this.geometry = this.createGeometry();
 
         // 创建材质
         await this.createMaterials();
@@ -141,164 +144,368 @@ export class ExtrudedPolygon extends Component {
     }
 
     /**
-     * 创建 2D 形状
-     * @returns {THREE.Shape}
-     */
-    createShape() {
-        const shape = new THREE.Shape();
-
-        // 处理点位数据
-        const points = this.config.points;
-
-        // 判断点位格式：2D [[x, y]] 或 3D [[x, y, z]]
-        const is2D = points[0].length === 2;
-
-        // 移动到起点
-        if (is2D) {
-            shape.moveTo(points[0][0], points[0][1]);
-        } else {
-            // 3D 点位，使用 x 和 z 坐标
-            shape.moveTo(points[0][0], points[0][2]);
-        }
-
-        // 绘制路径
-        for (let i = 1; i < points.length; i++) {
-            if (is2D) {
-                shape.lineTo(points[i][0], points[i][1]);
-            } else {
-                shape.lineTo(points[i][0], points[i][2]);
-            }
-        }
-
-        return shape;
-    }
-
-    /**
      * 创建拉伸几何体
-     * @param {THREE.Shape} shape - 2D 形状
-     * @returns {THREE.ExtrudeGeometry}
+     * 使用自定义算法实现拉伸，确保正确的 UV 映射和法线方向
+     * @returns {THREE.BufferGeometry}
      */
-    createGeometry(shape) {
-        // 合并拉伸设置
-        const extrudeSettings = {
-            ...this.config.extrudeSettings,
-            depth: this.config.height
-        };
+    createGeometry() {
+        const points = this.config.points;
+        const height = this.config.height;
 
-        // 创建拉伸几何体
-        const geometry = new THREE.ExtrudeGeometry(shape, extrudeSettings);
+        // 标准化点位数据为 {x, z} 格式并缓存
+        this.normalizedPoints = this.normalizePoints(points);
 
-        // 计算法线
-        geometry.computeVertexNormals();
+        // 创建 THREE.Shape 用于三角化
+        const shape = new THREE.Shape();
+        shape.moveTo(this.normalizedPoints[0].x, this.normalizedPoints[0].z);
+        for (let i = 1; i < this.normalizedPoints.length; i++) {
+            shape.lineTo(this.normalizedPoints[i].x, this.normalizedPoints[i].z);
+        }
 
-        // 修复侧面 UV 映射
-        this.fixSideUVMapping(geometry);
+        // 使用 ShapeGeometry 进行三角化
+        const shapeGeometry = new THREE.ShapeGeometry(shape);
+
+        // 提取三角化后的顶点和索引
+        const shapePositions = shapeGeometry.attributes.position.array;
+        const shapeIndices = shapeGeometry.index ? shapeGeometry.index.array : null;
+
+        // 构建完整的几何体数据
+        const geometryData = this.buildExtrudedGeometry(
+            this.normalizedPoints,
+            shapePositions,
+            shapeIndices,
+            height
+        );
+
+        // 缓存顶点偏移信息，用于高度更新优化
+        this.sideVertexCount = this.normalizedPoints.length * 4;
+        this.bottomVertexOffset = this.sideVertexCount;
+        const bottomFaceVertexCount = shapePositions.length / 3;
+        this.topVertexOffset = this.bottomVertexOffset + bottomFaceVertexCount;
+
+        // 创建 BufferGeometry
+        const geometry = new THREE.BufferGeometry();
+        geometry.setAttribute(
+            'position',
+            new THREE.Float32BufferAttribute(geometryData.positions, 3)
+        );
+        geometry.setAttribute('normal', new THREE.Float32BufferAttribute(geometryData.normals, 3));
+        geometry.setAttribute('uv', new THREE.Float32BufferAttribute(geometryData.uvs, 2));
+        geometry.setIndex(geometryData.indices);
+
+        // 设置材质组
+        geometry.addGroup(0, geometryData.sideIndicesCount, 0); // 侧面使用材质索引 0
+        geometry.addGroup(
+            geometryData.sideIndicesCount,
+            geometryData.faceIndicesCount,
+            1
+        ); // 底面和顶面使用材质索引 1
+
+        // 清理临时几何体
+        shapeGeometry.dispose();
 
         return geometry;
     }
 
     /**
-     * 修复侧面 UV 映射
-     *
-     * THREE.ExtrudeGeometry 的默认 UV 映射不适合纹理贴图，
-     * 需要根据侧面的实际尺寸重新计算 UV 坐标
-     *
-     * @param {THREE.ExtrudeGeometry} geometry - 拉伸几何体
+     * 标准化点位数据为 {x, z} 格式
+     * @param {Array} points - 原始点位数据
+     * @returns {Array} 标准化后的点位数组
      */
-    fixSideUVMapping(geometry) {
-        const points = this.config.points;
-        if (!points || points.length < 3) return;
+    normalizePoints(points) {
+        const normalized = [];
+        for (let i = 0; i < points.length; i++) {
+            const point = points[i];
+            if (point.length === 2) {
+                // 2D 格式: [x, z]
+                normalized.push({ x: point[0], z: point[1] });
+            } else {
+                // 3D 格式: [x, y, z]，使用 x 和 z
+                normalized.push({ x: point[0], z: point[2] || 0 });
+            }
+        }
+        return normalized;
+    }
 
-        // 计算多边形的周长
+    /**
+     * 构建拉伸几何体的顶点、法线、UV 和索引数据
+     * @param {Array} normalizedPoints - 标准化后的点位数组 [{x, z}, ...]
+     * @param {Array} shapePositions - 三角化后的形状顶点数组
+     * @param {Array} shapeIndices - 三角化后的形状索引数组
+     * @param {number} height - 拉伸高度
+     * @returns {Object} 包含 positions, normals, uvs, indices 的对象
+     */
+    buildExtrudedGeometry(normalizedPoints, shapePositions, shapeIndices, height) {
+        const positions = [];
+        const normals = [];
+        const uvs = [];
+        const indices = [];
+
+        // 计算多边形的边界框（用于 UV 映射）
+        const bounds = this.calculateBounds(normalizedPoints);
+
+        // 计算多边形的周长（用于侧面 UV 映射）
+        const perimeter = this.calculatePerimeter(normalizedPoints);
+
+        let vertexOffset = 0;
+
+        // ========== 1. 生成侧面（Side Faces）==========
+        const sideData = this.buildSideFaces(normalizedPoints, height, perimeter);
+        positions.push(...sideData.positions);
+        normals.push(...sideData.normals);
+        uvs.push(...sideData.uvs);
+        indices.push(...sideData.indices);
+        vertexOffset += sideData.vertexCount;
+
+        const sideIndicesCount = sideData.indices.length;
+
+        // ========== 2. 生成底面（Bottom Face）==========
+        const bottomData = this.buildBottomFace(shapePositions, shapeIndices, bounds);
+        positions.push(...bottomData.positions);
+        normals.push(...bottomData.normals);
+        uvs.push(...bottomData.uvs);
+        // 调整索引偏移
+        const bottomIndices = bottomData.indices.map((idx) => idx + vertexOffset);
+        indices.push(...bottomIndices);
+        vertexOffset += bottomData.vertexCount;
+
+        // ========== 3. 生成顶面（Top Face）==========
+        const topData = this.buildTopFace(shapePositions, shapeIndices, bounds, height);
+        positions.push(...topData.positions);
+        normals.push(...topData.normals);
+        uvs.push(...topData.uvs);
+        // 调整索引偏移
+        const topIndices = topData.indices.map((idx) => idx + vertexOffset);
+        indices.push(...topIndices);
+
+        const faceIndicesCount = bottomIndices.length + topIndices.length;
+
+        return {
+            positions,
+            normals,
+            uvs,
+            indices,
+            sideIndicesCount,
+            faceIndicesCount
+        };
+    }
+
+    /**
+     * 计算多边形的边界框
+     * @param {Array} points - 点位数组 [{x, z}, ...]
+     * @returns {Object} {minX, maxX, minZ, maxZ, width, height}
+     */
+    calculateBounds(points) {
+        let minX = Infinity,
+            maxX = -Infinity;
+        let minZ = Infinity,
+            maxZ = -Infinity;
+
+        for (const point of points) {
+            minX = Math.min(minX, point.x);
+            maxX = Math.max(maxX, point.x);
+            minZ = Math.min(minZ, point.z);
+            maxZ = Math.max(maxZ, point.z);
+        }
+
+        return {
+            minX,
+            maxX,
+            minZ,
+            maxZ,
+            width: maxX - minX,
+            height: maxZ - minZ
+        };
+    }
+
+    /**
+     * 计算多边形的周长
+     * @param {Array} points - 点位数组 [{x, z}, ...]
+     * @returns {number} 周长
+     */
+    calculatePerimeter(points) {
         let perimeter = 0;
         for (let i = 0; i < points.length; i++) {
             const p1 = points[i];
             const p2 = points[(i + 1) % points.length];
-            const dx = p2[0] - p1[0];
-            const dy = (p2[1] || 0) - (p1[1] || 0);
-            perimeter += Math.sqrt(dx * dx + dy * dy);
+            const dx = p2.x - p1.x;
+            const dz = p2.z - p1.z;
+            perimeter += Math.sqrt(dx * dx + dz * dz);
+        }
+        return perimeter;
+    }
+
+    /**
+     * 构建侧面几何数据
+     * @param {Array} points - 点位数组 [{x, z}, ...]
+     * @param {number} height - 拉伸高度
+     * @param {number} perimeter - 多边形周长
+     * @returns {Object} {positions, normals, uvs, indices, vertexCount}
+     */
+    buildSideFaces(points, height, perimeter) {
+        const positions = [];
+        const normals = [];
+        const uvs = [];
+        const indices = [];
+
+        let accumulatedLength = 0;
+
+        for (let i = 0; i < points.length; i++) {
+            const p1 = points[i];
+            const p2 = points[(i + 1) % points.length];
+
+            // 计算边的长度
+            const dx = p2.x - p1.x;
+            const dz = p2.z - p1.z;
+            const edgeLength = Math.sqrt(dx * dx + dz * dz);
+
+            // 计算法线方向（垂直于边，朝外）
+            const nx = -dz / edgeLength;
+            const nz = dx / edgeLength;
+
+            // UV 坐标
+            const u1 = accumulatedLength / perimeter;
+            const u2 = (accumulatedLength + edgeLength) / perimeter;
+
+            // 当前边的顶点索引
+            const baseIndex = i * 4;
+
+            // 底部左顶点
+            positions.push(p1.x, 0, p1.z);
+            normals.push(nx, 0, nz);
+            uvs.push(u1, 0.0);
+
+            // 底部右顶点
+            positions.push(p2.x, 0, p2.z);
+            normals.push(nx, 0, nz);
+            uvs.push(u2, 0.0);
+
+            // 顶部右顶点
+            positions.push(p2.x, height, p2.z);
+            normals.push(nx, 0, nz);
+            uvs.push(u2, 1.0);
+
+            // 顶部左顶点
+            positions.push(p1.x, height, p1.z);
+            normals.push(nx, 0, nz);
+            uvs.push(u1, 1.0);
+
+            // 两个三角形（逆时针顺序，法线朝外）
+            indices.push(baseIndex + 0, baseIndex + 1, baseIndex + 2);
+            indices.push(baseIndex + 0, baseIndex + 2, baseIndex + 3);
+
+            accumulatedLength += edgeLength;
         }
 
-        const height = this.config.height;
-        const position = geometry.attributes.position;
-        const uv = geometry.attributes.uv;
+        return {
+            positions,
+            normals,
+            uvs,
+            indices,
+            vertexCount: points.length * 4
+        };
+    }
 
-        // 获取所有顶点的 Y 坐标范围
-        let minY = Infinity;
-        let maxY = -Infinity;
-        for (let i = 0; i < position.count; i++) {
-            const y = position.getY(i);
-            minY = Math.min(minY, y);
-            maxY = Math.max(maxY, y);
+    /**
+     * 构建底面几何数据
+     * @param {Array} shapePositions - 三角化后的形状顶点数组
+     * @param {Array} shapeIndices - 三角化后的形状索引数组
+     * @param {Object} bounds - 边界框信息
+     * @returns {Object} {positions, normals, uvs, indices, vertexCount}
+     */
+    buildBottomFace(shapePositions, shapeIndices, bounds) {
+        const positions = [];
+        const normals = [];
+        const uvs = [];
+        const indices = [];
+
+        // 遍历三角化后的顶点
+        const vertexCount = shapePositions.length / 3;
+        for (let i = 0; i < vertexCount; i++) {
+            const x = shapePositions[i * 3];
+            const z = shapePositions[i * 3 + 1]; // ShapeGeometry 使用 xy 平面，我们映射到 xz
+
+            // 位置：y = 0（底面）
+            positions.push(x, 0, z);
+
+            // 法线：朝下（-y）
+            normals.push(0, -1, 0);
+
+            // UV：顶视图投影
+            const u = bounds.width > 0 ? (x - bounds.minX) / bounds.width : 0.5;
+            const v = bounds.height > 0 ? (z - bounds.minZ) / bounds.height : 0.5;
+            uvs.push(u, v);
         }
 
-        // 为侧面顶点重新计算 UV
-        // 侧面顶点的特征：Y 坐标在 minY 和 maxY 之间，且不在正面上
-        const epsilon = 0.001;
-
-        for (let i = 0; i < position.count; i++) {
-            const x = position.getX(i);
-            const y = position.getY(i);
-            const z = position.getZ(i);
-
-            // 判断是否是正面顶点
-            const isBottomFace = Math.abs(y - minY) < epsilon;
-            const isTopFace = Math.abs(y - maxY) < epsilon;
-            const isFace = isBottomFace || isTopFace;
-
-            if (!isFace) {
-                // 这是侧面顶点，重新计算 UV
-                // U 坐标：根据顶点在周长上的位置
-                // V 坐标：根据顶点的高度
-
-                // 计算 V 坐标（高度方向）
-                const v = (y - minY) / height;
-
-                // 计算 U 坐标（周长方向）
-                // 找到最接近的边
-                let minDist = Infinity;
-                let u = 0;
-                let accumulatedLength = 0;
-
-                for (let j = 0; j < points.length; j++) {
-                    const p1 = points[j];
-                    const p2 = points[(j + 1) % points.length];
-
-                    // 计算点到边的距离
-                    const x1 = p1[0];
-                    const z1 = p1[1] !== undefined ? p1[1] : p1[2] || 0;
-                    const x2 = p2[0];
-                    const z2 = p2[1] !== undefined ? p2[1] : p2[2] || 0;
-
-                    const edgeLength = Math.sqrt((x2 - x1) ** 2 + (z2 - z1) ** 2);
-
-                    // 计算点在边上的投影
-                    const dx = x2 - x1;
-                    const dz = z2 - z1;
-                    const t = Math.max(
-                        0,
-                        Math.min(1, ((x - x1) * dx + (z - z1) * dz) / (dx * dx + dz * dz))
-                    );
-                    const projX = x1 + t * dx;
-                    const projZ = z1 + t * dz;
-
-                    const dist = Math.sqrt((x - projX) ** 2 + (z - projZ) ** 2);
-
-                    if (dist < minDist) {
-                        minDist = dist;
-                        u = (accumulatedLength + t * edgeLength) / perimeter;
-                    }
-
-                    accumulatedLength += edgeLength;
-                }
-
-                // 设置新的 UV 坐标
-                uv.setXY(i, u, v);
+        // 索引：需要反转顺序使法线朝下
+        if (shapeIndices) {
+            for (let i = 0; i < shapeIndices.length; i += 3) {
+                indices.push(shapeIndices[i + 2], shapeIndices[i + 1], shapeIndices[i + 0]);
             }
-            // 正面的 UV 保持不变（使用 ExtrudeGeometry 的默认 UV）
+        } else {
+            // 如果没有索引，按顺序创建
+            for (let i = 0; i < vertexCount; i += 3) {
+                indices.push(i + 2, i + 1, i + 0);
+            }
         }
 
-        uv.needsUpdate = true;
+        return {
+            positions,
+            normals,
+            uvs,
+            indices,
+            vertexCount
+        };
+    }
+
+    /**
+     * 构建顶面几何数据
+     * @param {Array} shapePositions - 三角化后的形状顶点数组
+     * @param {Array} shapeIndices - 三角化后的形状索引数组
+     * @param {Object} bounds - 边界框信息
+     * @param {number} height - 拉伸高度
+     * @returns {Object} {positions, normals, uvs, indices, vertexCount}
+     */
+    buildTopFace(shapePositions, shapeIndices, bounds, height) {
+        const positions = [];
+        const normals = [];
+        const uvs = [];
+        const indices = [];
+
+        // 遍历三角化后的顶点
+        const vertexCount = shapePositions.length / 3;
+        for (let i = 0; i < vertexCount; i++) {
+            const x = shapePositions[i * 3];
+            const z = shapePositions[i * 3 + 1];
+
+            // 位置：y = height（顶面）
+            positions.push(x, height, z);
+
+            // 法线：朝上（+y）
+            normals.push(0, 1, 0);
+
+            // UV：顶视图投影（与底面相同）
+            const u = bounds.width > 0 ? (x - bounds.minX) / bounds.width : 0.5;
+            const v = bounds.height > 0 ? (z - bounds.minZ) / bounds.height : 0.5;
+            uvs.push(u, v);
+        }
+
+        // 索引：保持原顺序使法线朝上
+        if (shapeIndices) {
+            indices.push(...shapeIndices);
+        } else {
+            for (let i = 0; i < vertexCount; i++) {
+                indices.push(i);
+            }
+        }
+
+        return {
+            positions,
+            normals,
+            uvs,
+            indices,
+            vertexCount
+        };
     }
 
     /**
@@ -486,6 +693,7 @@ export class ExtrudedPolygon extends Component {
         const angleRad = (this.config.face.gradientAngle * Math.PI) / 180;
 
         // 为每个顶点计算颜色
+        const epsilon = 0.001;
         for (let i = 0; i < positionAttribute.count; i++) {
             const x = positionAttribute.getX(i);
             const y = positionAttribute.getY(i);
@@ -494,8 +702,6 @@ export class ExtrudedPolygon extends Component {
             let color;
 
             // 判断顶点是否在正面（底部或顶部）
-            // 正面的顶点 Y 坐标接近 minY（底部）或接近 maxY（顶部）
-            const epsilon = 0.001;
             const isBottomFace = Math.abs(y - minY) < epsilon;
             const isTopFace = Math.abs(y - maxY) < epsilon;
             const isFace = isBottomFace || isTopFace;
@@ -557,10 +763,71 @@ export class ExtrudedPolygon extends Component {
     }
 
     /**
+     * 优化的高度更新方法
+     * 仅更新受高度影响的顶点位置，避免重新创建整个几何体
+     * @param {number} newHeight - 新的拉伸高度
+     */
+    updateHeight(newHeight) {
+        if (!this.geometry || !this.normalizedPoints) {
+            // 如果几何体未初始化，使用完整更新
+            this.config.height = newHeight;
+            return;
+        }
+
+        // 更新配置
+        this.config.height = newHeight;
+
+        const positions = this.geometry.attributes.position.array;
+
+        // 1. 更新侧面的顶部顶点（每条边有4个顶点，索引2和3是顶部顶点）
+        for (let i = 0; i < this.normalizedPoints.length; i++) {
+            // 每条边的顶点索引
+            const baseIndex = i * 4;
+
+            // 顶部右顶点 (索引 2)
+            const topRightIndex = (baseIndex + 2) * 3;
+            positions[topRightIndex + 1] = newHeight; // 更新 y 坐标
+
+            // 顶部左顶点 (索引 3)
+            const topLeftIndex = (baseIndex + 3) * 3;
+            positions[topLeftIndex + 1] = newHeight; // 更新 y 坐标
+        }
+
+        // 2. 更新顶面的所有顶点
+        // 顶面顶点从 topVertexOffset 开始
+        const topFaceVertexCount = this.geometry.attributes.position.count - this.topVertexOffset;
+        for (let i = 0; i < topFaceVertexCount; i++) {
+            const vertexIndex = (this.topVertexOffset + i) * 3;
+            positions[vertexIndex + 1] = newHeight; // 更新 y 坐标
+        }
+
+        // 标记位置属性需要更新
+        this.geometry.attributes.position.needsUpdate = true;
+
+        // 如果启用了渐变，需要重新应用（因为颜色可能基于高度）
+        if (this.config.side.useGradient || this.config.face.useGradient) {
+            this.applyGradient();
+        }
+    }
+
+    /**
      * 更新配置
      * @param {Object} newConfig - 新配置
      */
     async updateConfig(newConfig) {
+        // 检查是否只更新高度，如果是则使用优化方法
+        const isOnlyHeightUpdate =
+            newConfig.height !== undefined &&
+            Object.keys(newConfig).length === 1 &&
+            this.geometry &&
+            this.normalizedPoints;
+
+        if (isOnlyHeightUpdate) {
+            // 使用优化的高度更新方法
+            this.updateHeight(newConfig.height);
+            return;
+        }
+
         // 深度合并配置（支持嵌套对象）
         if (newConfig.side) {
             this.config.side = { ...this.config.side, ...newConfig.side };

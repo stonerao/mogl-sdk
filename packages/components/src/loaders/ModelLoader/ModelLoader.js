@@ -158,7 +158,7 @@ export class ModelLoader extends Component {
                 });
             }
             // 添加到场景
-            this.add(this.model);
+            this.componentScene.add(this.model);
 
             this.emit('loadComplete', loadCompleteData);
             this.emit('loaded', loadCompleteData); // 向后兼容
@@ -533,7 +533,7 @@ export class ModelLoader extends Component {
                 // eslint-disable-next-line no-console
                 console.warn(
                     `[W3D Performance Warning] ModelLoader: Enabling events for all meshes (count: ${allMeshes.length}) may impact performance. ` +
-                        "Consider specifying only interactive meshes using interactiveMeshes: ['mesh1', 'mesh2']."
+                        'Consider specifying only interactive meshes using interactiveMeshes: [\'mesh1\', \'mesh2\'].'
                 );
             }
             return;
@@ -575,7 +575,7 @@ export class ModelLoader extends Component {
         // eslint-disable-next-line no-console
         console.warn(
             `ModelLoader: Invalid interactiveMeshes configuration: ${interactiveMeshes}. ` +
-                "Expected: false, '*', or array of mesh names."
+                'Expected: false, \'*\', or array of mesh names.'
         );
     }
 
