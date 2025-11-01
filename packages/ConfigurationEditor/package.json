@@ -1,0 +1,37 @@
+{
+  "name": "configuration-editor",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "工业组态编辑器 - 基于 W3D SDK 的可视化组态编辑器",
+  "author": "W3D Team",
+  "license": "MIT",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "lint": "eslint src --ext .js,.vue",
+    "lint:fix": "eslint src --ext .js,.vue --fix"
+  },
+  "dependencies": {
+    "@element-plus/icons-vue": "^2.3.0",
+    "@w3d/core": "workspace:*",
+    "@w3d/utils": "workspace:*",
+    "axios": "^1.6.0",
+    "element-plus": "^2.5.0",
+    "gsap": "^3.13.0",
+    "mqtt": "^5.3.0",
+    "pinia": "^2.1.0",
+    "socket.io-client": "^4.6.0",
+    "three": "^0.180.0",
+    "uuid": "^9.0.1",
+    "vue": "^3.4.0",
+    "vue-router": "^4.2.0"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^5.0.0",
+    "eslint": "^8.57.0",
+    "eslint-plugin-vue": "^9.20.0",
+    "prettier": "^3.2.5",
+    "vite": "^5.1.4"
+  }
+}

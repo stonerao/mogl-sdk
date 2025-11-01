@@ -1,0 +1,61 @@
+{
+  "app": {
+    "title": "Configuration Editor",
+    "subtitle": "Industrial Configuration Editor"
+  },
+  "menu": {
+    "file": "File",
+    "edit": "Edit",
+    "view": "View",
+    "help": "Help"
+  },
+  "toolbar": {
+    "new": "New",
+    "open": "Open",
+    "save": "Save",
+    "undo": "Undo",
+    "redo": "Redo",
+    "delete": "Delete",
+    "copy": "Copy",
+    "paste": "Paste",
+    "zoomIn": "Zoom In",
+    "zoomOut": "Zoom Out",
+    "fitView": "Fit to View",
+    "grid": "Show Grid",
+    "snap": "Snap to Grid",
+    "preview": "Preview",
+    "settings": "Settings"
+  },
+  "panel": {
+    "components": "Components",
+    "properties": "Properties",
+    "data": "Data Binding",
+    "events": "Events"
+  },
+  "component": {
+    "basic": "Basic Shapes",
+    "text": "Text",
+    "media": "Media",
+    "chart": "Charts",
+    "control": "Controls"
+  },
+  "property": {
+    "name": "Name",
+    "type": "Type",
+    "position": "Position",
+    "size": "Size",
+    "style": "Style",
+    "color": "Color",
+    "opacity": "Opacity",
+    "rotation": "Rotation",
+    "visible": "Visible"
+  },
+  "message": {
+    "loading": "Loading...",
+    "saving": "Saving...",
+    "saved": "Saved successfully",
+    "error": "Operation failed",
+    "noSelection": "Please select a node"
+  }
+}
+

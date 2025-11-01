@@ -1,0 +1,61 @@
+{
+  "app": {
+    "title": "工业组态编辑器",
+    "subtitle": "Configuration Editor"
+  },
+  "menu": {
+    "file": "文件",
+    "edit": "编辑",
+    "view": "视图",
+    "help": "帮助"
+  },
+  "toolbar": {
+    "new": "新建",
+    "open": "打开",
+    "save": "保存",
+    "undo": "撤销",
+    "redo": "重做",
+    "delete": "删除",
+    "copy": "复制",
+    "paste": "粘贴",
+    "zoomIn": "放大",
+    "zoomOut": "缩小",
+    "fitView": "适应画布",
+    "grid": "显示网格",
+    "snap": "网格吸附",
+    "preview": "预览",
+    "settings": "设置"
+  },
+  "panel": {
+    "components": "组件库",
+    "properties": "属性配置",
+    "data": "数据绑定",
+    "events": "事件配置"
+  },
+  "component": {
+    "basic": "基础形状",
+    "text": "文本",
+    "media": "媒体",
+    "chart": "图表",
+    "control": "控件"
+  },
+  "property": {
+    "name": "名称",
+    "type": "类型",
+    "position": "位置",
+    "size": "尺寸",
+    "style": "样式",
+    "color": "颜色",
+    "opacity": "透明度",
+    "rotation": "旋转",
+    "visible": "可见"
+  },
+  "message": {
+    "loading": "加载中...",
+    "saving": "保存中...",
+    "saved": "保存成功",
+    "error": "操作失败",
+    "noSelection": "请选择一个节点"
+  }
+}
+

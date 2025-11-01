@@ -1,0 +1,112 @@
+/**
+ * CSS 样式重置
+ * 
+ * @description 重置浏览器默认样式，确保跨浏览器一致性
+ */
+
+/* ========== 基础重置 ========== */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html,
+body {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+body {
+  font-family: var(--font-family);
+  font-size: var(--font-size-md);
+  color: var(--text-primary);
+  background-color: var(--bg-primary);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ========== 滚动条样式 ========== */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-secondary);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--bg-tertiary);
+  border-radius: var(--radius-md);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--bg-hover);
+}
+
+/* ========== 链接 ========== */
+a {
+  color: var(--primary-color);
+  text-decoration: none;
+  transition: color var(--transition-fast);
+}
+
+a:hover {
+  color: var(--primary-light);
+}
+
+/* ========== 列表 ========== */
+ul,
+ol {
+  list-style: none;
+}
+
+/* ========== 按钮 ========== */
+button {
+  border: none;
+  outline: none;
+  cursor: pointer;
+  background: transparent;
+  font-family: inherit;
+}
+
+/* ========== 输入框 ========== */
+input,
+textarea,
+select {
+  border: none;
+  outline: none;
+  font-family: inherit;
+  font-size: inherit;
+  color: inherit;
+  background: transparent;
+}
+
+/* ========== 图片 ========== */
+img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+
+/* ========== 标题 ========== */
+h1, h2, h3, h4, h5, h6 {
+  font-weight: normal;
+}
+
+/* ========== 选中文本 ========== */
+::selection {
+  background: var(--primary-color);
+  color: var(--text-inverse);
+}
+
+/* ========== 禁用用户选择（某些元素） ========== */
+.no-select {
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+}
+

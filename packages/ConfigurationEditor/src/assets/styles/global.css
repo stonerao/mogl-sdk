@@ -1,0 +1,226 @@
+/**
+ * 全局样式
+ * 
+ * @description 定义全局通用样式和工具类
+ */
+
+/* ========== 应用根容器 ========== */
+#app {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* ========== 通用工具类 ========== */
+
+/* 弹性布局 */
+.flex {
+  display: flex;
+}
+
+.flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.flex-between {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.flex-column {
+  display: flex;
+  flex-direction: column;
+}
+
+/* 文本对齐 */
+.text-center {
+  text-align: center;
+}
+
+.text-left {
+  text-align: left;
+}
+
+.text-right {
+  text-align: right;
+}
+
+/* 文本省略 */
+.text-ellipsis {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* 间距 */
+.mt-xs { margin-top: var(--spacing-xs); }
+.mt-sm { margin-top: var(--spacing-sm); }
+.mt-md { margin-top: var(--spacing-md); }
+.mt-lg { margin-top: var(--spacing-lg); }
+
+.mb-xs { margin-bottom: var(--spacing-xs); }
+.mb-sm { margin-bottom: var(--spacing-sm); }
+.mb-md { margin-bottom: var(--spacing-md); }
+.mb-lg { margin-bottom: var(--spacing-lg); }
+
+.ml-xs { margin-left: var(--spacing-xs); }
+.ml-sm { margin-left: var(--spacing-sm); }
+.ml-md { margin-left: var(--spacing-md); }
+.ml-lg { margin-left: var(--spacing-lg); }
+
+.mr-xs { margin-right: var(--spacing-xs); }
+.mr-sm { margin-right: var(--spacing-sm); }
+.mr-md { margin-right: var(--spacing-md); }
+.mr-lg { margin-right: var(--spacing-lg); }
+
+.p-xs { padding: var(--spacing-xs); }
+.p-sm { padding: var(--spacing-sm); }
+.p-md { padding: var(--spacing-md); }
+.p-lg { padding: var(--spacing-lg); }
+
+/* 显示/隐藏 */
+.hidden {
+  display: none !important;
+}
+
+.invisible {
+  visibility: hidden;
+}
+
+/* 光标 */
+.cursor-pointer {
+  cursor: pointer;
+}
+
+.cursor-move {
+  cursor: move;
+}
+
+.cursor-not-allowed {
+  cursor: not-allowed;
+}
+
+/* 过渡动画 */
+.transition-fast {
+  transition: all var(--transition-fast);
+}
+
+.transition-normal {
+  transition: all var(--transition-normal);
+}
+
+.transition-slow {
+  transition: all var(--transition-slow);
+}
+
+/* ========== 自定义滚动条 ========== */
+.custom-scrollbar {
+  overflow: auto;
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: var(--border-color);
+  border-radius: var(--radius-sm);
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: var(--border-light);
+}
+
+/* ========== 卡片样式 ========== */
+.card {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-md);
+}
+
+.card-header {
+  font-size: var(--font-size-lg);
+  font-weight: 500;
+  margin-bottom: var(--spacing-md);
+  padding-bottom: var(--spacing-sm);
+  border-bottom: 1px solid var(--border-color);
+}
+
+/* ========== 分割线 ========== */
+.divider {
+  height: 1px;
+  background: var(--border-color);
+  margin: var(--spacing-md) 0;
+}
+
+.divider-vertical {
+  width: 1px;
+  background: var(--border-color);
+  margin: 0 var(--spacing-md);
+}
+
+/* ========== 徽章 ========== */
+.badge {
+  display: inline-block;
+  padding: 2px 8px;
+  font-size: var(--font-size-xs);
+  border-radius: var(--radius-sm);
+  background: var(--bg-tertiary);
+  color: var(--text-secondary);
+}
+
+.badge-primary {
+  background: var(--primary-color);
+  color: white;
+}
+
+.badge-success {
+  background: var(--accent-success);
+  color: white;
+}
+
+.badge-warning {
+  background: var(--accent-warning);
+  color: white;
+}
+
+.badge-danger {
+  background: var(--accent-danger);
+  color: white;
+}
+
+/* ========== 加载动画 ========== */
+.loading {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  border: 2px solid var(--border-color);
+  border-top-color: var(--primary-color);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ========== 禁用状态 ========== */
+.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
