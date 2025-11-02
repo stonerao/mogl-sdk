@@ -1,6 +1,6 @@
+import * as THREE from 'three';
 import { Component } from '@w3d/core';
 import { ModelLoader as CoreModelLoader } from '@w3d/core';
-import * as THREE from 'three';
 import { handleBake } from './Bake';
 
 /**
@@ -23,7 +23,7 @@ import { handleBake } from './Bake';
  * const fbxModel = await scene.add('ModelLoader', {
  *     name: 'character',
  *     url: '/models/character.fbx',
- *     scale: 0.01
+ *     scale: 0.01`
  * });
  */
 export class ModelLoader extends Component {
@@ -867,6 +867,64 @@ export class ModelLoader extends Component {
 
         // 触发烘焙光照移除事件
         this.emit('bakedLightingRemoved', { removedCount });
+    }
+
+    /**
+     * 更新配置并重新加载模型
+     * @param {Object} newConfig - 新配置
+     * @returns {Promise<void>}
+     */
+    async updateConfig(newConfig) {
+        // 合并配置
+        this.config = {
+            ...this.config,
+            ...newConfig
+        };
+        // 如果 URL 改变，重新加载模型
+        if (newConfig.url !== undefined) {
+            // 清理旧模型
+            if (this.model) {
+                this.componentScene.remove(this.model);
+                this.model.traverse((child) => {
+                    if (child.isMesh) {
+                        if (child.geometry) child.geometry.dispose();
+                        if (child.material) {
+                            if (Array.isArray(child.material)) {
+                                child.material.forEach((m) => m.dispose());
+                            } else {
+                                child.material.dispose();
+                            }
+                        }
+                    }
+                });
+                this.model = null;
+            }
+
+            // 清理动画
+            if (this.mixer) {
+                this.scene.animationManager.remove(this.model);
+                this.mixer = null;
+            }
+
+            // 重新加载模型
+            await this.loadModel();
+        } else {
+            // 仅更新变换和阴影
+            if (
+                newConfig.scale !== undefined ||
+                newConfig.position !== undefined ||
+                newConfig.rotation !== undefined
+            ) {
+                this.applyTransform();
+            }
+
+            if (newConfig.castShadow !== undefined || newConfig.receiveShadow !== undefined) {
+                this.applyShadow();
+            }
+        }
+
+        // 触发配置更新事件
+        this.emit('configUpdated', this.config);
     }
 
     /**

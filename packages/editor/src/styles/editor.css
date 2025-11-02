@@ -1,0 +1,52 @@
+/* 编辑器专用样式 */
+
+/* 滚动条样式 */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--color-bg-secondary);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--color-border-hover);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--color-text-tertiary);
+}
+
+/* 面板样式 */
+.panel {
+    @apply bg-white border-r border-gray-200;
+}
+
+.panel-header {
+    @apply px-4 py-3 border-b border-gray-200 font-medium text-sm text-gray-700;
+}
+
+.panel-content {
+    @apply p-1 overflow-y-auto;
+}
+
+/* 工具栏样式 */
+.toolbar {
+    @apply flex items-center gap-2 px-4 bg-white border-b border-gray-200;
+}
+
+.toolbar-divider {
+    @apply w-px h-6 bg-gray-200;
+}
+
+/* 画布样式 */
+.canvas-container {
+    @apply relative w-full h-full bg-gray-100;
+}
+
+.canvas-container canvas {
+    @apply w-full h-full;
+}
+

@@ -1,0 +1,65 @@
+import { defineConfig } from 'vite';
+import vue from '@vitejs/plugin-vue';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+
+export default defineConfig({
+    // Vue 插件
+    plugins: [vue()],
+
+    // 开发服务器
+    server: {
+        port: 8091,
+        open: true,
+        cors: true,
+        // 配置文件系统访问，允许访问 examples 的 public 目录
+        fs: {
+            allow: ['..']
+        }
+    },
+
+    // 公共目录配置 - 使用 examples 的 public 目录
+    publicDir: path.resolve(__dirname, '../examples/public'),
+
+    // 构建配置
+    build: {
+        outDir: 'dist',
+        assetsDir: 'assets',
+        rollupOptions: {
+            output: {
+                manualChunks: {
+                    three: ['three'],
+                    vue: ['vue', 'vue-router', 'pinia'],
+                    w3d: ['@w3d/core', '@w3d/components', '@w3d/utils']
+                }
+            }
+        },
+        minify: 'terser',
+        chunkSizeWarningLimit: 1000
+    },
+
+    // 路径别名
+    resolve: {
+        alias: {
+            '@': path.resolve(__dirname, 'src'),
+            '@w3d/core': path.resolve(__dirname, '../core/src'),
+            '@w3d/components': path.resolve(__dirname, '../components/src'),
+            '@w3d/utils': path.resolve(__dirname, '../utils/src')
+        }
+    },
+
+    // 优化配置
+    optimizeDeps: {
+        include: ['three', 'vue', 'vue-router', 'pinia'],
+        exclude: [
+            '@w3d/core',
+            '@w3d/components',
+            '@w3d/utils',
+            'troika-three-text',
+            'troika-three-utils'
+        ]
+    }
+});
+

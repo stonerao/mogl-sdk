@@ -7,7 +7,6 @@ dist/
 build/
 *.tsbuildinfo
 /docs
-/packages/editor
 # Logs
 logs/
 *.log

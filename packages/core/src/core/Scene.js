@@ -200,6 +200,7 @@ export class Scene {
      * @returns {Promise<Component>} 组件实例
      */
     async add(componentName, config = {}) {
+        console.log('[Scene] 添加组件:', componentName, config);
         return this.componentManager.add(componentName, config);
     }
 
